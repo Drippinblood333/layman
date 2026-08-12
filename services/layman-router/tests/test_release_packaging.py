@@ -61,6 +61,7 @@ def test_staged_release_assets_are_flat_and_match_checksums(tmp_path: Path):
         release / "legacy" / "layman-skill-v1.zip": b"legacy",
         release / "legacy" / "layman-skill-v1.zip.sha256": b"legacy-checksum",
         release / "sbom.cdx.json": b"{}",
+        release / "requirements.lock": b"dependency==1.0 \\",
         release / "RELEASE_NOTES.md": b"notes",
         release / "README.md": b"readme",
         release / "README.zh-CN.md": b"readme-zh",

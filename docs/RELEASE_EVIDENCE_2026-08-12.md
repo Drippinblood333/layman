@@ -10,12 +10,12 @@ This snapshot records verified local evidence and keeps external release gates s
 - CI was updated to the current major releases of checkout, setup-python, artifact upload/download and release publishing actions, pinned to verified full commit SHAs. The three-platform test job now builds and clean-installs both Python distributions in addition to `pip check`, OSV audit, static analysis, whole-checkout secret scanning and release validation; Dependabot checks Python and GitHub Actions weekly.
 - Current GitHub runner labels are used: `macos-15-intel` for Intel, `macos-15` for Apple Silicon and `ubuntu-24.04-arm` for Linux ARM. The latter is currently a GitHub Public Preview runner, so hosted execution remains an external gate.
 - The Windows x64 standalone executable built with PyInstaller 6.22.0 on Python 3.14.3.
-- Wheel, source archive, Codex plugin ZIP, Windows ZIP, CycloneDX 1.5 SBOM and SHA-256 manifests built locally.
+- Wheel, source archive, Codex plugin ZIP, Windows ZIP, hash-locked runtime requirements, CycloneDX 1.5 SBOM and SHA-256 manifests built locally.
 - Fresh virtual environments installed the wheel and sdist independently. Both exposed the CLI, passed `doctor`, and contained all 19 bundled marketplace/plugin files with hashes matching the repository sources.
-- All 19 entries in `SHA256SUMS.json` were rehashed successfully; the SBOM contains seven dependency components.
-- The public-release staging step produced 13 allowlisted payload assets plus two checksum manifests at one flat directory level. Platform ZIP validation rejects missing executables, incorrect `BUILD.json` metadata and incomplete five-platform tagged releases.
+- All 20 entries in `SHA256SUMS.json` were rehashed successfully. The SBOM contains all 24 locked direct and transitive runtime components, every component version and purl was checked against `requirements.lock`, and the final JSON passed the official CycloneDX 1.5 schema.
+- The public-release staging step produced 14 allowlisted payload assets plus two checksum manifests at one flat directory level. Platform ZIP validation rejects missing executables, incorrect `BUILD.json` metadata and incomplete five-platform tagged releases.
 - Release publishing is limited to version-aligned `v1.0.0-rc.*` candidates and the owner-approved `v1.0.0` tag; unrelated `v*` tags cannot invoke the publishing job.
-- The isolated release-assets job installs the local package and its resolved runtime dependencies before generating the SBOM, then runs `pip check`; this prevents a clean runner from failing when dependency versions are read for provenance.
+- The isolated release-assets job installs runtime dependencies from `requirements.lock` with `--require-hashes`, installs the local package without re-resolving dependencies, and runs `pip check`. The build then rejects any installed/locked version mismatch before generating the complete runtime SBOM.
 
 ## Isolated Windows smoke test
 

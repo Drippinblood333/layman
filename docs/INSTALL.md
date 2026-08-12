@@ -87,6 +87,14 @@ python -m venv .venv
 
 On macOS/Linux, use `.venv/bin/python` and `.venv/bin/layman`.
 
+To reproduce the release runtime dependency set instead of resolving the compatible ranges again:
+
+```powershell
+python -m pip install --require-hashes -r .\services\layman-router\requirements.lock
+python -m pip install --no-deps .\services\layman-router
+python -m pip check
+```
+
 ## Upgrade and uninstall
 
 Install the new release over the old executable, then run `layman doctor`. Legacy v2 data is copied from `~/.layman-router` to `~/.layman` only when the new destination does not exist; the source is retained.

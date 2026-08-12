@@ -22,6 +22,7 @@
 - Restricted automated release publishing to the version-aligned `v1.0.0-rc.*` candidate series and final `v1.0.0` tag.
 - Made the clean release job install and validate runtime dependencies before generating the resolved-version SBOM.
 - Expanded the CI secret scan from selected public directories to the complete checked-out source tree.
+- Refreshed the hashed runtime lock, made release builds consume it strictly, and expanded the SBOM from direct dependencies to the complete locked runtime set.
 - Bundled the complete local Codex marketplace inside wheel and source distributions so clean package installs can run `layman setup`.
 - Made setup create an explicitly configured new `CODEX_HOME` before its first Codex probe.
 - Added wheel and sdist clean-install smoke checks to the Windows, macOS and Linux CI matrix.

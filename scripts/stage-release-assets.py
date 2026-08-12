@@ -55,6 +55,7 @@ def main() -> int:
         release / "legacy" / "layman-skill-v1.zip",
         release / "legacy" / "layman-skill-v1.zip.sha256",
         release / "sbom.cdx.json",
+        release / "requirements.lock",
         release / "RELEASE_NOTES.md",
         release / "README.md",
         release / "README.zh-CN.md",

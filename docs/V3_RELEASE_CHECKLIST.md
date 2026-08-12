@@ -37,7 +37,7 @@ Updated: 2026-08-12
 - [x] Cross-platform PyInstaller matrix and release packaging workflow exist.
 - [x] The five-platform standalone matrix uses currently documented GitHub runner labels and runs help/setup/doctor/purge lifecycle smoke checks without requiring an API key or Codex installation.
 - [x] Setup records an explicitly skipped plugin so uninstall can purge data without Codex while older or managed-plugin states remain conservative.
-- [x] Release ZIP, wheel, sdist, checksums and SBOM build locally.
+- [x] Release ZIP, wheel, sdist, hash-locked runtime requirements, checksums and a complete 24-component runtime SBOM build locally; the SBOM passes the official CycloneDX 1.5 schema.
 - [x] Fresh virtual environments independently install the wheel and sdist, verify the bundled plugin hashes, expose the CLI and pass `doctor`.
 - [x] GitHub Release assets are staged as a flat allowlisted set with checksums that match their public filenames.
 - [x] One-line installers require and verify `SHA256SUMS.txt` before extraction.
@@ -51,7 +51,7 @@ Updated: 2026-08-12
 - [x] Issue, feature and pull-request templates exist.
 - [x] CI, security checks and release workflow exist.
 - [x] The publishing job accepts only version-aligned `v1.0.0-rc.*` candidates and the owner-approved `v1.0.0` tag.
-- [x] The clean release-assets job installs and validates the runtime dependency tree before building the dependency-version SBOM.
+- [x] The clean release-assets job uses `--require-hashes`, validates the installed tree against the lock, and rejects drift before building the runtime SBOM.
 - [x] Honest Plus calibration report exists.
 - [x] Public GitHub repository exists under `Drippinblood333/layman`.
 - [x] The public repository has Actions, Issues, private vulnerability reporting, secret scanning and push protection enabled; workflow token permissions default to read-only.
