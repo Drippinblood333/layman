@@ -23,6 +23,7 @@ Updated: 2026-08-12
 - [x] 30-task/60-call token benchmark completed; the savings gate failed and the negative result is published.
 - [x] GPT-5.6 model identifiers, reasoning efforts and 2026-07-30 short/long-context standard prices match current official documentation.
 - [x] The installed dependency tree passes `pip check`; the 2026-08-12 OSV audit reports no known vulnerabilities after upgrading pytest and Pillow.
+- [x] Strict hashed runtime installation and all 90 tests pass under independent Python 3.12.13 as well as the primary Python 3.14 environment; Python 3.11 remains in hosted CI.
 - [x] CI uses current action majors pinned to full commit SHAs and runs `pip check`, OSV audit, tests, Python package build/install smoke checks, static analysis, plugin validation and whole-checkout secret scanning; Dependabot covers Python and GitHub Actions.
 - [ ] Human semantic-quality scoring is complete.
 - [ ] macOS and Linux CI runs are green on the public repository.
