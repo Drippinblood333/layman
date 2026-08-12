@@ -15,6 +15,7 @@ This snapshot records verified local evidence and keeps external release gates s
 - All 19 entries in `SHA256SUMS.json` were rehashed successfully; the SBOM contains seven dependency components.
 - The public-release staging step produced 13 allowlisted payload assets plus two checksum manifests at one flat directory level. Platform ZIP validation rejects missing executables, incorrect `BUILD.json` metadata and incomplete five-platform tagged releases.
 - Release publishing is limited to `v0.9.0-rc.*` candidates and the owner-approved `v1.0.0` tag; unrelated `v*` tags cannot invoke the publishing job.
+- The isolated release-assets job installs the local package and its resolved runtime dependencies before generating the SBOM, then runs `pip check`; this prevents a clean runner from failing when dependency versions are read for provenance.
 
 ## Isolated Windows smoke test
 
