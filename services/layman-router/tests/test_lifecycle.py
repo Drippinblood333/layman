@@ -148,3 +148,41 @@ def test_purge_skips_codex_removal_when_plugin_was_explicitly_skipped(monkeypatc
 
     assert main(["uninstall", "--purge-data"]) == 0
     assert not home.exists()
+
+
+def test_skip_plugin_preserves_an_existing_managed_plugin_state(monkeypatch, tmp_path: Path):
+    home = tmp_path / "layman-home"
+    home.mkdir()
+    (home / "state.json").write_text('{"codex_plugin_managed": true}', encoding="utf-8")
+    monkeypatch.setenv("LAYMAN_HOME", str(home))
+    monkeypatch.setattr("layman_router.paths.legacy_home", lambda: tmp_path / "missing")
+    monkeypatch.setattr(
+        "layman_router.cli.detect_user_mode",
+        lambda: ("plus", {"codex_login": {"available": False}}),
+    )
+    monkeypatch.setattr(
+        "layman_router.cli.find_codex",
+        lambda: (_ for _ in ()).throw(FileNotFoundError("no Codex")),
+    )
+
+    assert main(["setup", "--mode", "plus", "--skip-plugin"]) == 0
+    assert read_state()["codex_plugin_managed"] is True
+
+
+def test_skip_plugin_keeps_legacy_install_state_conservative(monkeypatch, tmp_path: Path):
+    home = tmp_path / "layman-home"
+    home.mkdir()
+    (home / "state.json").write_text('{"mode": "plus"}', encoding="utf-8")
+    monkeypatch.setenv("LAYMAN_HOME", str(home))
+    monkeypatch.setattr("layman_router.paths.legacy_home", lambda: tmp_path / "missing")
+    monkeypatch.setattr(
+        "layman_router.cli.detect_user_mode",
+        lambda: ("plus", {"codex_login": {"available": False}}),
+    )
+    monkeypatch.setattr(
+        "layman_router.cli.find_codex",
+        lambda: (_ for _ in ()).throw(FileNotFoundError("no Codex")),
+    )
+
+    assert main(["setup", "--mode", "plus", "--skip-plugin"]) == 0
+    assert "codex_plugin_managed" not in read_state()

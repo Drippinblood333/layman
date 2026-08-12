@@ -21,11 +21,12 @@
 - Updated release workflows to current action majors pinned to full commit SHAs, added an OSV dependency-audit gate, and enabled weekly Dependabot updates for Python and GitHub Actions.
 - Restricted automated release publishing to the documented candidate series and final `v1.0.0` tag.
 - Made the clean release job install and validate runtime dependencies before generating the resolved-version SBOM.
+- Expanded the CI secret scan from selected public directories to the complete checked-out source tree.
 - Bundled the complete local Codex marketplace inside wheel and source distributions so clean package installs can run `layman setup`.
 - Made setup create an explicitly configured new `CODEX_HOME` before its first Codex probe.
 - Added wheel and sdist clean-install smoke checks to the Windows, macOS and Linux CI matrix.
 - Replaced the retired macOS Intel runner label and added standalone setup/doctor/purge smoke checks to all five platform builds.
-- Recorded explicit `setup --skip-plugin` state so data purging remains usable without Codex while managed-plugin installs keep conservative cleanup protection.
+- Recorded explicit `setup --skip-plugin` state so fresh skipped-plugin installs can purge without Codex, while repeated or legacy states keep conservative cleanup protection.
 - Staged a flat, allowlisted GitHub Release asset set whose checksum names exactly match downloaded asset names.
 - Added a 30-task, 60-call direct-versus-Layman paired benchmark with hidden validation.
 - Published its negative result: Layman improved accepted quality by one task but increased median total and output tokens, so optimization remains Experimental.

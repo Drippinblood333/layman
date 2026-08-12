@@ -188,8 +188,16 @@ def main(argv: list[str] | None = None) -> int:
             mode = detected_mode if args.mode == "auto" else args.mode
             if mode == "api" and not os.getenv("OPENAI_API_KEY"):
                 raise RuntimeError("API mode requires OPENAI_API_KEY in the current environment")
+            previous_state = read_state()
             state = setup_state(mode)
-            state["codex_plugin_managed"] = not args.skip_plugin
+            if not args.skip_plugin:
+                state["codex_plugin_managed"] = True
+            elif "codex_plugin_managed" in previous_state:
+                state["codex_plugin_managed"] = previous_state["codex_plugin_managed"]
+            elif previous_state:
+                state.pop("codex_plugin_managed", None)
+            else:
+                state["codex_plugin_managed"] = False
             write_state(state)
             result: dict[str, object] = {
                 "mode": mode,

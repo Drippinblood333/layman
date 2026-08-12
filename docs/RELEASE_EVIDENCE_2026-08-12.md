@@ -4,10 +4,10 @@ This snapshot records verified local evidence and keeps external release gates s
 
 ## Local automated gates
 
-- 88 unit and integration tests passed.
-- The 300-case deterministic routing matrix, release checks, legacy v1 hash check, public plugin manifest/MCP/skill validation, Ruff, Bandit and release secret scan passed.
+- 90 unit and integration tests passed.
+- The 300-case deterministic routing matrix, release checks, legacy v1 hash check, public plugin manifest/MCP/skill validation, Ruff, Bandit and whole-checkout release secret scan passed.
 - The installed dependency tree passed `pip check`. An OSV audit initially identified fixed 2026 advisories in Pillow 11.3.0 and pytest 8.4.2; after raising the project floors and upgrading to Pillow 12.3.0 and pytest 9.1.1, the audit reported no known vulnerabilities.
-- CI was updated to the current major releases of checkout, setup-python, artifact upload/download and release publishing actions, pinned to verified full commit SHAs. The three-platform test job now builds and clean-installs both Python distributions in addition to `pip check`, OSV audit, static analysis and release validation; Dependabot checks Python and GitHub Actions weekly.
+- CI was updated to the current major releases of checkout, setup-python, artifact upload/download and release publishing actions, pinned to verified full commit SHAs. The three-platform test job now builds and clean-installs both Python distributions in addition to `pip check`, OSV audit, static analysis, whole-checkout secret scanning and release validation; Dependabot checks Python and GitHub Actions weekly.
 - Current GitHub runner labels are used: `macos-15-intel` for Intel, `macos-15` for Apple Silicon and `ubuntu-24.04-arm` for Linux ARM. The latter is currently a GitHub Public Preview runner, so hosted execution remains an external gate.
 - The Windows x64 standalone executable built with PyInstaller 6.22.0 on Python 3.14.3.
 - Wheel, source archive, Codex plugin ZIP, Windows ZIP, CycloneDX 1.5 SBOM and SHA-256 manifests built locally.
@@ -30,7 +30,13 @@ The standalone executable was tested under a new ignored workspace path containi
 - Codex plugin and marketplace listings after uninstall: both passed with no Layman reference remaining.
 - The reusable standalone smoke gate also passed locally with no API key or plugin installation: help, Plus setup with `--skip-plugin`, state persistence, `doctor`, and `uninstall --purge-data`. The same gate is configured for all five standalone runner entries.
 
-The test also reproduced and fixed four release blockers: automatic discovery previously selected a broken npm `codex.cmd` wrapper, purge uninstall previously left Codex pointing at a deleted local marketplace, an explicitly configured new `CODEX_HOME` was not created before the first Codex probe, and users who intentionally skipped plugin installation could not purge their isolated Layman data without a Codex CLI. Layman now probes candidate executables with `--version`, can discover supported editor-bundled CLIs, creates an explicit Codex home when needed, records whether plugin management was skipped, and removes Codex references before deleting local data whenever those references may exist.
+The test also reproduced and fixed four release blockers: automatic discovery previously selected a broken npm `codex.cmd` wrapper, purge uninstall previously left Codex pointing at a deleted local marketplace, an explicitly configured new `CODEX_HOME` was not created before the first Codex probe, and users who intentionally skipped plugin installation could not purge their isolated Layman data without a Codex CLI. Layman now probes candidate executables with `--version`, can discover supported editor-bundled CLIs, creates an explicit Codex home when needed, records whether plugin management was skipped, and removes Codex references before deleting local data whenever those references may exist. Repeated skip requests preserve managed state, while legacy state without explicit evidence remains conservative.
+
+## Read-only GitHub settings audit
+
+The empty remote repository is public and the authenticated owner has admin access. Issues and Actions are enabled; workflow tokens default to read-only, while the release job requests `contents: write` only for its publishing job. Private vulnerability reporting, secret scanning and push protection are enabled. The workflow itself pins all external actions even though repository-wide SHA enforcement is not currently required.
+
+Dependabot vulnerability alerts and security updates are disabled. No ruleset or branch protection exists because `main` has not been pushed yet. Enabling those security settings and adding required CI checks after the first successful hosted run remain external configuration gates.
 
 ## Official OpenAI verification
 
@@ -49,6 +55,7 @@ The estimator applies long-context rates to the full request when input exceeds 
 ## External gates still open
 
 - The public GitHub repository exists, but it has no pushed default branch, workflow run, tag or release yet.
+- Dependabot vulnerability alerts/security updates and a required-check branch ruleset must be enabled after the initial branch and check names exist.
 - macOS x64/arm64 and Linux x64/arm64 builds must pass hosted CI.
 - Published one-line installers must be tested against an actual `v0.9.0-rc.1` prerelease.
 - Human semantic scoring and invited-user acceptance by 5–10 testers remain open.

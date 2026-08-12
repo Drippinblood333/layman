@@ -28,7 +28,7 @@ jobs:
       - run: python scripts/smoke-python-packages.py --packages build/python-packages
       - run: ruff check services/layman-router/src services/layman-router/tests scripts evals/token_optimization
       - run: bandit -q -ll -r services/layman-router/src -x services/layman-router/tests
-      - run: python scripts/scan-release.py README.md docs plugins services/layman-router/src
+      - run: python scripts/scan-release.py
 
   standalone:
     strategy:

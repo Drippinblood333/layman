@@ -16,14 +16,14 @@ Updated: 2026-08-12
 
 ## Phase 2 — Validation
 
-- [x] All 88 unit/integration tests pass locally.
+- [x] All 90 unit/integration tests pass locally.
 - [x] 300-case deterministic routing matrix passes.
 - [x] 401, 429, 5xx, timeout, empty stream and interrupted stream paths are covered.
 - [x] Fixed 18-case/36-call Plus calibration completed with 36 successes and no stored answer text.
 - [x] 30-task/60-call token benchmark completed; the savings gate failed and the negative result is published.
 - [x] GPT-5.6 model identifiers, reasoning efforts and 2026-07-30 short/long-context standard prices match current official documentation.
 - [x] The installed dependency tree passes `pip check`; the 2026-08-12 OSV audit reports no known vulnerabilities after upgrading pytest and Pillow.
-- [x] CI uses current action majors pinned to full commit SHAs and runs `pip check`, OSV audit, tests, Python package build/install smoke checks, static analysis, plugin validation and secret scanning; Dependabot covers Python and GitHub Actions.
+- [x] CI uses current action majors pinned to full commit SHAs and runs `pip check`, OSV audit, tests, Python package build/install smoke checks, static analysis, plugin validation and whole-checkout secret scanning; Dependabot covers Python and GitHub Actions.
 - [ ] Human semantic-quality scoring is complete.
 - [ ] macOS and Linux CI runs are green on the public repository.
 - [ ] Live API benchmark exists; until then API routing remains Beta.
@@ -54,6 +54,9 @@ Updated: 2026-08-12
 - [x] The clean release-assets job installs and validates the runtime dependency tree before building the dependency-version SBOM.
 - [x] Honest Plus calibration report exists.
 - [x] Public GitHub repository exists under `Drippinblood333/layman`.
+- [x] The public repository has Actions, Issues, private vulnerability reporting, secret scanning and push protection enabled; workflow token permissions default to read-only.
 - [ ] The initial `main` branch is pushed and hosted CI completes successfully.
+- [ ] Dependabot vulnerability alerts/security updates are enabled after the default branch exists.
+- [ ] A `main` ruleset requires the verified hosted CI checks after their check names exist.
 - [ ] `v0.9.0-rc.1` is tested by 5–10 invited users with no unresolved P0/P1 issue.
 - [ ] Owner approves and publishes `v1.0.0`.
