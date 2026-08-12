@@ -285,6 +285,27 @@ def test_docker_build_uses_repository_context_and_includes_plugin_sources():
     assert "plugins/layman" in dockerfile
 
 
+def test_ci_quality_tools_are_version_pinned_in_the_dev_extra():
+    pyproject = (ROOT / "services" / "layman-router" / "pyproject.toml").read_text(
+        encoding="utf-8"
+    )
+    for requirement in (
+        "pytest==9.1.1",
+        "pytest-asyncio==1.4.0",
+        "Pillow==12.3.0",
+        "ruff==0.15.21",
+        "bandit==1.9.4",
+        "pip-audit==2.10.1",
+    ):
+        assert f'"{requirement}"' in pyproject
+
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    assert 'python -m pip install -e "./services/layman-router[dev]"' in workflow
+    assert '"./services/layman-router[dev]" ruff bandit pip-audit' not in workflow
+
+
 def test_hatch_build_finds_plugin_bundle_in_shallow_project_root(
     tmp_path: Path, monkeypatch
 ):

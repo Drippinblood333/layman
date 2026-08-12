@@ -16,14 +16,14 @@ Updated: 2026-08-12
 
 ## Phase 2 — Validation
 
-- [x] The current 148-test unit/integration suite passes locally.
+- [x] The current 149-test unit/integration suite passes locally.
 - [x] 300-case deterministic routing matrix passes.
 - [x] 401, 429, 5xx, timeout, empty stream and interrupted stream paths are covered.
 - [ ] Fresh fingerprinted 18-case/36-call Plus calibration is complete for the current release candidate; the 2026-07-16 historical run completed without execution errors but cannot close this gate.
 - [x] 30-task/60-call token benchmark completed; the savings gate failed and the negative result is published.
 - [x] GPT-5.6 model identifiers, reasoning efforts and 2026-07-30 short/long-context standard prices match current official documentation.
 - [x] The installed dependency tree passes `pip check`; the 2026-08-12 OSV audit reports no known vulnerabilities after upgrading pytest and Pillow.
-- [x] Strict hashed runtime installation and the 125-test pre-audit suite passed under a clean Python 3.14 environment; the final 148-test suite passed in the primary Python 3.14.3 environment, and the earlier 90-test baseline passed under independent Python 3.12.13. Python 3.11 remains in hosted CI.
+- [x] Strict hashed runtime installation and the 125-test pre-audit suite passed under a clean Python 3.14 environment; the final 149-test suite passed in the primary Python 3.14.3 environment, and the earlier 90-test baseline passed under independent Python 3.12.13. Python 3.11 remains in hosted CI.
 - [x] CI uses current action majors pinned to full commit SHAs and runs `pip check`, OSV audit, tests, Python package build/install smoke checks, static analysis, plugin validation, whole-checkout secret scanning and a digest-pinned Docker build/health smoke; Dependabot covers Python and GitHub Actions.
 - [ ] Human semantic-quality scoring is complete.
 - [ ] macOS and Linux CI runs are green on the public repository.
