@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 from typing import Any
@@ -11,6 +13,22 @@ from .models import ProjectConfig, RouterConfig
 
 REPO_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "projects.yaml"
 BUNDLED_CONFIG_PATH = Path(__file__).with_name("default_config.yaml")
+
+
+def routing_config_sha256(config: RouterConfig) -> str:
+    routing_identity = {
+        "price_version": config.price_version,
+        "tiers": config.model_dump(mode="json")["tiers"],
+        "projects": config.model_dump(mode="json")["projects"],
+    }
+    return hashlib.sha256(
+        json.dumps(routing_identity, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def upstream_identity_sha256(config: RouterConfig) -> str:
+    normalized = config.upstream_base_url.rstrip("/").lower()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
 def load_config(path: str | Path | None = None) -> RouterConfig:

@@ -13,7 +13,7 @@ tiers:
   fast:
     model: gpt-5.6-luna
     reasoning_effort: low
-    max_output_tokens: 8000
+    max_output_tokens: 800
     pricing:
       input_per_million: 0.2
       cached_input_per_million: 0.02
@@ -23,7 +23,7 @@ tiers:
   balanced:
     model: gpt-5.6-terra
     reasoning_effort: medium
-    max_output_tokens: 16000
+    max_output_tokens: 1500
     pricing:
       input_per_million: 2.0
       cached_input_per_million: 0.2
@@ -33,7 +33,7 @@ tiers:
   deep:
     model: gpt-5.6-sol
     reasoning_effort: high
-    max_output_tokens: 32000
+    max_output_tokens: 2500
     pricing:
       input_per_million: 5.0
       cached_input_per_million: 0.5

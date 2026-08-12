@@ -10,7 +10,27 @@ Layman 1.0 does not copy or vendor source code from the comparison projects belo
 | Superpowers | https://github.com/obra/superpowers | MIT | Skill-composition comparison only |
 | Claude Code Router | https://github.com/musistudio/claude-code-router | MIT | Routing-architecture comparison only |
 
-Layman's runtime Python dependencies are listed in `services/layman-router/pyproject.toml` and the release SBOM. Their licenses remain those of their respective authors.
+Layman's exact direct and transitive runtime Python dependencies are pinned in
+`services/layman-router/requirements.lock`. Every public platform ZIP also includes
+`runtime-dependencies.json`, which records each installed version, SPDX license
+expression, package metadata URL, upstream source URL, and the evidence used for the
+license conclusion. The release `sbom.cdx.json` is generated from and checked against
+that same manifest. Unknown or unsupported licenses fail the release build. All
+third-party packages remain under the terms of their respective authors.
+
+Standalone ZIPs additionally contain `standalone-components.json` plus the
+`THIRD_PARTY_LICENSES/` directory. The component inventory identifies the exact
+embedded CPython runtime/standard library and PyInstaller version, including the
+PyInstaller bootloader exception and runtime-hook license scopes. The directory
+contains the license and copyright notice files extracted from every locked Python
+distribution, CPython, and PyInstaller; their SHA-256 digests are checked before a
+release asset is staged.
+
+The repository copy at `third_party/cpython/LICENSE` is the exact `LICENSE.txt`
+from the official CPython 3.14.3 Windows embeddable distribution. It is kept as a
+digest-pinned, platform-independent source for every standalone build, because
+installed Python layouts on hosted Linux and macOS runners do not reliably retain
+that complete incorporated-software notice file.
 
 Before vendoring third-party source in a future release:
 

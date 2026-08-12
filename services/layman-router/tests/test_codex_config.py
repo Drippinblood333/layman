@@ -27,6 +27,8 @@ def test_codex_enable_and_disable_restore_only_managed_values(tmp_path: Path):
     assert document["model"] == "auto"
     assert document["model_provider"] == "layman-router"
     assert document["model_providers"]["layman-router"]["wire_api"] == "responses"
+    assert document["model_providers"]["layman-router"]["request_max_retries"] == 0
+    assert document["model_providers"]["layman-router"]["stream_max_retries"] == 0
     assert document["features"]["apps"] is True
 
     disable_codex(apply=True, home=tmp_path)
@@ -50,6 +52,23 @@ def test_disable_preserves_user_change_and_keeps_recovery_state(tmp_path: Path):
     assert restored["model"] == "user-changed-model"
     assert change.conflicts
     assert (tmp_path / "layman-router-state.json").exists()
+
+
+def test_disable_recognizes_legacy_managed_provider_without_retry_fields(tmp_path: Path):
+    config_path = tmp_path / "config.toml"
+    config_path.write_text('model = "original"\n', encoding="utf-8")
+    enable_codex(apply=True, home=tmp_path)
+    document = tomlkit.parse(config_path.read_text(encoding="utf-8"))
+    del document["model_providers"]["layman-router"]["request_max_retries"]
+    del document["model_providers"]["layman-router"]["stream_max_retries"]
+    config_path.write_text(tomlkit.dumps(document), encoding="utf-8")
+
+    change = disable_codex(apply=True, home=tmp_path)
+
+    assert not change.conflicts
+    restored = tomlkit.parse(config_path.read_text(encoding="utf-8"))
+    assert restored["model"] == "original"
+    assert "model_providers" not in restored
 
 
 def test_restore_backup_requires_scoped_valid_backup(tmp_path: Path):

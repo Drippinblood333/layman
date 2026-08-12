@@ -81,6 +81,8 @@ def enable_codex(*, apply: bool, home: Path | None = None) -> ConfigChange:
     provider["base_url"] = "http://127.0.0.1:8787/v1"
     provider["wire_api"] = "responses"
     provider["env_key"] = "OPENAI_API_KEY"
+    provider["request_max_retries"] = 0
+    provider["stream_max_retries"] = 0
     providers[PROVIDER_ID] = provider
     after = tomlkit.dumps(document)
     diff = _render_change(before, after, config_path)
@@ -126,8 +128,11 @@ def disable_codex(*, apply: bool, home: Path | None = None) -> ConfigChange:
             "base_url": "http://127.0.0.1:8787/v1",
             "wire_api": "responses",
             "env_key": "OPENAI_API_KEY",
+            "request_max_retries": 0,
+            "stream_max_retries": 0,
         }
-        if current_provider is not None and current_provider.unwrap() != expected_provider:
+        legacy_provider = {key: value for key, value in expected_provider.items() if not key.endswith("_max_retries")}
+        if current_provider is not None and current_provider.unwrap() not in (expected_provider, legacy_provider):
             conflicts.append("model_providers.layman-router changed after enablement; left unchanged")
         elif state["router_provider_present"]:
             restored = tomlkit.table()

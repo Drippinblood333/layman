@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
 import random
 import shutil
@@ -12,6 +13,8 @@ import sys
 import tempfile
 import time
 import uuid
+from dataclasses import asdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -34,11 +37,12 @@ from layman_router.plus_eval import (  # noqa: E402
     find_codex,
     subscription_environment,
 )
-from layman_router.plus_run import run_plus_task  # noqa: E402
+from layman_router.plus_run import COMPACT_PROMPT, POLICIES, _execution_contract, run_plus_task  # noqa: E402
 
 
 DEFAULT_OUTPUT = Path.home() / ".layman" / "token-benchmark.jsonl"
 DEFAULT_WORK = ROOT / "build" / "token-benchmark-work"
+BENCHMARK_SCHEMA_VERSION = 2
 
 
 def _execution_prompt(case: BenchmarkCase) -> str:
@@ -51,22 +55,63 @@ def _execution_prompt(case: BenchmarkCase) -> str:
     )
 
 
-def _completed_keys(output: Path) -> set[str]:
+def _stable_digest(value: Any) -> str:
+    payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _experiment_manifest(seed: int) -> dict[str, Any]:
+    config = load_config()
+    cases = [asdict(case) for case in CASES]
+    policies = {tier.value: asdict(policy) for tier, policy in POLICIES.items()}
+    components = {
+        "randomization_seed": seed,
+        "cases_sha256": _stable_digest(cases),
+        "routing_config_sha256": _stable_digest(config.model_dump(mode="json")),
+        "execution_policies_sha256": _stable_digest(policies),
+        "execution_contract_sha256": hashlib.sha256(
+            inspect.getsource(_execution_contract).encode("utf-8")
+        ).hexdigest(),
+        "compact_prompt_sha256": hashlib.sha256(COMPACT_PROMPT.encode("utf-8")).hexdigest(),
+        "benchmark_protocol_sha256": hashlib.sha256(
+            Path(__file__).read_bytes()
+            + (Path(__file__).with_name("fixture.py")).read_bytes()
+        ).hexdigest(),
+    }
+    return {
+        "schema_version": BENCHMARK_SCHEMA_VERSION,
+        **components,
+        "experiment_digest": _stable_digest(
+            {"schema_version": BENCHMARK_SCHEMA_VERSION, **components}
+        ),
+    }
+
+
+def _completed_keys(output: Path, experiment_digest: str) -> set[str]:
     if not output.exists():
         return set()
     keys: set[str] = set()
     for line in output.read_text(encoding="utf-8").splitlines():
         if line.strip():
             record = json.loads(line)
-            if record.get("execution_status") == "completed":
+            if (
+                record.get("experiment_digest") == experiment_digest
+                and record.get("execution_status") == "completed"
+            ):
                 keys.add(str(record["key"]))
     return keys
 
 
-def _failure_counts(output: Path) -> tuple[int, int]:
+def _failure_counts(output: Path, experiment_digest: str) -> tuple[int, int]:
     if not output.exists():
         return 0, 0
-    records = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines() if line.strip()]
+    records = [
+        record
+        for line in output.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+        for record in [json.loads(line)]
+        if record.get("experiment_digest") == experiment_digest
+    ]
     failures = sum(
         record.get("execution_status") != "completed" or not record.get("validation", {}).get("passed", False)
         for record in records
@@ -129,10 +174,17 @@ def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[s
         }
 
 
-def _public_record(case: BenchmarkCase, arm: str, result: dict[str, Any], validation: dict[str, Any]) -> dict[str, Any]:
+def _public_record(
+    case: BenchmarkCase,
+    arm: str,
+    result: dict[str, Any],
+    validation: dict[str, Any],
+    *,
+    experiment: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     answer = result.pop("answer", "")
     usage = result.get("usage") or {}
-    return {
+    record = {
         "key": f"{case.id}:{arm}",
         "case_id": case.id,
         "category": case.category,
@@ -146,7 +198,11 @@ def _public_record(case: BenchmarkCase, arm: str, result: dict[str, Any], valida
         "answer_chars": len(answer),
         "validation": validation,
         "stores_answer_text": False,
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
     }
+    if experiment is not None:
+        record.update(experiment)
+    return record
 
 
 def _ordered_arms(seed: int) -> list[tuple[BenchmarkCase, str]]:
@@ -160,13 +216,16 @@ def _ordered_arms(seed: int) -> list[tuple[BenchmarkCase, str]]:
 
 
 def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
+    experiment = _experiment_manifest(args.seed)
+    experiment_digest = experiment["experiment_digest"]
     plan = _ordered_arms(args.seed)
-    done = _completed_keys(args.output)
+    done = _completed_keys(args.output, experiment_digest)
     pending = [(case, arm) for case, arm in plan if f"{case.id}:{arm}" not in done]
     if not args.run:
         return {
             "mode": "dry-run", "cases": len(CASES), "planned_calls": len(plan),
             "completed_calls": len(plan) - len(pending), "pending_calls": len(pending),
+            "experiment_digest": experiment_digest,
             "next": [{"key": f"{case.id}:{arm}", "category": case.category} for case, arm in pending[: args.max_calls]],
             "privacy": "Synthetic prompts only; result JSONL excludes answer text and generated code.",
         }
@@ -176,9 +235,26 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     login = codex_login_status(executable)
     if not login["available"] or not login["chatgpt_login"]:
         raise RuntimeError("Benchmark requires ChatGPT subscription login; API billing is disabled")
+    version_result = subprocess.run(
+        [executable, "--version"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+        env=subscription_environment(),
+    )
+    codex_version = version_result.stdout.strip() if version_result.returncode == 0 else "unavailable"
+    experiment = {
+        **{key: value for key, value in experiment.items() if key != "experiment_digest"},
+        "codex_version": codex_version,
+    }
+    experiment["experiment_digest"] = _stable_digest(experiment)
+    experiment_digest = experiment["experiment_digest"]
+    done = _completed_keys(args.output, experiment_digest)
+    pending = [(case, arm) for case, arm in plan if f"{case.id}:{arm}" not in done]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.work_root.mkdir(parents=True, exist_ok=True)
-    baseline_total, baseline_failed = _failure_counts(args.output)
+    baseline_total, baseline_failed = _failure_counts(args.output, experiment_digest)
     completed_now = 0
     failed_now = 0
     with args.output.open("a", encoding="utf-8") as stream:
@@ -190,7 +266,7 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             else:
                 result = run_plus_task(_execution_prompt(case), cwd=workspace, codex_path=executable)
             validation = validate_workspace(case, workspace, result.get("answer", ""))
-            record = _public_record(case, arm, result, validation)
+            record = _public_record(case, arm, result, validation, experiment=experiment)
             stream.write(json.dumps(record, ensure_ascii=False) + "\n")
             stream.flush()
             _remove_workspace(workspace, args.work_root)
@@ -209,11 +285,17 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "mode": "run", "output": str(args.output.resolve()), "completed_now": completed_now,
         "failed_now": failed_now, "remaining": max(0, len(pending) - completed_now - failed_now),
+        "experiment_digest": experiment_digest,
     }
 
 
 def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     records = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines() if line.strip()]
+    latest_digest = records[-1].get("experiment_digest") if records else None
+    records = [
+        record for record in records
+        if record.get("experiment_digest") == latest_digest
+    ]
     pairs: dict[str, dict[str, dict[str, Any]]] = {}
     for record in records:
         pairs.setdefault(record["case_id"], {})[record["arm"]] = record
@@ -256,6 +338,7 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
         "median_files_read_not_higher": layman_files is not None and direct_files is not None and layman_files <= direct_files,
     }
     return {
+        "experiment_digest": latest_digest,
         "pairs": len(complete), "median_total_token_reduction": median_reduction,
         "bootstrap_95_percent_ci": [ci_low, bootstrap[int(len(bootstrap) * 0.975)] if bootstrap else None],
         "median_output_token_reduction": output_reduction,

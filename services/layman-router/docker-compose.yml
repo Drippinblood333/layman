@@ -1,6 +1,8 @@
 services:
   layman-router:
-    build: .
+    build:
+      context: ../..
+      dockerfile: services/layman-router/Dockerfile
     ports:
       - "127.0.0.1:8787:8787"
     environment:

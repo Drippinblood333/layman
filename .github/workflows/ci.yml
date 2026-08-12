@@ -17,6 +17,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
+      - run: python -m pip install --require-hashes -r services/layman-router/requirements.lock
       - run: python -m pip install -e "./services/layman-router[dev]" ruff bandit pip-audit
       - run: python -m pip check
       - run: python -m pip_audit --local --progress-spinner off --vulnerability-service osv
@@ -26,9 +27,27 @@ jobs:
       - run: python scripts/validate-public-plugin.py
       - run: python -m build services/layman-router --outdir build/python-packages
       - run: python scripts/smoke-python-packages.py --packages build/python-packages
-      - run: ruff check services/layman-router/src services/layman-router/tests scripts evals/token_optimization
+      - run: ruff check services/layman-router/src services/layman-router/tests scripts evals/token_optimization evals/router-v2/benchmark.py
       - run: bandit -q -ll -r services/layman-router/src -x services/layman-router/tests
       - run: python scripts/scan-release.py
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - run: docker build --file services/layman-router/Dockerfile --tag layman-router:ci .
+      - name: Smoke-test container health
+        run: |
+          container=$(docker run --detach --publish 127.0.0.1:8787:8787 --env LAYMAN_ROUTER_HOST=0.0.0.0 --name layman-router-ci layman-router:ci)
+          cleanup() { docker logs "$container" || true; docker rm --force "$container" || true; }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8787/healthz >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
 
   standalone:
     strategy:
@@ -41,7 +60,7 @@ jobs:
           - os: macos-15-intel
             platform: macos-x64
             artifact: layman-macos-x64
-          - os: macos-14
+          - os: macos-15
             platform: macos-arm64
             artifact: layman-macos-arm64
           - os: ubuntu-latest
@@ -55,9 +74,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: '3.11'
+          python-version: '3.14.3'
           cache: pip
-      - run: python -m pip install -e "./services/layman-router[dev]"
+      - run: python -m pip install --require-hashes -r services/layman-router/requirements.lock
+      - run: python -m pip install --no-deps -e ./services/layman-router
+      - run: python -m pip install pyinstaller==6.22.0 pyinstaller-hooks-contrib==2026.6
       - run: python scripts/build-standalone.py
       - run: python scripts/smoke-standalone.py
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -69,7 +90,7 @@ jobs:
 
   release-assets:
     if: startsWith(github.ref, 'refs/tags/v1.0.0-rc.') || github.ref == 'refs/tags/v1.0.0'
-    needs: [test, standalone]
+    needs: [test, docker, standalone]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -78,7 +99,7 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.11'
-      - run: python -m pip install build
+      - run: python -m pip install build==1.5.0
       - run: python -m pip install --require-hashes -r services/layman-router/requirements.lock
       - run: python -m pip install --no-deps "./services/layman-router"
       - run: python -m pip check
@@ -88,6 +109,7 @@ jobs:
           pattern: layman-*
       - run: python scripts/package-platform-artifacts.py --artifacts build/platform-artifacts --output release/layman-v1.0.0
       - run: python scripts/build-release.py
+      - run: python scripts/runtime_inventory.py validate --platform-archives release/layman-v1.0.0
       - run: python scripts/smoke-python-packages.py
       - run: python scripts/scan-release.py release/layman-v1.0.0
       - run: python scripts/stage-release-assets.py --require-all-platforms

@@ -35,3 +35,13 @@ During calibration, ambiguous synthetic specifications and syntax-dependent vali
 The published savings gate failed. Token optimization remains **Experimental** and API context rewriting remains opt-in. The release must state this negative result and must not claim a fixed token-saving percentage or actual API-bill savings.
 
 The next experiment should focus on why no task selected Fast, reduce redundant tool/file access, and validate compaction separately with genuinely long-history tasks. Any tuned policy should be evaluated on a new holdout set rather than reusing these 30 tasks as proof.
+
+## 2026-08-12 policy update — not a new savings result
+
+The implementation now uses leaner execution ceilings: Fast starts with 3 files and may expand to 6, Balanced 6/12, and Deep 10/20. The 800, 1,500 and 2,500-token final-answer values are soft concision targets, not truncation boundaries. Declaring a large tool schema no longer makes an ordinary focused task agentic by itself, retry usage is accumulated per attempt, and incomplete or unpriced requests are excluded from the automatic-routing savings cohort rather than treated as free.
+
+Tool-call and elapsed-time limits are process-enforced. Unique-file limits use paths observable in Codex's structured events and cover common source, configuration, documentation and data extensions; a batch command can still make that count a lower bound. The prompt budget remains a planning constraint rather than a filesystem access-control boundary.
+
+The unchanged 30-case corpus now routes 4 cases to Fast, 22 to Balanced and 4 high-risk cases to Deep. This is a deterministic policy check, **not** evidence that the new policy saves tokens. No additional subscription-backed model calls were made during this update. Before any savings claim, run a fresh holdout comparison with the same acceptance criteria and publish gross input, cached input, output, tool output, attempts, latency and signed cost deltas.
+
+Benchmark checkpoints now carry a SHA-256 experiment fingerprint derived from the cases, routing configuration, execution budgets, execution/compaction prompts, randomization seed, validation protocol and, for live runs, the actual Codex CLI version. Records include a UTC timestamp. Results from an older fingerprint remain historical records but are never resumed into or analyzed as the current policy run.

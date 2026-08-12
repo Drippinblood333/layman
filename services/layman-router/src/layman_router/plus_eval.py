@@ -20,7 +20,6 @@ from .routing import decide_route
 
 DEFAULT_CASES_PATH = Path(__file__).with_name("plus_release_cases.jsonl")
 EXTENDED_CASES_PATH = Path(__file__).with_name("plus_cases.jsonl")
-DEFAULT_OUTPUT_PATH = Path.home() / ".layman" / "plus-eval.jsonl"
 SAFE_DEFAULT_CALL_LIMIT = 12
 API_BILLING_ENV_VARS = {
     "OPENAI_API_KEY", "CODEX_API_KEY", "AZURE_OPENAI_API_KEY",
@@ -31,6 +30,7 @@ DIRECT_ANSWER_PREFIX = (
     "This is an isolated quality evaluation. Answer the task directly without calling tools, "
     "reading files, or changing the computer. Be correct and concise.\n\nTASK:\n"
 )
+EVAL_PROTOCOL_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -202,7 +202,33 @@ def build_plan(cases: list[dict[str, Any]], *, config: Any | None = None) -> lis
     return plan
 
 
-def completed_keys(output: Path) -> set[str]:
+def experiment_fingerprint(
+    cases: list[dict[str, Any]], plan: list[PlusEvalArm], *, codex_version: str
+) -> str:
+    payload = {
+        "protocol_version": EVAL_PROTOCOL_VERSION,
+        "cases": cases,
+        "routes": [
+            {
+                "key": arm.key,
+                "model": arm.model,
+                "effort": arm.effort,
+                "tier": arm.route_tier,
+                "reason": arm.route_reason,
+            }
+            for arm in plan
+        ],
+        "prompt_contract": DIRECT_ANSWER_PREFIX,
+        "codex_version": codex_version,
+    }
+    return hashlib.sha256(
+        json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
+    ).hexdigest()
+
+
+def completed_keys(output: Path, fingerprint: str) -> set[str]:
     if not output.exists():
         return set()
     keys: set[str] = set()
@@ -210,12 +236,18 @@ def completed_keys(output: Path) -> set[str]:
         if not line.strip():
             continue
         item = json.loads(line)
-        if item.get("status") == "completed" and item.get("key"):
+        if (
+            item.get("status") == "completed"
+            and item.get("key")
+            and item.get("experiment_fingerprint") == fingerprint
+        ):
             keys.add(str(item["key"]))
     return keys
 
 
-def public_plan(plan: list[PlusEvalArm], done: set[str]) -> dict[str, Any]:
+def public_plan(
+    plan: list[PlusEvalArm], done: set[str], *, fingerprint: str
+) -> dict[str, Any]:
     pending = [arm for arm in plan if arm.key not in done]
     return {
         "mode": "dry-run",
@@ -224,6 +256,7 @@ def public_plan(plan: list[PlusEvalArm], done: set[str]) -> dict[str, Any]:
         "planned_calls": len(plan),
         "completed_calls": len(plan) - len(pending),
         "pending_calls": len(pending),
+        "experiment_fingerprint": fingerprint,
         "privacy": "prompts are sent through stdin; prompt and answer text are not written to the result log",
         "routes": [
             {"key": arm.key, "category": arm.category, "model": arm.model, "effort": arm.effort, "tier": arm.route_tier}
@@ -310,6 +343,7 @@ def run_arm(
     codex_path: str,
     workspace: Path,
     store_outputs: bool = False,
+    experiment_fingerprint_value: str | None = None,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
 ) -> dict[str, Any]:
     workspace.mkdir(parents=True, exist_ok=True)
@@ -343,6 +377,8 @@ def run_arm(
             "prompt_sha256": hashlib.sha256(arm.prompt.encode("utf-8")).hexdigest(),
             "answer_sha256": hashlib.sha256(answer.encode("utf-8")).hexdigest() if answer else None,
             "answer_chars": len(answer), "human_score": None,
+            "experiment_fingerprint": experiment_fingerprint_value,
+            "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
         if result.returncode != 0:
             record["error_category"] = _safe_error(result.stderr, result.returncode)
@@ -366,12 +402,31 @@ def run_plus_eval(
         raise ValueError("max_calls must be positive")
     if max_calls > SAFE_DEFAULT_CALL_LIMIT and not allow_more_calls:
         raise ValueError(f"max_calls above {SAFE_DEFAULT_CALL_LIMIT} requires --allow-more-calls")
-    plan = build_plan(load_cases(cases_path))
-    done = completed_keys(output)
-    preview = public_plan(plan, done)
+    cases = load_cases(cases_path)
+    plan = build_plan(cases)
+    executable = find_codex(codex_path) if execute else None
+    codex_version = "unresolved-dry-run"
+    if executable is not None:
+        version_result = subprocess.run(
+            [executable, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+            env=subscription_environment(),
+        )
+        if version_result.returncode != 0 or not version_result.stdout.strip():
+            raise RuntimeError("Codex version could not be verified for this calibration")
+        codex_version = version_result.stdout.strip()
+    fingerprint = experiment_fingerprint(cases, plan, codex_version=codex_version)
+    done = completed_keys(output, fingerprint)
+    preview = public_plan(plan, done, fingerprint=fingerprint)
     if not execute:
+        preview["resume_status"] = (
+            "conservative preview; completed records are matched only after --run verifies the Codex version"
+        )
         return preview
-    executable = find_codex(codex_path)
+    assert executable is not None
     login = codex_login_status(executable)
     if not login["available"]:
         raise RuntimeError(login["status"])
@@ -383,7 +438,13 @@ def run_plus_eval(
     failed = 0
     with output.open("a", encoding="utf-8") as stream:
         for arm in pending:
-            record = run_arm(arm, codex_path=executable, workspace=workspace, store_outputs=store_outputs)
+            record = run_arm(
+                arm,
+                codex_path=executable,
+                workspace=workspace,
+                store_outputs=store_outputs,
+                experiment_fingerprint_value=fingerprint,
+            )
             stream.write(json.dumps(record, ensure_ascii=False) + "\n")
             stream.flush()
             if record["status"] == "completed":
@@ -397,5 +458,7 @@ def run_plus_eval(
         "completed_now": completed_now, "failed_now": failed,
         "remaining_after_run": max(0, preview["pending_calls"] - completed_now - failed),
         "stores_output_text": store_outputs,
+        "experiment_fingerprint": fingerprint,
+        "codex_version": codex_version,
         "billing_note": "Uses ChatGPT subscription login. API-dollar values are not measured in this mode.",
     }

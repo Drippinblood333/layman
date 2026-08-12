@@ -12,6 +12,7 @@ FAST_TASKS = {
     TaskType.TRANSLATION,
     TaskType.CLASSIFICATION,
     TaskType.EXTRACTION,
+    TaskType.DOCUMENTATION,
 }
 DEEP_TASKS = {TaskType.DEBUGGING, TaskType.ARCHITECTURE, TaskType.SECURITY, TaskType.MATH}
 

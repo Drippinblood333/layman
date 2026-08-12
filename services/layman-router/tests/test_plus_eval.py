@@ -11,6 +11,7 @@ from layman_router.plus_eval import (
     build_plan,
     codex_login_status,
     completed_keys,
+    experiment_fingerprint,
     find_codex,
     load_cases,
     run_arm,
@@ -35,6 +36,7 @@ def test_dry_run_does_not_resolve_or_call_codex(tmp_path: Path):
         codex_path="definitely-missing", execute=False,
     )
     assert result["mode"] == "dry-run"
+    assert result["resume_status"].startswith("conservative preview")
     assert result["pending_calls"] == 36
     assert all(set(route) == {"key", "category", "model", "effort", "tier"} for route in result["routes"])
 
@@ -120,8 +122,20 @@ def test_run_arm_removes_api_billing_environment(monkeypatch, tmp_path: Path):
 def test_resume_only_accepts_completed_records(tmp_path: Path):
     output = tmp_path / "results.jsonl"
     output.write_text(
-        json.dumps({"key": "a:auto", "status": "completed"}) + "\n" +
-        json.dumps({"key": "b:auto", "status": "failed"}) + "\n",
+        json.dumps({"key": "a:auto", "status": "completed", "experiment_fingerprint": "current"}) + "\n" +
+        json.dumps({"key": "b:auto", "status": "completed", "experiment_fingerprint": "old"}) + "\n" +
+        json.dumps({"key": "c:auto", "status": "failed", "experiment_fingerprint": "current"}) + "\n",
         encoding="utf-8",
     )
-    assert completed_keys(output) == {"a:auto"}
+    assert completed_keys(output, "current") == {"a:auto"}
+
+
+def test_experiment_fingerprint_changes_with_cases_routes_or_codex(router_config):
+    cases = load_cases()
+    plan = build_plan(cases, config=router_config)
+    current = experiment_fingerprint(cases, plan, codex_version="codex 1")
+    assert current == experiment_fingerprint(cases, plan, codex_version="codex 1")
+    assert current != experiment_fingerprint(cases, plan, codex_version="codex 2")
+    changed_cases = [*cases]
+    changed_cases[0] = {**changed_cases[0], "input": changed_cases[0]["input"] + " changed"}
+    assert current != experiment_fingerprint(changed_cases, plan, codex_version="codex 1")

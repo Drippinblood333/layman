@@ -2,6 +2,8 @@
 
 Layman has two user modes. Every user receives `$layman` and `$layman-status`. ChatGPT users can use the Experimental `$layman-auto` one-task launcher. OpenAI API users additionally receive the local `model="auto"` Responses proxy. A ChatGPT subscription cannot authenticate the API proxy.
 
+No public Layman release exists yet. Until a verified GitHub release is published, the one-line commands below intentionally have no installable target; contributors should use [source installation](#source-installation).
+
 ## Standalone installation
 
 Windows PowerShell:
@@ -17,6 +19,16 @@ curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install
 ```
 
 The installer downloads the matching release artifact and `SHA256SUMS.txt`, verifies the archive before extraction, adds the executable to the user path, installs the bundled local Codex plugin marketplace, and runs `layman setup --mode auto`. It never enables API routing without an API key. Code signing is not claimed for the first release candidate. Restart Codex and open a new task after installation so the plugin and updated path are loaded.
+
+Release-candidate testers must target the exact prerelease tag because GitHub's `latest` endpoint excludes prereleases:
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Drippinblood333/layman/main/install.ps1))) -Version v1.0.0-rc.1
+```
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install.sh | LAYMAN_VERSION=v1.0.0-rc.1 sh
+```
 
 ## ChatGPT Plus mode
 
@@ -99,4 +111,6 @@ python -m pip check
 
 Install the new release over the old executable, then run `layman doctor`. Legacy v2 data is copied from `~/.layman-router` to `~/.layman` only when the new destination does not exist; the source is retained.
 
-Run `layman uninstall` to stop the service, remove the Layman plugin and local marketplace, and restore managed Codex settings. Data and backups remain in `~/.layman`. Add `--purge-data` only when permanent deletion is intended; plugin and marketplace references are removed before that directory is deleted. If no working Codex CLI is available to remove possible references, Layman refuses the purge and keeps the data intact. The exception is a fresh installation created with `setup --skip-plugin`: Layman records that no plugin was managed and can purge its data without calling Codex. Re-running that option never downgrades an existing or legacy installation's conservative cleanup state.
+Run `layman uninstall` to stop the service, remove the Layman plugin and local marketplace, and restore managed Codex settings. Data and backups remain in `~/.layman`. Add `--purge-data` only when permanent deletion is intended. Purging succeeds only when plugin/marketplace references are resolved, the home has a valid Layman ownership marker, Layman originally created the directory, and every remaining entry appears in its managed-path manifest. A pre-existing custom `LAYMAN_HOME`, an unknown file, a malformed marker or an unavailable Codex CLI when references may remain causes a refusal and preserves the data. A fresh installation created with `setup --skip-plugin` records that no plugin was managed and can purge its isolated Layman-created home without calling Codex. Re-running that option never downgrades an existing or legacy installation's conservative cleanup state.
+
+Destructive tasks are blocked before a child Codex process starts. After reviewing the exact stdin task and scope, a local terminal user can make a one-run authorization with `layman run --allow-destructive --clipboard`. The Codex MCP tool intentionally has no equivalent switch.

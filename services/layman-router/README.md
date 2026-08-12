@@ -4,6 +4,8 @@ This package provides Layman's project inspection, task planning, Plus execution
 
 The service binds to `127.0.0.1:8787` by default. It never stores prompt, code, instruction, tool-argument, API-key, or response text. Local SQLite telemetry contains routing features, usage, latency, price-table estimates and error categories.
 
+Automatic execution blocks deterministic destructive commands before starting Codex. Only the local CLI exposes the exact-task `--allow-destructive` override; the MCP surface never does. `uninstall --purge-data` also requires a Layman-created data home, a valid ownership marker and no unmanaged entries.
+
 ```powershell
 python -m pip install -e ".[dev]"
 layman setup --mode api

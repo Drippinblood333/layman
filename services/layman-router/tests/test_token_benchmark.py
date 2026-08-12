@@ -3,14 +3,28 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from evals.token_optimization.benchmark import _public_record, run_benchmark
+from evals.token_optimization.benchmark import _completed_keys, _public_record, run_benchmark
 from evals.token_optimization.cases import CASES
 from evals.token_optimization.fixture import prepare_workspace, validate_workspace
+from layman_router.plus_run import plus_task_plan
 
 
 def test_benchmark_has_exact_category_distribution():
     counts = {category: sum(case.category == category for case in CASES) for category in {case.category for case in CASES}}
     assert counts == {"bugfix": 6, "feature": 6, "refactor": 5, "testing": 5, "docs_config": 4, "high_risk": 4}
+
+
+def test_benchmark_expected_tiers_match_current_lean_policy(router_config):
+    routes = {
+        case.id: plus_task_plan(case.prompt, config=router_config)["route_tier"]
+        for case in CASES
+    }
+    assert all(routes[case.id] == case.expected_tier for case in CASES)
+    assert {tier: list(routes.values()).count(tier) for tier in {"fast", "balanced", "deep"}} == {
+        "fast": 4,
+        "balanced": 22,
+        "deep": 4,
+    }
 
 
 def test_dry_run_plans_sixty_calls_without_codex(tmp_path: Path):
@@ -22,6 +36,22 @@ def test_dry_run_plans_sixty_calls_without_codex(tmp_path: Path):
     assert result["cases"] == 30
     assert result["planned_calls"] == 60
     assert result["pending_calls"] == 60
+    assert len(result["experiment_digest"]) == 64
+
+    args.seed += 1
+    changed_seed = run_benchmark(args)
+    assert changed_seed["experiment_digest"] != result["experiment_digest"]
+
+
+def test_checkpoint_does_not_reuse_a_result_from_another_policy(tmp_path: Path):
+    output = tmp_path / "results.jsonl"
+    output.write_text(
+        '{"key":"bugfix-01:layman","execution_status":"completed",'
+        '"experiment_digest":"old-policy"}\n',
+        encoding="utf-8",
+    )
+    assert _completed_keys(output, "current-policy") == set()
+    assert _completed_keys(output, "old-policy") == {"bugfix-01:layman"}
 
 
 def test_read_only_fixture_requires_no_changes_and_required_plan_terms(tmp_path: Path):

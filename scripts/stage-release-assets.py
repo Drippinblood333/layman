@@ -8,6 +8,8 @@ import shutil
 import zipfile
 from pathlib import Path
 
+from runtime_inventory import MANIFEST_NAME, STANDALONE_MANIFEST_NAME, validate_release_runtime
+
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "1.0.0"
@@ -55,6 +57,7 @@ def main() -> int:
         release / "legacy" / "layman-skill-v1.zip",
         release / "legacy" / "layman-skill-v1.zip.sha256",
         release / "sbom.cdx.json",
+        release / MANIFEST_NAME,
         release / "requirements.lock",
         release / "RELEASE_NOTES.md",
         release / "README.md",
@@ -64,6 +67,7 @@ def main() -> int:
         release / "SECURITY.md",
     ]
     available_platforms = []
+    platform_archives: list[Path] = []
     for platform, executable in PLATFORMS.items():
         archive = release / f"layman-{platform}.zip"
         if not archive.is_file():
@@ -72,12 +76,21 @@ def main() -> int:
             continue
         with zipfile.ZipFile(archive) as package:
             names = set(package.namelist())
-        if executable not in names or "BUILD.json" not in names:
+        if executable not in names or not {
+            "BUILD.json", MANIFEST_NAME, STANDALONE_MANIFEST_NAME, "THIRD_PARTY_NOTICES.md"
+        } <= names:
             raise SystemExit(f"platform archive has an invalid root layout: {archive.name}")
         sources.append(archive)
+        platform_archives.append(archive)
         available_platforms.append(platform)
     if not available_platforms:
         raise SystemExit("no platform archives were found")
+    validate_release_runtime(
+        release / "requirements.lock",
+        release / MANIFEST_NAME,
+        release / "sbom.cdx.json",
+        platform_archives,
+    )
 
     destinations: dict[str, Path] = {}
     for source in sources:

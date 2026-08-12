@@ -1,4 +1,6 @@
 * text=auto
+.gitattributes text eol=lf
+.dockerignore text eol=lf
 *.ps1 text eol=crlf
 *.sh text eol=lf
 *.py text eol=lf
@@ -6,6 +8,11 @@
 *.json text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
+*.toml text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+Dockerfile text eol=lf
+third_party/cpython/LICENSE text eol=lf -whitespace
 *.zip binary
 *.gif binary
 *.sqlite3 binary

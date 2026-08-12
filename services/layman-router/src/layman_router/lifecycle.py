@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import secrets
 import signal
@@ -11,7 +12,7 @@ import webbrowser
 from pathlib import Path
 from typing import Any, Callable
 
-from .paths import layman_home, migrate_legacy_data, read_state, write_state
+from .paths import layman_home, mark_layman_home_owned, migrate_legacy_data, read_state, write_state
 from .plus_eval import codex_login_status, find_codex
 
 
@@ -50,23 +51,97 @@ def _is_running(pid: int) -> bool:
         return False
 
 
+def _process_start_token(pid: int) -> str | None:
+    """Return an OS-owned process creation token so a reused PID is never signalled."""
+
+    if pid <= 0:
+        return None
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+
+        handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return None
+        try:
+            creation = wintypes.FILETIME()
+            exit_time = wintypes.FILETIME()
+            kernel = wintypes.FILETIME()
+            user = wintypes.FILETIME()
+            if not ctypes.windll.kernel32.GetProcessTimes(
+                handle,
+                ctypes.byref(creation),
+                ctypes.byref(exit_time),
+                ctypes.byref(kernel),
+                ctypes.byref(user),
+            ):
+                return None
+            value = (creation.dwHighDateTime << 32) | creation.dwLowDateTime
+            return f"win:{value}"
+        finally:
+            ctypes.windll.kernel32.CloseHandle(handle)
+    proc_stat = Path(f"/proc/{pid}/stat")
+    if proc_stat.is_file():
+        try:
+            remainder = proc_stat.read_text(encoding="ascii").rsplit(")", 1)[1].split()
+            return f"proc:{remainder[19]}"
+        except (OSError, IndexError, UnicodeDecodeError):
+            return None
+    ps = shutil.which("ps")
+    if not ps:
+        return None
+    try:
+        result = subprocess.run(
+            [ps, "-o", "lstart=", "-p", str(pid)],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    started = result.stdout.strip()
+    return f"ps:{started}" if result.returncode == 0 and started else None
+
+
 def process_status() -> dict[str, Any]:
     path = _pid_path()
     if not path.exists():
         return {"running": False, "pid": None}
     try:
-        pid = int(path.read_text(encoding="ascii").strip())
-    except (ValueError, OSError):
+        raw = path.read_text(encoding="utf-8").strip()
+        if raw.startswith("{"):
+            record = json.loads(raw)
+            pid = int(record["pid"])
+            expected_start = str(record["start_token"])
+            legacy = False
+        else:
+            pid = int(raw)
+            expected_start = ""
+            legacy = True
+    except (KeyError, TypeError, ValueError, OSError, json.JSONDecodeError):
         return {"running": False, "pid": None, "stale_pid_file": True}
-    return {"running": _is_running(pid), "pid": pid}
+    running = _is_running(pid)
+    actual_start = _process_start_token(pid) if running else None
+    verified = bool(expected_start and actual_start == expected_start)
+    return {
+        "running": running,
+        "pid": pid,
+        "identity_verified": verified,
+        "legacy_pid_file": legacy,
+    }
 
 
 def start_router() -> dict[str, Any]:
     current = process_status()
     if current["running"]:
+        if not current.get("identity_verified"):
+            raise RuntimeError(
+                f"PID {current.get('pid')} is alive but is not verified as the Layman instance; refusing to replace it"
+            )
         return {**current, "started": False}
     home = layman_home()
-    home.mkdir(parents=True, exist_ok=True)
+    mark_layman_home_owned(home)
     state = read_state()
     environment = os.environ.copy()
     token = state.get("admin_token")
@@ -79,12 +154,48 @@ def start_router() -> dict[str, Any]:
             _process_command("serve"), stdin=subprocess.DEVNULL, stdout=log, stderr=log,
             env=environment, start_new_session=os.name != "nt", creationflags=creationflags,
         )
-    _pid_path().write_text(str(process.pid), encoding="ascii")
+    start_token = _process_start_token(process.pid)
+    if not start_token:
+        try:
+            _terminate_router_tree(process.pid, force=True)
+        except (OSError, subprocess.SubprocessError, RuntimeError):
+            process.terminate()
+        raise RuntimeError("Could not verify the new Layman process identity; startup was cancelled")
+    pid_path = _pid_path()
+    temporary = pid_path.with_suffix(".tmp")
+    temporary.write_text(
+        json.dumps({"format": 1, "pid": process.pid, "start_token": start_token}),
+        encoding="utf-8",
+    )
+    os.replace(temporary, pid_path)
     for _ in range(30):
         if process.poll() is not None:
             raise RuntimeError(f"Layman exited during startup. Inspect {log_path}")
         time.sleep(0.1)
     return {"running": True, "pid": process.pid, "started": True, "log": str(log_path)}
+
+
+def _terminate_router_tree(pid: int, *, force: bool = False) -> None:
+    """Stop only the already identity-verified router process tree."""
+
+    if os.name == "nt":
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        result = subprocess.run(
+            ["taskkill", "/PID", str(pid), "/T", "/F"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+            creationflags=flags,
+        )
+        if result.returncode != 0 and _is_running(pid):
+            raise RuntimeError(
+                result.stderr.strip()
+                or result.stdout.strip()
+                or f"Could not stop Layman process tree {pid}"
+            )
+        return
+    os.killpg(pid, signal.SIGKILL if force else signal.SIGTERM)
 
 
 def stop_router() -> dict[str, Any]:
@@ -93,13 +204,34 @@ def stop_router() -> dict[str, Any]:
     if not current["running"] or not pid:
         _pid_path().unlink(missing_ok=True)
         return {"running": False, "stopped": False}
-    os.kill(int(pid), signal.SIGTERM)
+    if not current.get("identity_verified"):
+        return {
+            **current,
+            "stopped": False,
+            "refused": "PID identity could not be verified; no signal was sent",
+        }
+    try:
+        _terminate_router_tree(int(pid))
+    except (OSError, subprocess.SubprocessError, RuntimeError) as exc:
+        return {**current, "stopped": False, "error": str(exc)}
     for _ in range(50):
         if not _is_running(int(pid)):
             break
         time.sleep(0.1)
-    _pid_path().unlink(missing_ok=True)
-    return {"running": _is_running(int(pid)), "stopped": not _is_running(int(pid)), "pid": pid}
+    running = _is_running(int(pid))
+    if running and os.name != "nt":
+        try:
+            _terminate_router_tree(int(pid), force=True)
+        except (OSError, subprocess.SubprocessError, RuntimeError):
+            pass
+        for _ in range(10):
+            if not _is_running(int(pid)):
+                break
+            time.sleep(0.1)
+        running = _is_running(int(pid))
+    if not running:
+        _pid_path().unlink(missing_ok=True)
+    return {"running": running, "stopped": not running, "pid": pid}
 
 
 def setup_state(mode: str) -> dict[str, Any]:

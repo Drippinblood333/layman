@@ -2,35 +2,31 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.metadata
 import json
-import re
 import shutil
 import subprocess
 import sys
 import zipfile
 from pathlib import Path
 
+from runtime_inventory import (
+    MANIFEST_NAME,
+    PLATFORM_ARCHIVE_PATTERN,
+    build_runtime_manifest,
+    build_sbom,
+    validate_release_runtime,
+    write_json,
+)
+from release_archives import write_platform_archive
+
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "1.0.0"
 V1_SHA256 = "A9F1736B6754BD1A5E6BAAD4E53ABBB1F9F07742D7C82C55CA96F457FC7D1B84"
-LOCK_PATTERN = re.compile(r"^([A-Za-z0-9_.-]+)==([^\s\\]+)\s*\\$")
 
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
-
-
-def locked_dependencies(path: Path) -> list[tuple[str, str]]:
-    dependencies = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        match = LOCK_PATTERN.match(line)
-        if match:
-            dependencies.append((match.group(1), match.group(2)))
-    if not dependencies:
-        raise RuntimeError(f"no hashed dependencies found in {path}")
-    return dependencies
 
 
 def main() -> int:
@@ -77,30 +73,26 @@ def main() -> int:
     }):
         archive = output / f"layman-{directory.name}.zip"
         archive.unlink(missing_ok=True)
-        shutil.make_archive(str(archive.with_suffix("")), "zip", directory)
-    dependencies = locked_dependencies(lock_path)
-    mismatches = {
-        name: {"locked": version, "installed": importlib.metadata.version(name)}
-        for name, version in dependencies
-        if importlib.metadata.version(name) != version
-    }
-    if mismatches:
-        raise RuntimeError(f"installed runtime dependencies do not match requirements.lock: {mismatches}")
-    sbom = {
-        "bomFormat": "CycloneDX", "specVersion": "1.5", "version": 1,
-        "metadata": {"component": {
-            "type": "application", "name": "layman-codex", "version": VERSION,
-            "purl": f"pkg:pypi/layman-codex@{VERSION}",
-        }},
-        "components": [
-            {
-                "type": "library", "name": name, "version": version,
-                "purl": f"pkg:pypi/{name.lower().replace('_', '-')}@{version}",
-            }
-            for name, version in dependencies
-        ],
-    }
-    (output / "sbom.cdx.json").write_text(json.dumps(sbom, indent=2), encoding="utf-8")
+        executable = directory / ("layman.exe" if directory.name.startswith("windows-") else "layman")
+        if not executable.is_file():
+            raise SystemExit(f"standalone executable is missing: {executable}")
+        write_platform_archive(
+            directory,
+            archive,
+            executable,
+            posix_executable=not directory.name.startswith("windows-"),
+        )
+    manifest_path = output / MANIFEST_NAME
+    sbom_path = output / "sbom.cdx.json"
+    manifest = build_runtime_manifest(lock_path, VERSION)
+    write_json(manifest_path, manifest)
+    write_json(sbom_path, build_sbom(manifest))
+    platform_archives = sorted(
+        path
+        for path in output.glob("*.zip")
+        if PLATFORM_ARCHIVE_PATTERN.fullmatch(path.name)
+    )
+    validate_release_runtime(lock_path, manifest_path, sbom_path, platform_archives)
     checksum_names = {"SHA256SUMS.json", "SHA256SUMS.txt"}
     artifacts = sorted(path for path in output.rglob("*") if path.is_file() and path.name not in checksum_names)
     checksums = {str(path.relative_to(output)).replace("\\", "/"): digest(path) for path in artifacts}

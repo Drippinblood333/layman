@@ -1,11 +1,11 @@
 ---
 name: layman
-description: Turn a software idea or coding request into the easiest reliable path from intent to verified result. Use when a beginner does not know how to describe, start, continue, or evaluate a project; when a developer wants a scoped implementation, bug fix, release check, or lower-waste Codex workflow; or when Layman should inspect project progress, select only necessary context and workflow modules, and explain the outcome in plain language.
+description: Turn a software idea or coding request into the easiest reliable path from intent to a result with inspectable verification evidence. Use when a beginner does not know how to describe, start, continue, or evaluate a project; when a developer wants a scoped implementation, bug fix, release check, or lower-waste Codex workflow; or when Layman should inspect project progress, select only necessary context and workflow modules, and explain the outcome in plain language.
 ---
 
 # Layman
 
-Help anyone turn an idea into working, verified software with fewer unnecessary steps and less wasted model work. Preserve the user's original request. Never silently rewrite it, claim success without verification, or promise a fixed token-saving percentage.
+Help anyone turn an idea into working software with reported verification evidence and fewer unnecessary steps. Preserve the user's original request. Never silently rewrite it, treat subprocess completion as proof, claim success without a real check, or promise a fixed token-saving percentage.
 
 ## Choose the smallest path
 
@@ -45,7 +45,7 @@ For planning-only requests, include the current stage, smallest useful target, a
 
 ## Cost and privacy
 
-- Optimize the total work needed to reach a verified result, not just final-answer length.
+- Optimize the total work needed to produce a useful result and inspectable verification evidence, not just final-answer length.
 - Avoid repeated file reads, duplicated history, full logs, whole-repository scans, and speculative retries.
 - Never present ChatGPT subscription use as API credit or measured API savings.
 - Never retain prompts, code, tool arguments, secrets, or answer text in Layman telemetry.

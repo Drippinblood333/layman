@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import ModelPricing, RouterConfig, RouteTier, UsageRecord
+from .paths import layman_home, mark_layman_home_owned
 
 
 SCHEMA = """
@@ -78,9 +79,22 @@ class UsageStore:
         self.config = config
 
     def initialize(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+        created_parent = not self.path.parent.exists()
+        if self.path.parent.expanduser().resolve() == layman_home():
+            mark_layman_home_owned(self.path.parent)
+        else:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+        if created_parent:
+            try:
+                self.path.parent.chmod(0o700)
+            except OSError:
+                pass
         with sqlite3.connect(self.path) as connection:
             connection.executescript(SCHEMA)
+        try:
+            self.path.chmod(0o600)
+        except OSError:
+            pass
 
     def prune(self) -> int:
         cutoff = (datetime.now(timezone.utc) - timedelta(days=self.config.telemetry_retention_days)).isoformat()
@@ -128,7 +142,30 @@ class UsageStore:
                 """
                 SELECT COUNT(*) total_requests,
                        COALESCE(SUM(estimated_cost_usd), 0) total_cost_usd,
-                       COALESCE(SUM(estimated_always_deep_cost_usd), 0) estimated_always_deep_cost_usd,
+                       COALESCE(SUM(CASE
+                           WHEN COALESCE(json_extract(metadata_json, '$.automatic'), 1) = 1
+                            AND COALESCE(json_extract(metadata_json, '$.cost_estimate_available'), 1) = 1
+                            AND COALESCE(json_extract(metadata_json, '$.usage_incomplete'), 0) = 0
+                           THEN estimated_cost_usd ELSE 0 END), 0) estimated_automatic_cost_usd,
+                       COALESCE(SUM(CASE
+                           WHEN COALESCE(json_extract(metadata_json, '$.automatic'), 1) = 1
+                            AND COALESCE(json_extract(metadata_json, '$.cost_estimate_available'), 1) = 1
+                            AND COALESCE(json_extract(metadata_json, '$.usage_incomplete'), 0) = 0
+                           THEN estimated_always_deep_cost_usd ELSE 0 END), 0) estimated_always_deep_cost_usd,
+                       COALESCE(SUM(CASE
+                           WHEN COALESCE(json_extract(metadata_json, '$.automatic'), 1) = 1
+                           THEN 1 ELSE 0 END), 0) automatic_requests,
+                       COALESCE(SUM(CASE
+                           WHEN COALESCE(json_extract(metadata_json, '$.automatic'), 1) = 1
+                            AND COALESCE(json_extract(metadata_json, '$.cost_estimate_available'), 1) = 1
+                            AND COALESCE(json_extract(metadata_json, '$.usage_incomplete'), 0) = 0
+                           THEN 1 ELSE 0 END), 0) savings_eligible_requests,
+                       COALESCE(SUM(CASE
+                           WHEN COALESCE(json_extract(metadata_json, '$.cost_estimate_available'), 1) = 0
+                           THEN 1 ELSE 0 END), 0) unpriced_requests,
+                       COALESCE(SUM(CASE
+                           WHEN COALESCE(json_extract(metadata_json, '$.usage_incomplete'), 0) = 1
+                           THEN 1 ELSE 0 END), 0) usage_incomplete_requests,
                        COALESCE(AVG(latency_ms), 0) average_latency_ms,
                        COALESCE(AVG(fallback_used), 0) fallback_rate,
                        AVG(CASE WHEN validator_passed IS NOT NULL THEN validator_passed END) validator_pass_rate,
@@ -155,12 +192,16 @@ class UsageStore:
         result = dict(row)
         result["routes"] = {item["route_tier"]: item["count"] for item in route_rows}
         baseline = float(result["estimated_always_deep_cost_usd"])
-        actual = float(result["total_cost_usd"])
-        savings = max(0.0, baseline - actual)
+        actual = float(result["estimated_automatic_cost_usd"])
+        savings = baseline - actual
         result["estimated_savings_usd"] = round(savings, 6)
         result["estimated_savings_percent"] = round((savings / baseline * 100) if baseline else 0, 2)
+        result["total_cost_is_partial"] = bool(result["unpriced_requests"] or result["usage_incomplete_requests"])
         result["measured_savings_usd"] = None
-        result["measurement_note"] = "Estimated savings reuse observed token counts at deep-tier prices; run the offline eval for measured savings."
+        result["measurement_note"] = (
+            "Estimated signed savings compare only complete, priced automatic requests with the same observed "
+            "token counts at deep-tier prices; unpriced or incomplete requests are reported separately."
+        )
         result["price_version"] = self.config.price_version
         return result
 
@@ -175,7 +216,7 @@ class UsageStore:
                        selected_model, reasoning_effort, route_reason_json, input_tokens,
                        cached_tokens, cache_write_tokens, output_tokens, reasoning_tokens, latency_ms,
                        estimated_cost_usd, estimated_always_deep_cost_usd, fallback_used,
-                       validator_passed, error_category, created_at
+                       validator_passed, error_category, metadata_json, created_at
                 FROM usage_log
                 WHERE (? IS NULL OR project_id = ?)
                 ORDER BY created_at DESC LIMIT ?
@@ -186,8 +227,18 @@ class UsageStore:
         for row in rows:
             item = dict(row)
             item["route_reason"] = json.loads(item.pop("route_reason_json"))
+            metadata = json.loads(item.pop("metadata_json"))
             item["fallback_used"] = bool(item["fallback_used"])
             item["validator_passed"] = None if item["validator_passed"] is None else bool(item["validator_passed"])
+            item["automatic"] = bool(metadata.get("automatic", True))
+            item["cost_estimate_available"] = bool(metadata.get("cost_estimate_available", True))
+            item["usage_incomplete"] = bool(metadata.get("usage_incomplete", False))
+            item["cost_estimate_complete"] = bool(metadata.get(
+                "cost_estimate_complete", item["cost_estimate_available"] and not item["usage_incomplete"]
+            ))
+            item["attempt_count"] = int(metadata.get("attempt_count", 1))
+            item["unpriced_attempts"] = int(metadata.get("unpriced_attempts", 0))
+            item["attempts"] = metadata.get("attempts", [])
             result.append(item)
         return result
 

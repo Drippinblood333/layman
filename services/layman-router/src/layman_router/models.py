@@ -90,6 +90,8 @@ class TaskFeatures(BaseModel):
     prompt_chars: int = Field(ge=0)
     tool_count: int = Field(ge=0)
     agentic: bool
+    destructive: bool = False
+    destructive_reason: str | None = None
     project_id: str
     quality: Literal["economy", "standard", "production"]
     budget: Literal["low", "medium", "high"]

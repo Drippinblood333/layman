@@ -6,7 +6,6 @@ import http.client
 import json
 import os
 import secrets
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -14,6 +13,7 @@ from pathlib import Path
 
 import uvicorn
 
+from . import __version__
 from .codex_config import disable_codex, enable_codex, list_backups, restore_backup
 from .config import load_config
 from .lifecycle import (
@@ -26,8 +26,8 @@ from .lifecycle import (
     start_router,
     stop_router,
 )
-from .paths import layman_home, read_state, write_state
-from .plus_eval import DEFAULT_OUTPUT_PATH, SAFE_DEFAULT_CALL_LIMIT, codex_login_status, find_codex, run_plus_eval
+from .paths import layman_home, purge_layman_home, read_state, write_state
+from .plus_eval import SAFE_DEFAULT_CALL_LIMIT, codex_login_status, find_codex, run_plus_eval
 from .plus_run import run_plus_task
 from .project_status import inspect_project
 from .task_plan import create_task_plan
@@ -110,6 +110,7 @@ def _input_task(*, clipboard: bool = False) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="layman")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
     setup = commands.add_parser("setup", help="Set up Layman for ChatGPT Plus or OpenAI API use")
     setup.add_argument("--mode", choices=("auto", "plus", "api"), default="auto")
@@ -131,6 +132,11 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--codex-path")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--timeout", type=int, default=1_800)
+    run.add_argument(
+        "--allow-destructive",
+        action="store_true",
+        help="Explicitly authorize the exact destructive task supplied on stdin",
+    )
     run.add_argument("--clipboard", action="store_true", help="Read Unicode task text directly from the clipboard")
     project = commands.add_parser("project", help="Understand an existing project without reading file contents")
     project_commands = project.add_subparsers(dest="project_command", required=True)
@@ -167,11 +173,16 @@ def build_parser() -> argparse.ArgumentParser:
     plus_run.add_argument("--codex-path")
     plus_run.add_argument("--dry-run", action="store_true", help="Show the selected route without making a model call")
     plus_run.add_argument("--timeout", type=int, default=1_800)
+    plus_run.add_argument(
+        "--allow-destructive",
+        action="store_true",
+        help="Explicitly authorize the exact destructive task supplied on stdin",
+    )
     plus_run.add_argument("--clipboard", action="store_true", help="Read Unicode task text directly from the clipboard")
     plus_eval = plus_commands.add_parser("eval", help="Preview or run a capped auto-versus-deep subscription evaluation")
     plus_eval.add_argument("--cases", type=Path)
-    plus_eval.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
-    plus_eval.add_argument("--workspace", type=Path, default=Path.home() / ".layman" / "plus-workspace")
+    plus_eval.add_argument("--output", type=Path, default=layman_home() / "plus-eval.jsonl")
+    plus_eval.add_argument("--workspace", type=Path, default=layman_home() / "plus-workspace")
     plus_eval.add_argument("--codex-path")
     plus_eval.add_argument("--max-calls", type=int, default=SAFE_DEFAULT_CALL_LIMIT)
     plus_eval.add_argument("--run", action="store_true", help="Actually consume ChatGPT/Codex subscription usage")
@@ -271,6 +282,7 @@ def main(argv: list[str] | None = None) -> int:
                 codex_path=args.codex_path,
                 timeout_seconds=args.timeout,
                 execute=not args.dry_run,
+                allow_destructive=args.allow_destructive,
             )
             answer = result.pop("answer", "")
             if args.dry_run:
@@ -348,10 +360,9 @@ def main(argv: list[str] | None = None) -> int:
                 result["codex_config_restored"] = "not-managed"
             if args.purge_data:
                 home = layman_home()
-                if home == Path.home().resolve() or home.parent == home:
-                    raise RuntimeError(f"Refusing unsafe data deletion target: {home}")
-                shutil.rmtree(home, ignore_errors=True)
+                removed = purge_layman_home(home)
                 result["purged"] = str(home)
+                result["purged_entries"] = removed
             print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0
         if args.command == "codex":
@@ -388,6 +399,7 @@ def main(argv: list[str] | None = None) -> int:
                     codex_path=args.codex_path,
                     timeout_seconds=args.timeout,
                     execute=not args.dry_run,
+                    allow_destructive=args.allow_destructive,
                 )
                 answer = result.pop("answer", "")
                 if args.dry_run:

@@ -94,6 +94,47 @@ def test_store_summary_has_estimate_label(router_config):
     assert "Estimated" in result["measurement_note"]
 
 
+def test_summary_uses_priced_automatic_cohort_and_signed_savings(router_config):
+    store = UsageStore(router_config.database_path, router_config)
+    store.initialize()
+    common = {
+        "project_id": "default",
+        "prompt_hash": "b" * 64,
+        "task_type": "summary",
+        "complexity": "low",
+        "risk": "low",
+        "route_tier": "fast",
+        "selected_model": "gpt-5.6-luna",
+        "reasoning_effort": "low",
+        "route_reason": ["test"],
+    }
+    store.add(UsageRecord(
+        request_id="automatic", **common,
+        estimated_cost_usd=2, estimated_always_deep_cost_usd=1,
+        metadata={"automatic": True, "cost_estimate_available": True, "usage_incomplete": False},
+    ))
+    store.add(UsageRecord(
+        request_id="explicit", **common,
+        estimated_cost_usd=10, estimated_always_deep_cost_usd=10,
+        metadata={"automatic": False, "cost_estimate_available": True, "usage_incomplete": False},
+    ))
+    store.add(UsageRecord(
+        request_id="unknown", **{**common, "selected_model": "custom-model"},
+        metadata={"automatic": False, "cost_estimate_available": False, "usage_incomplete": False},
+    ))
+
+    result = store.summary()
+    assert result["total_cost_usd"] == 12
+    assert result["estimated_automatic_cost_usd"] == 2
+    assert result["estimated_always_deep_cost_usd"] == 1
+    assert result["estimated_savings_usd"] == -1
+    assert result["estimated_savings_percent"] == -100
+    assert result["automatic_requests"] == 1
+    assert result["savings_eligible_requests"] == 1
+    assert result["unpriced_requests"] == 1
+    assert result["total_cost_is_partial"] is True
+
+
 def test_demo_seed_is_synthetic_and_populates_all_tiers(router_config):
     store = UsageStore(router_config.database_path, router_config)
     store.initialize()

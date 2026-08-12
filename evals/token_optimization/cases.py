@@ -36,12 +36,12 @@ CASES: list[BenchmarkCase] = [
     _function_case(
         "bugfix-03", "bugfix", "修复 src/target.py 的 parse_bool，只接受常见真假字符串，非法值抛出 ValueError。",
         "def parse_bool(value):\n    return bool(value)\n",
-        "from src.target import parse_bool\nassert parse_bool('true') is True\nassert parse_bool('YES') is True\nassert parse_bool('0') is False\ntry:\n    parse_bool('maybe')\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('expected ValueError')\n", "deep",
+        "from src.target import parse_bool\nassert parse_bool('true') is True\nassert parse_bool('YES') is True\nassert parse_bool('0') is False\ntry:\n    parse_bool('maybe')\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('expected ValueError')\n", "balanced",
     ),
     _function_case(
         "bugfix-04", "bugfix", "修复 src/target.py 的 chunks：正常分块，并在 size 小于1时抛出 ValueError。",
         "def chunks(values, size):\n    return [values[i:i + size] for i in range(0, len(values), size)]\n",
-        "from src.target import chunks\nassert chunks([1,2,3,4,5], 2) == [[1,2],[3,4],[5]]\ntry:\n    chunks([1], 0)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('expected ValueError')\n", "deep",
+        "from src.target import chunks\nassert chunks([1,2,3,4,5], 2) == [[1,2],[3,4],[5]]\ntry:\n    chunks([1], 0)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('expected ValueError')\n", "balanced",
     ),
     _function_case(
         "bugfix-05", "bugfix", "修复 src/target.py 的 word_counts，使统计忽略大小写并跳过空白项。",
@@ -53,7 +53,7 @@ CASES: list[BenchmarkCase] = [
         "修复 src/target.py 的 safe_filename：将 / \\ : * ? \" < > | 每个字符替换为下划线；"
         "先去掉首尾空白，如果结果为空则返回 untitled。",
         "def safe_filename(value):\n    return value.replace(' ', '_')\n",
-        "from src.target import safe_filename\nassert safe_filename('a/b:c?.txt') == 'a_b_c_.txt'\nassert safe_filename('   ') == 'untitled'\n", "deep",
+        "from src.target import safe_filename\nassert safe_filename('a/b:c?.txt') == 'a_b_c_.txt'\nassert safe_filename('   ') == 'untitled'\n", "balanced",
     ),
     _function_case(
         "feature-01", "feature", "在 src/target.py 实现 slugify(text)：小写、空白转连字符、移除其他标点并合并连字符。",
@@ -88,7 +88,7 @@ CASES: list[BenchmarkCase] = [
     _function_case(
         "refactor-01", "refactor", "重构 src/target.py，把重复的小计计算提取为 _line_total，保持 invoice_total 行为不变。",
         "def invoice_total(lines):\n    total = 0\n    for line in lines:\n        total += line['price'] * line['qty']\n    tax = 0\n    for line in lines:\n        tax += line['price'] * line['qty'] * 0.1\n    return total + tax\n",
-        "from src.target import invoice_total, _line_total\nassert _line_total({'price':3,'qty':2}) == 6\nassert invoice_total([{'price':10,'qty':2}]) == 22\n", "deep",
+        "from src.target import invoice_total, _line_total\nassert _line_total({'price':3,'qty':2}) == 6\nassert invoice_total([{'price':10,'qty':2}]) == 22\n", "balanced",
     ),
     _function_case(
         "refactor-02", "refactor", "重构 src/target.py，用单一 normalize_name 辅助函数消除两个公开函数中的重复清洗逻辑。",

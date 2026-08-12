@@ -22,10 +22,74 @@ def test_high_risk_routes_deep(router_config):
     assert decision.route_tier == RouteTier.DEEP
 
 
-def test_tool_heavy_fast_task_is_raised_to_balanced(router_config):
+def test_available_tool_count_alone_does_not_raise_fast_task(router_config):
     payload = {"model": "auto", "input": "总结结果", "tools": [{"type": "function", "name": "read"}, {"type": "function", "name": "search"}]}
     decision = decide_route(classify_task(payload, router_config), router_config)
+    assert decision.route_tier == RouteTier.FAST
+
+
+def test_explicit_multi_source_tool_intent_raises_fast_task(router_config):
+    payload = {
+        "model": "auto",
+        "input": "请总结并交叉检查两个资料源",
+        "tools": [{"type": "function", "name": "read"}, {"type": "function", "name": "search"}],
+    }
+    decision = decide_route(classify_task(payload, router_config), router_config)
     assert decision.route_tier == RouteTier.BALANCED
+
+
+def test_destructive_commands_are_high_risk_and_detected(router_config):
+    commands = (
+        "Run rm -rf .",
+        "rm -fr build",
+        "请执行 rm -rf build",
+        "rm -r build",
+        "Remove-Item build -Recurse",
+        "Remove-Item build -Force -Recurse",
+        "git reset --hard HEAD~1",
+        "git clean -d -f",
+        "git clean -fd",
+        "git clean -fdx",
+        "git restore -- README.md",
+        "git restore .",
+        "git checkout .",
+        "git branch -D old-work",
+        "TRUNCATE TABLE users",
+        "wipe the repository",
+        "force push main",
+        "remove all user accounts",
+    )
+    for command in commands:
+        features = classify_task({"model": "auto", "input": command}, router_config)
+        assert features.destructive, command
+        assert features.risk == "high", command
+
+
+def test_read_only_mentions_and_negated_risk_do_not_false_positive(router_config):
+    for task in (
+        "Fix the README; do not delete files.",
+        "Review this code; no production access is needed.",
+        "只读评审 rm -rf . 的风险，不要执行。",
+        "Fix the README; do not run rm -rf build.",
+        "Review the output of git clean -nfd without executing it.",
+    ):
+        features = classify_task({"model": "auto", "input": task}, router_config)
+        assert not features.destructive, task
+        assert features.risk == "low", task
+
+
+def test_latest_user_task_drives_type_while_active_calls_keep_safety(router_config):
+    payload = {
+        "model": "auto",
+        "input": [
+            {"role": "user", "content": "请评审生产支付迁移"},
+            {"role": "assistant", "content": "done"},
+            {"role": "user", "content": "请总结最终结论"},
+        ],
+    }
+    features = classify_task(payload, router_config)
+    assert features.task_type == TaskType.SUMMARY
+    assert features.risk == "low"
 
 
 def test_high_risk_floor_beats_fast_metadata_override(router_config):
