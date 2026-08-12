@@ -48,13 +48,14 @@ def estimate_cost(usage: dict[str, int], pricing: ModelPricing) -> float:
     output_tokens = max(0, int(usage.get("output_tokens", 0)))
     cache_write_tokens = min(input_tokens - cached_tokens, cache_write_tokens)
     uncached = input_tokens - cached_tokens - cache_write_tokens
+    rates = pricing.long_context if pricing.long_context and input_tokens > pricing.long_context.threshold_tokens else pricing
     total = (
-        uncached * pricing.input_per_million
-        + cached_tokens * pricing.cached_input_per_million
-        + output_tokens * pricing.output_per_million
+        uncached * rates.input_per_million
+        + cached_tokens * rates.cached_input_per_million
+        + output_tokens * rates.output_per_million
     ) / 1_000_000
-    if pricing.cache_write_per_million is not None:
-        total += cache_write_tokens * pricing.cache_write_per_million / 1_000_000
+    if rates.cache_write_per_million is not None:
+        total += cache_write_tokens * rates.cache_write_per_million / 1_000_000
     return round(total, 9)
 
 

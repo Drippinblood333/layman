@@ -14,6 +14,16 @@
 - Added adaptive file-reading, tool-output, final-answer and native compaction budgets.
 - Added opt-in exact context deduplication for automatic API requests and privacy-minimized optimization metrics.
 - Added opt-in GPT-5.6 stable-prefix caching with caller-marked API blocks, local cache read/write visibility, and stripping of Layman-only metadata before upstream forwarding.
+- Updated GPT-5.6 standard pricing to the official 2026-07-30 rates and added 272K-threshold long-context cost estimation.
+- Made Windows Codex discovery probe real executability and fall back to healthy VS Code/Cursor bundled CLIs when wrappers are broken.
+- Made uninstall remove the Codex plugin and local marketplace before optional data purging.
+- Raised pytest, pytest-asyncio, PyInstaller and Pillow development floors after the 2026-08-12 OSV audit found fixed vulnerabilities in the previous pytest/Pillow range.
+- Updated release workflows to current action majors pinned to full commit SHAs, added an OSV dependency-audit gate, and enabled weekly Dependabot updates for Python and GitHub Actions.
+- Restricted automated release publishing to the documented candidate series and final `v1.0.0` tag.
+- Bundled the complete local Codex marketplace inside wheel and source distributions so clean package installs can run `layman setup`.
+- Made setup create an explicitly configured new `CODEX_HOME` before its first Codex probe.
+- Added wheel and sdist clean-install smoke checks to the Windows, macOS and Linux CI matrix.
+- Staged a flat, allowlisted GitHub Release asset set whose checksum names exactly match downloaded asset names.
 - Added a 30-task, 60-call direct-versus-Layman paired benchmark with hidden validation.
 - Published its negative result: Layman improved accepted quality by one task but increased median total and output tokens, so optimization remains Experimental.
 - Fixed the release calibration at 18 synthetic cases and 36 paired ChatGPT Plus calls.

@@ -49,7 +49,7 @@ layman run --dry-run --clipboard
 layman run --clipboard
 ```
 
-安装与 API 配置见[安装文档](docs/INSTALL.md)。API 用户修改 Codex 配置前会看到差异预览和备份；`layman uninstall` 默认保留本地数据与恢复备份。
+安装与 API 配置见[安装文档](docs/INSTALL.md)。API 用户修改 Codex 配置前会看到差异预览和备份；`layman uninstall` 会先移除 Layman 插件与本地市场，再恢复受管配置，并默认保留本地数据与恢复备份。无法安全移除 Codex 引用时，`--purge-data` 会拒绝删除数据。
 
 ## 优化闭环
 
@@ -99,7 +99,7 @@ Layman 1.0 没有直接复制这些项目的代码，而是通过原创控制层
 
 ## 诚实的验证状态
 
-- 本地通过 68 项单元与集成测试以及 300 案例路由矩阵。
+- 本地通过 83 项单元与集成测试以及 300 案例路由矩阵。
 - 36 次 Plus 校准全部完成，默认未保存回答正文。
 - 30 组 Token 对照测试中，Layman 隐藏验证为 30/30，Direct 为 29/30；但 Layman 总 Token 配对中位数增加 19.54%，读取文件也更多。
 - 因此 Token 优化仍为 Experimental，不宣传固定节省比例；API 路由在完成正式真实 API 基准前保持 Beta。

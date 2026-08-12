@@ -11,6 +11,7 @@ from layman_router.plus_eval import (
     build_plan,
     codex_login_status,
     completed_keys,
+    find_codex,
     load_cases,
     run_arm,
     run_plus_eval,
@@ -53,6 +54,29 @@ def test_chatgpt_login_is_required():
     status = codex_login_status("codex", runner=fake_runner)
     assert status["available"] is True
     assert status["chatgpt_login"] is True
+
+
+def test_find_codex_skips_candidates_that_cannot_start(monkeypatch):
+    candidates = ["broken-codex.cmd", "healthy-codex.exe"]
+    monkeypatch.setattr("layman_router.plus_eval._codex_candidates", lambda: candidates)
+    attempted = []
+
+    def fake_runner(command, **kwargs):
+        attempted.append(command[0])
+        return subprocess.CompletedProcess(command, 0 if command[0] == candidates[1] else 1, stdout="", stderr="")
+
+    assert find_codex(runner=fake_runner) == candidates[1]
+    assert attempted == candidates
+
+
+def test_find_codex_reports_when_all_candidates_are_broken(monkeypatch):
+    monkeypatch.setattr("layman_router.plus_eval._codex_candidates", lambda: ["broken-codex.cmd"])
+
+    def fake_runner(command, **kwargs):
+        raise OSError("not executable")
+
+    with pytest.raises(FileNotFoundError, match="none could start"):
+        find_codex(runner=fake_runner)
 
 
 def test_run_arm_passes_prompt_on_stdin_and_redacts_text(tmp_path: Path):

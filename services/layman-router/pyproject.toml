@@ -25,11 +25,11 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.4,<9",
-  "pytest-asyncio>=1.0,<2",
-  "pyinstaller>=6.14,<7",
+  "pytest>=9.0.3,<10",
+  "pytest-asyncio>=1.4,<2",
+  "pyinstaller>=6.22,<7",
   "build>=1.2,<2",
-  "Pillow>=11,<12",
+  "Pillow>=12.3,<13",
 ]
 
 [project.scripts]
@@ -39,12 +39,17 @@ layman-router = "layman_router.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/layman_router"]
 
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"
+
 [tool.hatch.build]
 include = [
+  "hatch_build.py",
   "src/layman_router/**/*.py",
   "src/layman_router/**/*.yaml",
   "src/layman_router/**/*.jsonl",
   "src/layman_router/dashboard/*",
+  "src/layman_router/bundle/**/*",
 ]
 
 [tool.pytest.ini_options]

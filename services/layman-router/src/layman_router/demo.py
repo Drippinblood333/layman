@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 
 from .models import RouterConfig, RouteTier, UsageRecord
-from .telemetry import UsageStore
+from .telemetry import UsageStore, estimate_cost
 
 
 def seed_demo(store: UsageStore, config: RouterConfig, count: int = 36) -> None:
@@ -14,10 +14,10 @@ def seed_demo(store: UsageStore, config: RouterConfig, count: int = 36) -> None:
         spec = config.tiers[tier]
         input_tokens = 700 + (index * 137) % 4200
         output_tokens = 90 + (index * 43) % 700
-        input_cost = input_tokens * spec.pricing.input_per_million / 1_000_000
-        output_cost = output_tokens * spec.pricing.output_per_million / 1_000_000
+        usage = {"input_tokens": input_tokens, "cached_tokens": input_tokens // 5, "output_tokens": output_tokens}
         deep = config.tiers[RouteTier.DEEP].pricing
-        baseline = (input_tokens * deep.input_per_million + output_tokens * deep.output_per_million) / 1_000_000
+        actual = estimate_cost(usage, spec.pricing)
+        baseline = estimate_cost(usage, deep)
         error = "synthetic_timeout" if index in {17, 31} else None
         store.add(UsageRecord(
             request_id=f"demo-{index:04d}", project_id="demo-project",
@@ -28,8 +28,7 @@ def seed_demo(store: UsageStore, config: RouterConfig, count: int = 36) -> None:
             route_reason=["synthetic demo record"], input_tokens=input_tokens,
             cached_tokens=input_tokens // 5, output_tokens=output_tokens,
             reasoning_tokens=output_tokens // 4, latency_ms=380 + (index * 211) % 4200,
-            estimated_cost_usd=round(input_cost + output_cost, 9),
-            estimated_always_deep_cost_usd=round(baseline, 9),
+            estimated_cost_usd=actual, estimated_always_deep_cost_usd=baseline,
             fallback_used=index in {11, 28}, validator_passed=error is None,
             error_category=error, metadata={"synthetic_demo": True},
         ))

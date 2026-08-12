@@ -56,7 +56,82 @@ def subscription_environment() -> dict[str, str]:
     return environment
 
 
-def find_codex(explicit: str | None = None) -> str:
+def _windows_codex_candidates() -> list[str]:
+    candidates: list[str] = []
+    path_native = shutil.which("codex.exe")
+    if path_native:
+        candidates.append(path_native)
+
+    appdata = os.getenv("APPDATA")
+    if appdata:
+        npm_root = Path(appdata) / "npm"
+        candidates.extend(
+            str(path.resolve())
+            for path in sorted(
+                npm_root.glob(
+                    "node_modules/@openai/codex/node_modules/@openai/codex-win32-*/"
+                    "vendor/*-pc-windows-msvc/bin/codex.exe"
+                )
+            )
+            if path.is_file()
+        )
+
+    editor_roots = (Path.home() / ".vscode" / "extensions", Path.home() / ".cursor" / "extensions")
+    editor_candidates = [
+        path
+        for root in editor_roots
+        if root.is_dir()
+        for path in root.glob("openai.chatgpt-*/bin/windows-*/codex.exe")
+        if path.is_file()
+    ]
+    editor_candidates.sort(key=lambda path: path.stat().st_mtime, reverse=True)
+    candidates.extend(str(path.resolve()) for path in editor_candidates)
+
+    for name in ("codex.cmd", "codex"):
+        located = shutil.which(name)
+        if located:
+            candidates.append(located)
+    if appdata:
+        npm_wrapper = Path(appdata) / "npm" / "codex.cmd"
+        if npm_wrapper.is_file():
+            candidates.append(str(npm_wrapper.resolve()))
+    return candidates
+
+
+def _codex_candidates() -> list[str]:
+    candidates = _windows_codex_candidates() if os.name == "nt" else [shutil.which("codex") or ""]
+    unique: list[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        if not candidate:
+            continue
+        key = os.path.normcase(os.path.abspath(candidate))
+        if key not in seen:
+            seen.add(key)
+            unique.append(candidate)
+    return unique
+
+
+def _codex_starts(
+    candidate: str,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> bool:
+    try:
+        result = runner(
+            [candidate, "--version"], capture_output=True, text=True, timeout=10, check=False,
+            env=subscription_environment(),
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
+
+
+def find_codex(
+    explicit: str | None = None,
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> str:
     if explicit:
         candidate = Path(explicit).expanduser()
         if candidate.exists():
@@ -65,14 +140,16 @@ def find_codex(explicit: str | None = None) -> str:
         if located:
             return located
         raise FileNotFoundError(f"Codex executable not found: {explicit}")
-    for name in ("codex.cmd", "codex.exe", "codex") if os.name == "nt" else ("codex",):
-        located = shutil.which(name)
-        if located:
-            return located
-    if os.name == "nt":
-        npm_candidate = Path(os.getenv("APPDATA", "")) / "npm" / "codex.cmd"
-        if npm_candidate.exists():
-            return str(npm_candidate.resolve())
+    candidates = _codex_candidates()
+    for candidate in candidates:
+        if _codex_starts(candidate, runner=runner):
+            return candidate
+    if candidates:
+        attempted = ", ".join(candidates)
+        raise FileNotFoundError(
+            f"Codex CLI candidates were found but none could start. Tried: {attempted}. "
+            "Repair Codex CLI or pass --codex-path."
+        )
     raise FileNotFoundError("Codex CLI was not found. Install Codex CLI or pass --codex-path.")
 
 

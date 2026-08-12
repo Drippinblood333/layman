@@ -33,15 +33,46 @@ def test_incomplete_and_empty_fail_validation():
 def test_cost_counts_cached_tokens_once(router_config):
     usage = extract_usage(completed())
     price = router_config.tiers["fast"].pricing
-    expected = ((600 * 1.0) + (400 * 0.1) + (100 * 6.0)) / 1_000_000
+    expected = ((600 * 0.2) + (400 * 0.02) + (100 * 1.2)) / 1_000_000
     assert estimate_cost(usage, price) == expected
 
 
 def test_cost_replaces_uncached_rate_with_cache_write_rate(router_config):
     usage = {"input_tokens": 1000, "cached_tokens": 200, "cache_write_tokens": 300, "output_tokens": 0}
     price = router_config.tiers["fast"].pricing
-    expected = ((500 * 1.0) + (200 * 0.1) + (300 * 1.25)) / 1_000_000
+    expected = ((500 * 0.2) + (200 * 0.02) + (300 * 0.25)) / 1_000_000
     assert estimate_cost(usage, price) == expected
+
+
+def test_cost_uses_long_context_rates_above_272k(router_config):
+    price = router_config.tiers["fast"].pricing
+    short = {"input_tokens": 272_000, "cached_tokens": 0, "cache_write_tokens": 0, "output_tokens": 1000}
+    long = {"input_tokens": 272_001, "cached_tokens": 0, "cache_write_tokens": 0, "output_tokens": 1000}
+    assert estimate_cost(short, price) == round(((272_000 * 0.2) + (1000 * 1.2)) / 1_000_000, 9)
+    assert estimate_cost(long, price) == round(((272_001 * 0.4) + (1000 * 1.8)) / 1_000_000, 9)
+
+
+def test_official_2026_07_30_standard_prices_are_loaded(router_config):
+    assert router_config.price_version == "openai-standard-2026-07-30"
+    expected = {
+        "fast": (0.2, 0.02, 0.25, 1.2, 0.4, 0.04, 0.5, 1.8),
+        "balanced": (2.0, 0.2, 2.5, 12.0, 4.0, 0.4, 5.0, 18.0),
+        "deep": (5.0, 0.5, 6.25, 30.0, 10.0, 1.0, 12.5, 45.0),
+    }
+    for tier, values in expected.items():
+        price = router_config.tiers[tier].pricing
+        assert price.long_context is not None
+        assert price.long_context.threshold_tokens == 272_000
+        assert (
+            price.input_per_million,
+            price.cached_input_per_million,
+            price.cache_write_per_million,
+            price.output_per_million,
+            price.long_context.input_per_million,
+            price.long_context.cached_input_per_million,
+            price.long_context.cache_write_per_million,
+            price.long_context.output_per_million,
+        ) == values
 
 
 def test_store_summary_has_estimate_label(router_config):

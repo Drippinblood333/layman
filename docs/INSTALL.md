@@ -91,4 +91,4 @@ On macOS/Linux, use `.venv/bin/python` and `.venv/bin/layman`.
 
 Install the new release over the old executable, then run `layman doctor`. Legacy v2 data is copied from `~/.layman-router` to `~/.layman` only when the new destination does not exist; the source is retained.
 
-Run `layman uninstall` to stop the service and restore managed Codex settings. Data and backups remain in `~/.layman`. Add `--purge-data` only when permanent deletion is intended.
+Run `layman uninstall` to stop the service, remove the Layman plugin and local marketplace, and restore managed Codex settings. Data and backups remain in `~/.layman`. Add `--purge-data` only when permanent deletion is intended; plugin and marketplace references are removed before that directory is deleted. If no working Codex CLI is available to remove those references, Layman refuses the purge and keeps the data intact.

@@ -8,6 +8,10 @@ ChatGPT Plus users do not need an API key for `$layman`, `$layman-auto`, or the 
 
 Before general availability, the release candidate must pass all automated gates, fresh-machine installation checks, the 36-call Plus calibration and invited-user acceptance with no unresolved P0/P1 issue.
 
+The Windows release candidate probes Codex executables before selecting one, so a broken npm wrapper does not mask a healthy CLI bundled by a supported editor. Uninstall removes both the Layman plugin and its local marketplace before optional data purging. API cost estimates use the official 2026-07-30 GPT-5.6 standard prices and switch the full request to long-context rates above 272K input tokens.
+
+The release wheel and source distribution include the complete Layman local marketplace, so package installs can run `layman setup` without a repository checkout. CI independently clean-installs both formats and verifies every bundled plugin file. GitHub Release publishing stages a flat allowlisted asset set so installer filenames and checksum entries stay identical.
+
 Standalone installers require the release `SHA256SUMS.txt` manifest and stop before extraction when verification fails. After installation, users restart Codex and open a new task to load the plugin and updated executable path.
 
 The 2026-07-16 Plus calibration completed 36/36 calls with no answer text stored. Auto's API-price-table equivalent was 5.79% lower, while total latency was 14.43% higher. Because outputs were not retained, semantic quality review remains an open release gate.

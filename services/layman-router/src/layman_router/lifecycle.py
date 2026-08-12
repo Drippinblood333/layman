@@ -9,7 +9,7 @@ import sys
 import time
 import webbrowser
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from .paths import layman_home, migrate_legacy_data, read_state, write_state
 from .plus_eval import codex_login_status, find_codex
@@ -112,8 +112,15 @@ def setup_state(mode: str) -> dict[str, Any]:
     return state
 
 
+def _ensure_configured_codex_home() -> None:
+    configured = os.getenv("CODEX_HOME")
+    if configured:
+        Path(configured).expanduser().mkdir(parents=True, exist_ok=True)
+
+
 def detect_user_mode() -> tuple[str, dict[str, Any]]:
     details: dict[str, Any] = {"openai_api_key": bool(os.getenv("OPENAI_API_KEY"))}
+    _ensure_configured_codex_home()
     try:
         executable = find_codex()
         details["codex_path"] = executable
@@ -128,6 +135,9 @@ def detect_user_mode() -> tuple[str, dict[str, Any]]:
 def _bundle_root() -> Path:
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return Path(getattr(sys, "_MEIPASS")) / "layman-bundle"
+    packaged = Path(__file__).resolve().parent / "bundle"
+    if packaged.is_dir():
+        return packaged
     return Path(__file__).resolve().parents[4]
 
 
@@ -144,6 +154,7 @@ def install_codex_plugin() -> dict[str, Any]:
     shutil.copytree(bundle_plugin, root / "plugins" / "layman", dirs_exist_ok=True)
     if not manifest.exists():
         raise FileNotFoundError(f"Durable Layman marketplace was not created: {manifest}")
+    _ensure_configured_codex_home()
     executable = find_codex()
     add_marketplace = subprocess.run(
         [executable, "plugin", "marketplace", "add", str(root)], capture_output=True, text=True, check=False,
@@ -157,6 +168,38 @@ def install_codex_plugin() -> dict[str, Any]:
     if add_plugin.returncode != 0:
         raise RuntimeError(add_plugin.stderr.strip() or add_plugin.stdout.strip() or "Codex plugin installation failed")
     return {"installed": True, "marketplace": "layman-local", "plugin": "layman"}
+
+
+def remove_codex_plugin(
+    *, runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> dict[str, Any]:
+    executable = find_codex()
+    remove_plugin = runner(
+        [executable, "plugin", "remove", "layman@layman-local", "--json"],
+        capture_output=True, text=True, timeout=30, check=False,
+    )
+    plugin_output = " ".join((remove_plugin.stdout, remove_plugin.stderr)).strip()
+    if remove_plugin.returncode != 0 and not any(
+        marker in plugin_output.lower() for marker in ("not installed", "not found")
+    ):
+        raise RuntimeError(plugin_output or "Codex plugin removal failed")
+
+    remove_marketplace = runner(
+        [executable, "plugin", "marketplace", "remove", "layman-local", "--json"],
+        capture_output=True, text=True, timeout=30, check=False,
+    )
+    marketplace_output = " ".join((remove_marketplace.stdout, remove_marketplace.stderr)).strip()
+    marketplace_absent = any(
+        marker in marketplace_output.lower() for marker in ("not configured", "not installed", "not found")
+    )
+    if remove_marketplace.returncode != 0 and not marketplace_absent:
+        raise RuntimeError(marketplace_output or "Codex marketplace removal failed")
+    return {
+        "removed": True,
+        "plugin": "layman",
+        "marketplace": "layman-local",
+        "codex_path": executable,
+    }
 
 
 def open_dashboard(port: int = 8787) -> str:

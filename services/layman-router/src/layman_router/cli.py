@@ -21,6 +21,7 @@ from .lifecycle import (
     install_codex_plugin,
     open_dashboard,
     process_status,
+    remove_codex_plugin,
     setup_state,
     start_router,
     stop_router,
@@ -316,6 +317,15 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "uninstall":
             result: dict[str, object] = {"router": stop_router(), "data_retained": not args.purge_data}
+            try:
+                result["plugin"] = remove_codex_plugin()
+            except FileNotFoundError as exc:
+                result["plugin"] = {"removed": False, "status": str(exc)}
+                if args.purge_data:
+                    raise RuntimeError(
+                        "Refusing --purge-data because Codex plugin references could not be removed. "
+                        f"Restore a working Codex CLI and retry: {exc}"
+                    ) from exc
             try:
                 change = disable_codex(apply=True)
                 result["codex_config_restored"] = not change.conflicts

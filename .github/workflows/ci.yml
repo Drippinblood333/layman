@@ -12,16 +12,20 @@ jobs:
         os: [windows-latest, macos-14, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.11'
           cache: pip
-      - run: python -m pip install -e "./services/layman-router[dev]" ruff bandit
+      - run: python -m pip install -e "./services/layman-router[dev]" ruff bandit pip-audit
+      - run: python -m pip check
+      - run: python -m pip_audit --local --progress-spinner off --vulnerability-service osv
       - run: python -m pytest ./services/layman-router
       - run: python evals/check_router_v2.py
       - run: python evals/check_release.py
       - run: python scripts/validate-public-plugin.py
+      - run: python -m build services/layman-router --outdir build/python-packages
+      - run: python scripts/smoke-python-packages.py --packages build/python-packages
       - run: ruff check services/layman-router/src services/layman-router/tests scripts evals/token_optimization
       - run: bandit -q -ll -r services/layman-router/src -x services/layman-router/tests
       - run: python scripts/scan-release.py README.md docs plugins services/layman-router/src
@@ -32,19 +36,24 @@ jobs:
       matrix:
         include:
           - os: windows-latest
+            platform: windows-x64
             artifact: layman-windows-x64
           - os: macos-13
+            platform: macos-x64
             artifact: layman-macos-x64
           - os: macos-14
+            platform: macos-arm64
             artifact: layman-macos-arm64
           - os: ubuntu-latest
+            platform: linux-x64
             artifact: layman-linux-x64
           - os: ubuntu-24.04-arm
+            platform: linux-arm64
             artifact: layman-linux-arm64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.11'
           cache: pip
@@ -52,30 +61,37 @@ jobs:
       - run: python scripts/build-standalone.py
       - shell: bash
         run: find release/layman-v1.0.0 -type f \( -name layman -o -name layman.exe \) -exec {} --help \;
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ matrix.artifact }}
-          path: release/layman-v1.0.0/*/*
+          path: release/layman-v1.0.0/${{ matrix.platform }}/
+          if-no-files-found: error
+          compression-level: 0
 
   release-assets:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v0.9.0-rc.') || github.ref == 'refs/tags/v1.0.0'
     needs: [test, standalone]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.11'
       - run: python -m pip install build
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          path: release/layman-v1.0.0/platforms
-      - run: python scripts/package-platform-artifacts.py
+          path: build/platform-artifacts
+          pattern: layman-*
+      - run: python scripts/package-platform-artifacts.py --artifacts build/platform-artifacts --output release/layman-v1.0.0
       - run: python scripts/build-release.py
+      - run: python scripts/smoke-python-packages.py
       - run: python scripts/scan-release.py release/layman-v1.0.0
-      - uses: softprops/action-gh-release@v2
+      - run: python scripts/stage-release-assets.py --require-all-platforms
+      - run: python scripts/scan-release.py build/release-assets
+      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
         with:
           prerelease: ${{ contains(github.ref_name, '-rc.') }}
-          files: release/layman-v1.0.0/**
+          fail_on_unmatched_files: true
+          files: build/release-assets/*

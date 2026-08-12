@@ -1,6 +1,6 @@
 # Layman internal v3 / public 1.0 release checklist
 
-Updated: 2026-07-17
+Updated: 2026-08-12
 
 ## Phase 1 — Unified product
 
@@ -16,11 +16,14 @@ Updated: 2026-07-17
 
 ## Phase 2 — Validation
 
-- [x] All 68 unit/integration tests pass locally.
+- [x] All 87 unit/integration tests pass locally.
 - [x] 300-case deterministic routing matrix passes.
 - [x] 401, 429, 5xx, timeout, empty stream and interrupted stream paths are covered.
 - [x] Fixed 18-case/36-call Plus calibration completed with 36 successes and no stored answer text.
 - [x] 30-task/60-call token benchmark completed; the savings gate failed and the negative result is published.
+- [x] GPT-5.6 model identifiers, reasoning efforts and 2026-07-30 short/long-context standard prices match current official documentation.
+- [x] The installed dependency tree passes `pip check`; the 2026-08-12 OSV audit reports no known vulnerabilities after upgrading pytest and Pillow.
+- [x] CI uses current action majors pinned to full commit SHAs and runs `pip check`, OSV audit, tests, Python package build/install smoke checks, static analysis, plugin validation and secret scanning; Dependabot covers Python and GitHub Actions.
 - [ ] Human semantic-quality scoring is complete.
 - [ ] macOS and Linux CI runs are green on the public repository.
 - [ ] Live API benchmark exists; until then API routing remains Beta.
@@ -29,9 +32,12 @@ Updated: 2026-07-17
 
 - [x] Windows x64 standalone executable builds and runs without Python.
 - [x] Isolated setup installs a durable Codex marketplace and the Layman 1.0 plugin.
-- [x] Windows setup and doctor smoke tests pass with a Chinese/space-safe temporary path.
+- [x] Windows setup, repeated setup, doctor and clean uninstall pass with a Chinese/space-safe temporary path.
+- [x] Uninstall removes the Codex plugin and marketplace before `--purge-data` deletes the local marketplace files.
 - [x] Cross-platform PyInstaller matrix and release packaging workflow exist.
 - [x] Release ZIP, wheel, sdist, checksums and SBOM build locally.
+- [x] Fresh virtual environments independently install the wheel and sdist, verify the bundled plugin hashes, expose the CLI and pass `doctor`.
+- [x] GitHub Release assets are staged as a flat allowlisted set with checksums that match their public filenames.
 - [x] One-line installers require and verify `SHA256SUMS.txt` before extraction.
 - [ ] macOS x64/arm64 and Linux x64/arm64 artifacts pass hosted CI.
 - [ ] Published one-line installers are tested against an actual GitHub prerelease.
@@ -42,7 +48,9 @@ Updated: 2026-07-17
 - [x] Architecture and third-party provenance documentation exists; no competitor source is silently vendored.
 - [x] Issue, feature and pull-request templates exist.
 - [x] CI, security checks and release workflow exist.
+- [x] The publishing job accepts only `v0.9.0-rc.*` candidates and the owner-approved `v1.0.0` tag.
 - [x] Honest Plus calibration report exists.
-- [ ] Public GitHub repository is created after owner approval.
+- [x] Public GitHub repository exists under `Drippinblood333/layman`.
+- [ ] The initial `main` branch is pushed and hosted CI completes successfully.
 - [ ] `v0.9.0-rc.1` is tested by 5–10 invited users with no unresolved P0/P1 issue.
 - [ ] Owner approves and publishes `v1.0.0`.

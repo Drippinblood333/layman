@@ -29,11 +29,19 @@ class TaskType(StrEnum):
     GENERAL = "general"
 
 
-class ModelPricing(BaseModel):
+class TokenPricing(BaseModel):
     input_per_million: float = Field(ge=0)
     cached_input_per_million: float = Field(ge=0)
     output_per_million: float = Field(ge=0)
     cache_write_per_million: float | None = Field(default=None, ge=0)
+
+
+class LongContextPricing(TokenPricing):
+    threshold_tokens: int = Field(gt=0)
+
+
+class ModelPricing(TokenPricing):
+    long_context: LongContextPricing | None = None
 
 
 class TierConfig(BaseModel):

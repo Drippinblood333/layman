@@ -76,7 +76,7 @@ layman codex enable --apply
 layman start
 ```
 
-`layman uninstall` restores Layman-managed Codex settings. Local usage data and backups remain unless `--purge-data` is explicitly supplied.
+`layman uninstall` removes the Layman plugin and local marketplace, then restores Layman-managed Codex settings. Local usage data and backups remain unless `--purge-data` is explicitly supplied; purging is refused if Codex references cannot first be removed safely.
 
 ## How optimization works
 
@@ -126,7 +126,7 @@ Layman does not vendor code from these projects in 1.0. It combines compatible c
 
 ## Honest validation status
 
-- 68 unit and integration tests pass locally.
+- 83 unit and integration tests pass locally.
 - The deterministic routing matrix contains 300 cases, including the high-risk deep floor.
 - The 18-case Plus calibration completed 36/36 calls without retaining answer text.
 - The 30-pair token benchmark passed hidden validation 30/30 versus Direct's 29/30, but Layman used 19.54% more total tokens at the paired median and read more files.
