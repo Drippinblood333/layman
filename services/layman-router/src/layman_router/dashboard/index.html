@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Layman Router Control Room</title>
+  <link rel="stylesheet" href="/admin/assets/dashboard.css">
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <div class="brand"><span class="mark">L</span><div><strong>LAYMAN ROUTER</strong><small>CONTROL ROOM / LOCAL ONLY</small></div></div>
+    <div class="status"><i id="statusDot"></i><span id="statusText">正在连接</span></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">INFERENCE, INTENTIONALLY ROUTED</p>
+        <h1>每一次推理，<br><em>都花在正确的地方。</em></h1>
+        <p class="lede">本地优先的模型调度台。查看成本、质量、延迟和路由选择，不读取 Prompt 或代码原文。</p>
+      </div>
+      <div class="auth-card">
+        <label for="token">管理令牌</label>
+        <div class="token-row"><input id="token" type="password" autocomplete="off" placeholder="LAYMAN_ROUTER_ADMIN_TOKEN"><button id="connect">连接</button></div>
+        <small>令牌只保存在当前标签页的 sessionStorage。</small>
+      </div>
+    </section>
+
+    <section class="metric-grid">
+      <article class="metric primary"><span>估算节省</span><strong id="savings">—</strong><small id="savingUsd">反事实深度模型基线</small></article>
+      <article class="metric"><span>请求数</span><strong id="requests">—</strong><small id="tokens">— tokens</small></article>
+      <article class="metric"><span>平均延迟</span><strong id="latency">—</strong><small>端到端</small></article>
+      <article class="metric"><span>回退率</span><strong id="fallback">—</strong><small id="quality">质量通过率 —</small></article>
+    </section>
+
+    <section class="split">
+      <article class="panel route-panel">
+        <div class="panel-head"><div><span class="kicker">ROUTE MIX</span><h2>模型档位分布</h2></div><span id="priceVersion" class="pill">—</span></div>
+        <div class="route-bars">
+          <div><label><span>FAST / LUNA</span><b id="fastN">0</b></label><div class="track"><i id="fastBar" class="fast"></i></div></div>
+          <div><label><span>BALANCED / TERRA</span><b id="balancedN">0</b></label><div class="track"><i id="balancedBar" class="balanced"></i></div></div>
+          <div><label><span>DEEP / SOL</span><b id="deepN">0</b></label><div class="track"><i id="deepBar" class="deep"></i></div></div>
+        </div>
+      </article>
+      <article class="panel cost-panel">
+        <div class="panel-head"><div><span class="kicker">COST SIGNAL</span><h2>成本对照</h2></div></div>
+        <div class="cost-viz"><div class="actual"><span>当前路由</span><i id="actualCost"></i><b id="actualCostLabel">$0</b></div><div class="baseline"><span>始终深度</span><i id="baselineCost"></i><b id="baselineCostLabel">$0</b></div></div>
+        <p>这是按相同 token 数重算的估算，不等同于真实实验节省。</p>
+      </article>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-head"><div><span class="kicker">LIVE TRACE</span><h2>最近请求</h2></div><button id="refresh" class="ghost">刷新数据</button></div>
+      <div class="table-wrap"><table><thead><tr><th>时间</th><th>任务</th><th>风险</th><th>路由</th><th>Token</th><th>延迟</th><th>成本</th><th>状态</th></tr></thead><tbody id="recent"><tr><td colspan="8" class="empty">输入管理令牌后连接</td></tr></tbody></table></div>
+    </section>
+  </main>
+
+  <footer><span>LAYMAN ROUTER v0.3</span><span>LOOPBACK · PRIVACY-FIRST · RESPONSES API</span></footer>
+  <div id="toast" role="status"></div>
+  <script src="/admin/assets/dashboard.js" defer></script>
+</body>
+</html>

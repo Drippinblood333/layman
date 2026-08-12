@@ -1,0 +1,20 @@
+{
+  "name": "layman-local",
+  "interface": {
+    "displayName": "Layman Local"
+  },
+  "plugins": [
+    {
+      "name": "layman",
+      "source": {
+        "source": "local",
+        "path": "./plugins/layman"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

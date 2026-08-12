@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "layman": {
+      "command": "layman",
+      "args": ["mcp-server"]
+    }
+  }
+}

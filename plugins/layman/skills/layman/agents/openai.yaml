@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layman"
+  short_description: "Turn ideas into verified software with less wasted work"
+  default_prompt: "Use $layman to turn my idea into the smallest verified software result."

@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a reproducible Layman problem without sharing private prompts or keys.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Never include API keys, private prompts, project code, or saved model answers.
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options: [ChatGPT Plus skill, OpenAI API router, Installation, Dashboard]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Layman version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Use synthetic data and redact local paths where needed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true

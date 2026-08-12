@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layman Skill"
+  short_description: "把模糊想法和坏提示词改成安全可验收 AI Coding 任务"
+  default_prompt: "Use $layman-skill to turn my vague coding idea or prompt into a safe, verifiable AI coding task."

@@ -1,0 +1,8 @@
+{
+  "attempted_at": "2026-07-16",
+  "calls_completed": 0,
+  "status_code": 401,
+  "error_category": "invalid_api_key",
+  "billable_result_available": false,
+  "note": "The configured environment key was rejected by the OpenAI API. No cost or quality claim was derived from this attempt."
+}

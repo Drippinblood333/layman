@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layman Auto"
+  short_description: "Execute with the easiest reliable automatic Codex route"
+  default_prompt: "Use $layman-auto to implement this task with the easiest reliable route."

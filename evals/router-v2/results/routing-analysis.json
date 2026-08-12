@@ -1,0 +1,88 @@
+{
+  "cases": 300,
+  "iterations": 15000,
+  "elapsed_seconds": 6.7781,
+  "routes_per_second": 2213,
+  "misjudgments": 0,
+  "under_routes": 0,
+  "over_routes": 0,
+  "by_category": {
+    "summary": {
+      "fast->fast": 25,
+      "balanced->balanced": 10,
+      "deep->deep": 15
+    },
+    "rewrite": {
+      "fast->fast": 25,
+      "balanced->balanced": 10,
+      "deep->deep": 15
+    },
+    "code_explanation": {
+      "balanced->balanced": 30,
+      "deep->deep": 15,
+      "fast->fast": 5
+    },
+    "debugging": {
+      "deep->deep": 50
+    },
+    "architecture": {
+      "deep->deep": 50
+    },
+    "extraction": {
+      "fast->fast": 25,
+      "balanced->balanced": 10,
+      "deep->deep": 15
+    }
+  },
+  "top_route_reasons": [
+    [
+      "high-risk task",
+      45
+    ],
+    [
+      "code_explanation task",
+      40
+    ],
+    [
+      "routine summary task",
+      35
+    ],
+    [
+      "debugging task",
+      35
+    ],
+    [
+      "architecture task",
+      35
+    ],
+    [
+      "routine extraction task",
+      35
+    ],
+    [
+      "request override: fast",
+      30
+    ],
+    [
+      "high-risk safety floor overrides lower route",
+      30
+    ],
+    [
+      "routine rewrite task",
+      30
+    ],
+    [
+      "high input complexity",
+      15
+    ],
+    [
+      "production quality with elevated risk",
+      15
+    ],
+    [
+      "summary task",
+      5
+    ]
+  ],
+  "errors": []
+}

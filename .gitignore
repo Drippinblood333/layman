@@ -1,0 +1,14 @@
+.venv/
+.ruff_cache/
+.pytest_cache/
+.coverage
+__pycache__/
+*.py[cod]
+.pytest_cache/
+services/layman-router/data/
+services/layman-router/eval-results/
+*.egg-info/
+*.log
+build/
+release/layman-v1.0.0/
+*.spec

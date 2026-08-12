@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-14, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e "./services/layman-router[dev]" ruff bandit
+      - run: python -m pytest ./services/layman-router
+      - run: python evals/check_router_v2.py
+      - run: python evals/check_release.py
+      - run: python scripts/validate-public-plugin.py
+      - run: ruff check services/layman-router/src services/layman-router/tests scripts evals/token_optimization
+      - run: bandit -q -ll -r services/layman-router/src -x services/layman-router/tests
+      - run: python scripts/scan-release.py README.md docs plugins services/layman-router/src
+
+  standalone:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: layman-windows-x64
+          - os: macos-13
+            artifact: layman-macos-x64
+          - os: macos-14
+            artifact: layman-macos-arm64
+          - os: ubuntu-latest
+            artifact: layman-linux-x64
+          - os: ubuntu-24.04-arm
+            artifact: layman-linux-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e "./services/layman-router[dev]"
+      - run: python scripts/build-standalone.py
+      - shell: bash
+        run: find release/layman-v1.0.0 -type f \( -name layman -o -name layman.exe \) -exec {} --help \;
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: release/layman-v1.0.0/*/*
+
+  release-assets:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, standalone]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install build
+      - uses: actions/download-artifact@v4
+        with:
+          path: release/layman-v1.0.0/platforms
+      - run: python scripts/package-platform-artifacts.py
+      - run: python scripts/build-release.py
+      - run: python scripts/scan-release.py release/layman-v1.0.0
+      - uses: softprops/action-gh-release@v2
+        with:
+          prerelease: ${{ contains(github.ref_name, '-rc.') }}
+          files: release/layman-v1.0.0/**

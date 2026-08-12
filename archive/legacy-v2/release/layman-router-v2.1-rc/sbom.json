@@ -1,0 +1,44 @@
+{
+  "format": "layman-router-simple-sbom-v1",
+  "product": {
+    "name": "layman-router",
+    "version": "0.3.0"
+  },
+  "components": [
+    {
+      "name": "fastapi",
+      "version": "0.139.0",
+      "relationship": "direct-runtime-dependency"
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1",
+      "relationship": "direct-runtime-dependency"
+    },
+    {
+      "name": "jsonschema",
+      "version": "4.26.0",
+      "relationship": "direct-runtime-dependency"
+    },
+    {
+      "name": "pydantic",
+      "version": "2.13.4",
+      "relationship": "direct-runtime-dependency"
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3",
+      "relationship": "direct-runtime-dependency"
+    },
+    {
+      "name": "tomlkit",
+      "version": "0.15.0",
+      "relationship": "direct-runtime-dependency"
+    },
+    {
+      "name": "uvicorn",
+      "version": "0.51.0",
+      "relationship": "direct-runtime-dependency"
+    }
+  ]
+}

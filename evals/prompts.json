@@ -1,0 +1,93 @@
+[
+  {
+    "id": "idea-word-learning-miniapp",
+    "scenario": "idea_to_mvp",
+    "input": "我想做一个给学生背单词的小程序。",
+    "must_include": [
+      "目标用户",
+      "MVP",
+      "暂不做",
+      "数据结构",
+      "可复制给 Codex 的 prompt",
+      "验收标准",
+      "停止条件"
+    ],
+    "must_not_include": [
+      "直接生成完整项目",
+      "先做支付",
+      "先做复杂社交"
+    ]
+  },
+  {
+    "id": "audit-improve-whole-project",
+    "scenario": "prompt_audit",
+    "input": "帮我完善整个项目。",
+    "must_include": [
+      "风险判断",
+      "范围过大",
+      "只读分析",
+      "安全改写",
+      "验收标准",
+      "停止条件"
+    ],
+    "must_not_include": [
+      "可以直接执行",
+      "全仓库重构",
+      "尽可能多修改"
+    ]
+  },
+  {
+    "id": "safe-task-login",
+    "scenario": "safe_task_generation",
+    "input": "我想给现有项目加登录功能。",
+    "must_include": [
+      "先分析",
+      "实现 prompt",
+      "测试",
+      "环境变量",
+      "停止条件",
+      "不建议现在做的事"
+    ],
+    "must_not_include": [
+      "跳过分析直接实现",
+      "自行选择任意认证方案",
+      "忽略安全边界"
+    ]
+  },
+  {
+    "id": "handoff-downloaded-project",
+    "scenario": "new_project_handoff",
+    "input": "我刚下载了一个项目，不知道怎么开始。",
+    "must_include": [
+      "只读",
+      "技术栈",
+      "启动命令",
+      "测试命令",
+      "构建命令",
+      "第一个小任务"
+    ],
+    "must_not_include": [
+      "直接修复",
+      "逐文件解释全仓库",
+      "格式化代码"
+    ]
+  },
+  {
+    "id": "pre-release",
+    "scenario": "pre_release_check",
+    "input": "项目差不多做完了，怎么发布？",
+    "must_include": [
+      "构建",
+      "环境变量",
+      "README",
+      "安全检查",
+      "部署平台",
+      "发布 prompt"
+    ],
+    "must_not_include": [
+      "直接部署",
+      "跳过构建",
+      "忽略敏感信息"
+    ]
+  }
+]

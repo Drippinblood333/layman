@@ -1,0 +1,33 @@
+{
+  "name": "layman",
+  "version": "1.0.0",
+  "description": "An optimization and execution layer that makes Codex development easier, less wasteful, and more reliable",
+  "author": {
+    "name": "Layman contributors"
+  },
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "task-safety",
+    "model-routing",
+    "token-efficiency"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Layman",
+    "shortDescription": "Turn ideas into verified software with less wasted AI work.",
+    "longDescription": "Layman helps beginners and developers understand a project, choose the smallest reliable workflow, control context and model effort, execute safely, and verify the result. Plus users get one-task automatic execution through their ChatGPT login; API users can use the privacy-first local Responses router.",
+    "developerName": "Layman contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use $layman to turn my idea into the smallest verified software result.",
+      "Use $layman-status to explain where this project stands and what comes next.",
+      "Use $layman-auto to implement this task with the easiest reliable route."
+    ]
+  }
+}

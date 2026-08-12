@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layman Status"
+  short_description: "Explain project progress and the next step plainly"
+  default_prompt: "Use $layman-status to explain how far this project has progressed and what I should do next."

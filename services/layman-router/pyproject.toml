@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "layman-codex"
+version = "1.0.0"
+description = "An optimization and execution layer for easier, less wasteful, and more reliable Codex development"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.116,<1",
+  "httpx>=0.28,<1",
+  "jsonschema>=4.23,<5",
+  "pydantic>=2.11,<3",
+  "PyYAML>=6.0,<7",
+  "tomlkit>=0.13,<1",
+  "uvicorn>=0.35,<1",
+]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.0,<2",
+  "pyinstaller>=6.14,<7",
+  "build>=1.2,<2",
+  "Pillow>=11,<12",
+]
+
+[project.scripts]
+layman = "layman_router.cli:main"
+layman-router = "layman_router.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/layman_router"]
+
+[tool.hatch.build]
+include = [
+  "src/layman_router/**/*.py",
+  "src/layman_router/**/*.yaml",
+  "src/layman_router/**/*.jsonl",
+  "src/layman_router/dashboard/*",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+asyncio_mode = "auto"
+testpaths = ["tests"]

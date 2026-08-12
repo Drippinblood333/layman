@@ -1,0 +1,22 @@
+{
+  "name": "layman-router",
+  "version": "0.3.0",
+  "description": "Configure and inspect the local Layman Router for Codex",
+  "author": {
+    "name": "Layman Project Navigator contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Layman Router",
+    "shortDescription": "Route Codex requests by task cost, quality, and risk.",
+    "longDescription": "Set up, verify, recover, and inspect the local OpenAI-compatible Layman Router with a privacy-first cost and quality dashboard.",
+    "developerName": "Layman Project Navigator contributors",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Check my local Layman Router status.",
+      "Preview the Codex provider configuration for Layman Router.",
+      "Open and explain my Layman Router management dashboard."
+    ]
+  }
+}

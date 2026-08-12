@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layman Router"
+  short_description: "配置并检查 Codex 的本地智能模型路由与成本报告"
+  default_prompt: "Use $layman-router to check my local router status and explain recent routing costs."

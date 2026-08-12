@@ -1,10 +1,10 @@
 # Layman
 
-**Govern Codex work from intent to evidence-reported result, while measuring and bounding avoidable waste.**
+**Turn an idea into verified software with less wasted AI work.**
 
-Layman is an evidence-first efficiency governor and execution layer for Codex. It helps beginners understand what to do next and asks Codex to report verification evidence while using the lowest predicted sufficient model effort, enforced tool/process limits, and explicit context/output targets. A successful subprocess alone is not proof that the requested result was verified. Quality-adjusted efficiency remains Experimental until fresh holdouts pass.
+Layman is an optimization and execution layer for Codex. It helps beginners understand what to do next and helps developers reach a verified result with the minimum suitable context, workflow, model effort, permissions, and output.
 
-[中文说明](README.zh-CN.md) · [Installation](docs/INSTALL.md) · [Architecture](docs/ARCHITECTURE.md) · [Product direction](docs/PRODUCT_DIRECTION_2026-08-12.md) · [Security](docs/SECURITY.md) · [Benchmarks](docs/BENCHMARKS.md) · [Release status](docs/V3_RELEASE_CHECKLIST.md)
+[中文说明](README.zh-CN.md) · [Installation](docs/INSTALL.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Benchmarks](docs/BENCHMARKS.md) · [Release status](docs/V3_RELEASE_CHECKLIST.md)
 
 ![Layman illustrated walkthrough](docs/assets/layman-demo.gif)
 
@@ -17,7 +17,7 @@ Layman is an evidence-first efficiency governor and execution layer for Codex. I
 | `$layman-auto` | One unchanged task executed through the easiest reliable Plus route |
 | `$layman-router` | Setup, diagnosis, recovery, and explanation for API routing |
 
-Layman composes only the modules needed for the task: context selection, workflow, model routing, safety, tool limits/output targets, and verification guidance. A project is never called release-ready merely because test or CI files exist.
+Layman composes only the modules needed for the task: context selection, workflow, model routing, safety, tool/output limits, and verification. A project is never called release-ready merely because test or CI files exist.
 
 ## Plus and API modes
 
@@ -26,7 +26,7 @@ Layman composes only the modules needed for the task: context selection, workflo
 | Understand project progress | Yes | Yes |
 | Turn an idea into a scoped outcome | Yes | Yes |
 | One-task automatic Codex execution | Yes, Experimental | Requires ChatGPT login |
-| Context, compaction, file/tool limits, and final-output target | Yes, Experimental | For `model="auto"`: exact-text dedup opt-in and hard output cap only |
+| Context, compaction, file, and output budgets | Yes | Yes for opted-in auto requests |
 | Transparent Responses `model="auto"` routing | No | Yes, Beta |
 | Local usage and fallback dashboard | Demo only | Yes |
 
@@ -46,7 +46,7 @@ macOS or Linux:
 curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install.sh | sh
 ```
 
-The standalone installer does not require Python. Until a GitHub release with verified artifacts is published, contributors should use the [source installation](docs/INSTALL.md#source-installation); the one-line commands above intentionally have no installable target yet.
+The standalone installer does not require Python. Before the public repository exists, contributors can use the [source installation](docs/INSTALL.md#source-installation).
 
 ## First use
 
@@ -58,7 +58,7 @@ Use $layman-status to explain how far this project has progressed.
 Use $layman-auto to implement the next task and verify it.
 ```
 
-The equivalent CLI accepts the clipboard in these examples, or standard input when `--clipboard` is omitted, so task text need not be placed in command history:
+The equivalent privacy-safe CLI reads task text from standard input instead of command history:
 
 ```powershell
 layman status
@@ -76,15 +76,15 @@ layman codex enable --apply
 layman start
 ```
 
-`layman uninstall` removes the Layman plugin and local marketplace, then restores Layman-managed Codex settings. Local usage data and backups remain unless `--purge-data` is explicitly supplied. Purging is refused unless Codex references are removed, the data directory carries a Layman ownership marker, Layman created that directory, and every remaining entry is on the managed-path manifest.
+`layman uninstall` restores Layman-managed Codex settings. Local usage data and backups remain unless `--purge-data` is explicitly supplied.
 
 ## How optimization works
 
 - **Understand:** inspect bounded repository structure without retaining file contents and distinguish evidence from proof.
 - **Select:** choose only the relevant workflow and context modules.
 - **Route:** select fast, balanced, or deep model effort with a deep floor for high-risk work.
-- **Execute:** use an ephemeral Plus task or the compatible local Responses API route. Layman Auto blocks destructive local execution by default; the API proxy does not inspect or control downstream tool side effects.
-- **Verify:** instruct Codex to run the smallest meaningful test or manual check and report the evidence; callers must inspect that evidence before treating the result as verified.
+- **Execute:** use an ephemeral Plus task or the compatible local Responses API route.
+- **Verify:** require the smallest meaningful test or manual check before claiming success.
 - **Explain:** return outcome, verification, remaining risk, and one next step instead of full logs.
 
 API context deduplication remains opt-in with `metadata.layman_context_mode="safe"`. It removes only exact old prose duplicates and preserves the current user message, system/developer instructions, code blocks, and tool content. Telemetry excludes prompts, code, tool arguments, API keys, and answer text.
@@ -116,7 +116,7 @@ Use this only after a representative benchmark shows repeated prefixes and net s
 
 | Project | Primary optimization layer | Layman 1.0 approach |
 |---|---|---|
-| Caveman | Visible answer compression | Concise outcome/verification/risk output target |
+| Caveman | Visible answer compression | Bounded outcome/verification/risk output contract |
 | RTK | Shell and tool output compression | Tool-output budgets; external adapter planned instead of vendoring Rust |
 | Spec Kit | Specification-driven workflow | Smallest-outcome and acceptance-criteria workflow selection |
 | Superpowers | Composable development skills | Progressive, task-specific skill loading |
@@ -126,9 +126,9 @@ Layman does not vendor code from these projects in 1.0. It combines compatible c
 
 ## Honest validation status
 
-- The full local unit and integration suite passes; the release checklist records the dated evidence.
+- 68 unit and integration tests pass locally.
 - The deterministic routing matrix contains 300 cases, including the high-risk deep floor.
-- The historical 2026-07-16 Plus calibration completed 36/36 calls without execution errors or retained answer text; the current release candidate requires a fresh fingerprinted run.
+- The 18-case Plus calibration completed 36/36 calls without retaining answer text.
 - The 30-pair token benchmark passed hidden validation 30/30 versus Direct's 29/30, but Layman used 19.54% more total tokens at the paired median and read more files.
 - Token optimization therefore remains Experimental. Layman claims no fixed savings percentage.
 - API routing remains Beta until a release-grade live API benchmark exists.

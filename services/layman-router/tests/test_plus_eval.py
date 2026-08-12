@@ -1,0 +1,103 @@
+from __future__ import annotations
+
+import json
+import subprocess
+from pathlib import Path
+
+import pytest
+
+from layman_router.plus_eval import (
+    PlusEvalArm,
+    build_plan,
+    codex_login_status,
+    completed_keys,
+    load_cases,
+    run_arm,
+    run_plus_eval,
+)
+
+
+def test_release_plan_is_eighteen_cases_and_thirty_six_calls(router_config):
+    plan = build_plan(load_cases(), config=router_config)
+    assert len(load_cases()) == 18
+    assert len(plan) == 36
+    assert sum(arm.label == "always_deep" for arm in plan) == 18
+    assert {arm.label for arm in plan} == {"auto", "always_deep"}
+    assert all(arm.model == "gpt-5.6-sol" for arm in plan if arm.label == "always_deep")
+    assert next(arm for arm in plan if arm.case_id == "plus-summary-001" and arm.label == "auto").route_tier == "fast"
+    assert next(arm for arm in plan if arm.case_id == "plus-debugging-001" and arm.label == "auto").route_tier == "deep"
+
+
+def test_dry_run_does_not_resolve_or_call_codex(tmp_path: Path):
+    result = run_plus_eval(
+        cases_path=None, output=tmp_path / "results.jsonl", workspace=tmp_path / "workspace",
+        codex_path="definitely-missing", execute=False,
+    )
+    assert result["mode"] == "dry-run"
+    assert result["pending_calls"] == 36
+    assert all(set(route) == {"key", "category", "model", "effort", "tier"} for route in result["routes"])
+
+
+def test_call_cap_above_twelve_requires_explicit_override(tmp_path: Path):
+    with pytest.raises(ValueError, match="allow-more-calls"):
+        run_plus_eval(
+            cases_path=None, output=tmp_path / "results.jsonl", workspace=tmp_path,
+            codex_path=None, execute=False, max_calls=13,
+        )
+
+
+def test_chatgpt_login_is_required():
+    def fake_runner(*args, **kwargs):
+        return subprocess.CompletedProcess(args[0], 0, stdout="Logged in using ChatGPT\n", stderr="")
+
+    status = codex_login_status("codex", runner=fake_runner)
+    assert status["available"] is True
+    assert status["chatgpt_login"] is True
+
+
+def test_run_arm_passes_prompt_on_stdin_and_redacts_text(tmp_path: Path):
+    captured = {}
+
+    def fake_runner(command, **kwargs):
+        captured["command"] = command
+        captured["input"] = kwargs["input"]
+        captured["env"] = kwargs["env"]
+        message_path = Path(command[command.index("--output-last-message") + 1])
+        message_path.write_text("secret model answer", encoding="utf-8")
+        stdout = json.dumps({"type": "turn.completed", "usage": {"input_tokens": 11, "cached_input_tokens": 2, "output_tokens": 7}})
+        return subprocess.CompletedProcess(command, 0, stdout=stdout, stderr="")
+
+    arm = PlusEvalArm("case-1", "summary", "auto", "model-a", "low", "fast", ["test"], "secret prompt")
+    record = run_arm(arm, codex_path="codex", workspace=tmp_path, runner=fake_runner)
+    assert captured["input"].endswith("secret prompt")
+    assert "secret prompt" not in " ".join(captured["command"])
+    assert "OPENAI_API_KEY" not in captured["env"]
+    assert "CODEX_API_KEY" not in captured["env"]
+    assert "answer_text" not in record
+    assert record["usage"]["input_tokens"] == 11
+    assert record["answer_chars"] == len("secret model answer")
+
+
+def test_run_arm_removes_api_billing_environment(monkeypatch, tmp_path: Path):
+    monkeypatch.setenv("OPENAI_API_KEY", "must-not-reach-codex")
+    monkeypatch.setenv("CODEX_API_KEY", "must-not-reach-codex")
+    captured = {}
+
+    def fake_runner(command, **kwargs):
+        captured.update(kwargs["env"])
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="usage limit reached")
+
+    arm = PlusEvalArm("case-1", "summary", "auto", "model-a", "low", "fast", ["test"], "prompt")
+    run_arm(arm, codex_path="codex", workspace=tmp_path, runner=fake_runner)
+    assert "OPENAI_API_KEY" not in captured
+    assert "CODEX_API_KEY" not in captured
+
+
+def test_resume_only_accepts_completed_records(tmp_path: Path):
+    output = tmp_path / "results.jsonl"
+    output.write_text(
+        json.dumps({"key": "a:auto", "status": "completed"}) + "\n" +
+        json.dumps({"key": "b:auto", "status": "failed"}) + "\n",
+        encoding="utf-8",
+    )
+    assert completed_keys(output) == {"a:auto"}
