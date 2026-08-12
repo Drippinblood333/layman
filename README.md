@@ -46,7 +46,7 @@ macOS or Linux:
 curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install.sh | sh
 ```
 
-The standalone installer does not require Python. Before the public repository exists, contributors can use the [source installation](docs/INSTALL.md#source-installation).
+The standalone installer does not require Python. Until a GitHub release with verified artifacts is published, contributors should use the [source installation](docs/INSTALL.md#source-installation); the one-line commands above intentionally have no installable target yet.
 
 ## First use
 
@@ -126,7 +126,7 @@ Layman does not vendor code from these projects in 1.0. It combines compatible c
 
 ## Honest validation status
 
-- 83 unit and integration tests pass locally.
+- 90 unit and integration tests pass locally.
 - The deterministic routing matrix contains 300 cases, including the high-risk deep floor.
 - The 18-case Plus calibration completed 36/36 calls without retaining answer text.
 - The 30-pair token benchmark passed hidden validation 30/30 versus Direct's 29/30, but Layman used 19.54% more total tokens at the paired median and read more files.
