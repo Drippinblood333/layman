@@ -28,7 +28,7 @@ def test_plan_uses_fast_budget_for_simple_summary(router_config):
 
 
 def test_destructive_task_is_blocked_before_codex_without_explicit_authorization(tmp_path: Path):
-    result = run_plus_task("Run rm -rf .", cwd=tmp_path, codex_path="codex")
+    result = run_plus_task("Run rm -rf .", cwd=tmp_path, codex_path=sys.executable)
     assert result["status"] == "blocked"
     assert result["execution_allowed"] is False
     assert result["sandbox"] == "read-only"
@@ -59,7 +59,7 @@ def test_run_uses_stdin_chatgpt_login_and_ephemeral_config(monkeypatch, tmp_path
         event = json.dumps({"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}})
         return subprocess.CompletedProcess(command, 0, stdout=event, stderr="")
 
-    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path="codex", runner=fake_runner)
+    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path=sys.executable, runner=fake_runner)
     command, kwargs = calls[-1]
     assert kwargs["input"] == "请总结内容"
     assert kwargs["cwd"] == tmp_path.resolve()
@@ -100,7 +100,7 @@ def test_model_unavailable_only_falls_upward(tmp_path: Path):
         message_path.write_text("fallback answer", encoding="utf-8")
         return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
 
-    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path="codex", runner=fake_runner)
+    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path=sys.executable, runner=fake_runner)
     assert models == ["gpt-5.6-luna", "gpt-5.6-terra"]
     assert result["route_tier"] == "balanced"
     assert result["fallback_used"] is True
@@ -130,7 +130,7 @@ def test_fallback_accumulates_usage_from_every_attempt(tmp_path: Path):
         message_path.write_text("fallback answer", encoding="utf-8")
         return subprocess.CompletedProcess(command, 0, stdout=events, stderr="")
 
-    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path="codex", runner=fake_runner)
+    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path=sys.executable, runner=fake_runner)
     assert result["usage"] == {
         "input_tokens": 30,
         "cached_input_tokens": 3,
@@ -162,7 +162,7 @@ def test_budget_stop_marks_usage_incomplete_and_hides_partial_answer(tmp_path: P
         )
         return subprocess.CompletedProcess(command, 0, stdout="\n".join(events), stderr="")
 
-    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path="codex", runner=fake_runner)
+    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path=sys.executable, runner=fake_runner)
     assert result["status"] == "budget_exceeded"
     assert result["error_category"] == "budget_exceeded"
     assert result["usage_incomplete"] is True
