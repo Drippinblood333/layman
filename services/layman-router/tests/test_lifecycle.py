@@ -188,6 +188,24 @@ def test_mode_detection_creates_configured_codex_home(monkeypatch, tmp_path: Pat
     assert codex_home.is_dir()
 
 
+def test_mode_detection_tolerates_codex_status_timeout(monkeypatch, tmp_path: Path):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr("layman_router.lifecycle.find_codex", lambda: "codex.exe")
+    monkeypatch.setattr(
+        "layman_router.lifecycle.codex_login_status",
+        lambda executable: (_ for _ in ()).throw(
+            subprocess.TimeoutExpired([executable, "login", "status"], 15)
+        ),
+    )
+
+    mode, details = detect_user_mode()
+
+    assert mode == "plus"
+    assert details["codex_login"]["available"] is False
+    assert "timed out" in details["codex_login"]["status"]
+
+
 def test_remove_codex_plugin_tolerates_absent_marketplace(monkeypatch):
     monkeypatch.setattr("layman_router.lifecycle.find_codex", lambda: "codex.exe")
 
@@ -313,3 +331,25 @@ def test_skip_plugin_keeps_legacy_install_state_conservative(monkeypatch, tmp_pa
 
     assert main(["setup", "--mode", "plus", "--skip-plugin"]) == 0
     assert "codex_plugin_managed" not in read_state()
+
+
+def test_setup_tolerates_codex_status_timeout(monkeypatch, tmp_path: Path, capsys):
+    monkeypatch.setenv("LAYMAN_HOME", str(tmp_path / "layman-home"))
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
+    monkeypatch.setattr("layman_router.paths.legacy_home", lambda: tmp_path / "missing")
+    monkeypatch.setattr(
+        "layman_router.cli.detect_user_mode",
+        lambda: ("plus", {"codex_login": {"available": False}}),
+    )
+    monkeypatch.setattr("layman_router.cli.find_codex", lambda: "codex.exe")
+    monkeypatch.setattr(
+        "layman_router.cli.codex_login_status",
+        lambda executable: (_ for _ in ()).throw(
+            subprocess.TimeoutExpired([executable, "login", "status"], 15)
+        ),
+    )
+
+    assert main(["setup", "--mode", "plus", "--skip-plugin"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["plus_routing"]["available"] is False
+    assert "timed out" in result["plus_routing"]["status"]

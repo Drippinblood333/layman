@@ -257,7 +257,7 @@ def detect_user_mode() -> tuple[str, dict[str, Any]]:
         executable = find_codex()
         details["codex_path"] = executable
         details["codex_login"] = codex_login_status(executable)
-    except (FileNotFoundError, OSError) as exc:
+    except (FileNotFoundError, OSError, subprocess.SubprocessError) as exc:
         details["codex_login"] = {"available": False, "chatgpt_login": False, "status": str(exc)}
     if details["openai_api_key"]:
         return "api", details

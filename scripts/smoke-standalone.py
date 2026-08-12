@@ -32,15 +32,23 @@ def run(
     *,
     input_text: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+    result = subprocess.run(
         command,
         env=environment,
         input=input_text,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="strict",
         timeout=60,
-        check=True,
+        check=False,
     )
+    if result.returncode != 0:
+        rendered = " ".join(command)
+        raise RuntimeError(
+            f"standalone command failed ({result.returncode}): {rendered}\n"
+            f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        )
+    return result
 
 
 def parse_json(result: subprocess.CompletedProcess[str], command: str) -> dict[str, object]:
@@ -61,7 +69,8 @@ def _start_managed_server(
         env=environment,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True,
+        encoding="utf-8",
+        errors="strict",
         start_new_session=os.name != "nt",
     )
 

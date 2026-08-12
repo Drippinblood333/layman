@@ -33,6 +33,22 @@ from .project_status import inspect_project
 from .task_plan import create_task_plan
 
 
+def _configure_windows_stdio() -> None:
+    """Keep redirected Windows CLI and MCP output on the UTF-8 wire."""
+
+    if os.name != "nt":
+        return
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="strict")
+        except (OSError, ValueError):
+            # Some embedded or test-owned streams cannot be reconfigured.
+            pass
+
+
 def _fetch(path: str, *, admin: bool = False) -> dict:
     config = load_config()
     headers = {}
@@ -192,6 +208,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    _configure_windows_stdio()
     args = build_parser().parse_args(argv)
     try:
         if args.command == "setup":
@@ -234,7 +251,7 @@ def main(argv: list[str] | None = None) -> int:
                     executable = find_codex()
                     result["plus_routing"] = codex_login_status(executable)
                     result["plus_routing"]["codex_path"] = executable
-                except FileNotFoundError as exc:
+                except (FileNotFoundError, OSError, subprocess.SubprocessError) as exc:
                     result["plus_routing"] = {"available": False, "status": str(exc)}
             print(json.dumps(result, indent=2, ensure_ascii=False))
             return 0
@@ -418,7 +435,7 @@ def main(argv: list[str] | None = None) -> int:
             if not args.run:
                 print("Dry run only. Add --run to consume ChatGPT/Codex subscription usage.")
             return 0
-    except (RuntimeError, ValueError, FileNotFoundError, OSError) as exc:
+    except (RuntimeError, ValueError, FileNotFoundError, OSError, subprocess.SubprocessError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     return 2
