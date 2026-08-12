@@ -129,3 +129,22 @@ def test_purge_refuses_to_delete_data_when_codex_references_cannot_be_removed(mo
     monkeypatch.setattr("layman_router.cli.remove_codex_plugin", missing_codex)
     assert main(["uninstall", "--purge-data"]) == 1
     assert (home / "state.json").exists()
+
+
+def test_purge_skips_codex_removal_when_plugin_was_explicitly_skipped(monkeypatch, tmp_path: Path):
+    home = tmp_path / "layman-home"
+    home.mkdir()
+    (home / "state.json").write_text('{"codex_plugin_managed": false}', encoding="utf-8")
+    monkeypatch.setenv("LAYMAN_HOME", str(home))
+    monkeypatch.setattr("layman_router.cli.stop_router", lambda: {"running": False, "stopped": False})
+    monkeypatch.setattr(
+        "layman_router.cli.remove_codex_plugin",
+        lambda: (_ for _ in ()).throw(AssertionError("Codex removal must be skipped")),
+    )
+    monkeypatch.setattr(
+        "layman_router.cli.disable_codex",
+        lambda **kwargs: (_ for _ in ()).throw(FileNotFoundError("no Codex config")),
+    )
+
+    assert main(["uninstall", "--purge-data"]) == 0
+    assert not home.exists()

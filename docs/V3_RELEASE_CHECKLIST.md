@@ -16,7 +16,7 @@ Updated: 2026-08-12
 
 ## Phase 2 — Validation
 
-- [x] All 87 unit/integration tests pass locally.
+- [x] All 88 unit/integration tests pass locally.
 - [x] 300-case deterministic routing matrix passes.
 - [x] 401, 429, 5xx, timeout, empty stream and interrupted stream paths are covered.
 - [x] Fixed 18-case/36-call Plus calibration completed with 36 successes and no stored answer text.
@@ -35,6 +35,8 @@ Updated: 2026-08-12
 - [x] Windows setup, repeated setup, doctor and clean uninstall pass with a Chinese/space-safe temporary path.
 - [x] Uninstall removes the Codex plugin and marketplace before `--purge-data` deletes the local marketplace files.
 - [x] Cross-platform PyInstaller matrix and release packaging workflow exist.
+- [x] The five-platform standalone matrix uses currently documented GitHub runner labels and runs help/setup/doctor/purge lifecycle smoke checks without requiring an API key or Codex installation.
+- [x] Setup records an explicitly skipped plugin so uninstall can purge data without Codex while older or managed-plugin states remain conservative.
 - [x] Release ZIP, wheel, sdist, checksums and SBOM build locally.
 - [x] Fresh virtual environments independently install the wheel and sdist, verify the bundled plugin hashes, expose the CLI and pass `doctor`.
 - [x] GitHub Release assets are staged as a flat allowlisted set with checksums that match their public filenames.

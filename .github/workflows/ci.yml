@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-14, ubuntu-latest]
+        os: [windows-latest, macos-15, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -38,7 +38,7 @@ jobs:
           - os: windows-latest
             platform: windows-x64
             artifact: layman-windows-x64
-          - os: macos-13
+          - os: macos-15-intel
             platform: macos-x64
             artifact: layman-macos-x64
           - os: macos-14
@@ -59,8 +59,7 @@ jobs:
           cache: pip
       - run: python -m pip install -e "./services/layman-router[dev]"
       - run: python scripts/build-standalone.py
-      - shell: bash
-        run: find release/layman-v1.0.0 -type f \( -name layman -o -name layman.exe \) -exec {} --help \;
+      - run: python scripts/smoke-standalone.py
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ matrix.artifact }}

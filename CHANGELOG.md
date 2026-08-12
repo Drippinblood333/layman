@@ -23,6 +23,8 @@
 - Bundled the complete local Codex marketplace inside wheel and source distributions so clean package installs can run `layman setup`.
 - Made setup create an explicitly configured new `CODEX_HOME` before its first Codex probe.
 - Added wheel and sdist clean-install smoke checks to the Windows, macOS and Linux CI matrix.
+- Replaced the retired macOS Intel runner label and added standalone setup/doctor/purge smoke checks to all five platform builds.
+- Recorded explicit `setup --skip-plugin` state so data purging remains usable without Codex while managed-plugin installs keep conservative cleanup protection.
 - Staged a flat, allowlisted GitHub Release asset set whose checksum names exactly match downloaded asset names.
 - Added a 30-task, 60-call direct-versus-Layman paired benchmark with hidden validation.
 - Published its negative result: Layman improved accepted quality by one task but increased median total and output tokens, so optimization remains Experimental.

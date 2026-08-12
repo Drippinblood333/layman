@@ -26,7 +26,7 @@ from .lifecycle import (
     start_router,
     stop_router,
 )
-from .paths import layman_home, read_state
+from .paths import layman_home, read_state, write_state
 from .plus_eval import DEFAULT_OUTPUT_PATH, SAFE_DEFAULT_CALL_LIMIT, codex_login_status, find_codex, run_plus_eval
 from .plus_run import run_plus_task
 from .project_status import inspect_project
@@ -189,6 +189,8 @@ def main(argv: list[str] | None = None) -> int:
             if mode == "api" and not os.getenv("OPENAI_API_KEY"):
                 raise RuntimeError("API mode requires OPENAI_API_KEY in the current environment")
             state = setup_state(mode)
+            state["codex_plugin_managed"] = not args.skip_plugin
+            write_state(state)
             result: dict[str, object] = {
                 "mode": mode,
                 "capabilities": ["idea-to-verified-result", "project-status", "minimal-workflow-planning"] + (
@@ -317,15 +319,19 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "uninstall":
             result: dict[str, object] = {"router": stop_router(), "data_retained": not args.purge_data}
-            try:
-                result["plugin"] = remove_codex_plugin()
-            except FileNotFoundError as exc:
-                result["plugin"] = {"removed": False, "status": str(exc)}
-                if args.purge_data:
-                    raise RuntimeError(
-                        "Refusing --purge-data because Codex plugin references could not be removed. "
-                        f"Restore a working Codex CLI and retry: {exc}"
-                    ) from exc
+            plugin_managed = read_state().get("codex_plugin_managed")
+            if plugin_managed is False:
+                result["plugin"] = {"removed": False, "status": "skipped during setup"}
+            else:
+                try:
+                    result["plugin"] = remove_codex_plugin()
+                except FileNotFoundError as exc:
+                    result["plugin"] = {"removed": False, "status": str(exc)}
+                    if args.purge_data:
+                        raise RuntimeError(
+                            "Refusing --purge-data because Codex plugin references could not be removed. "
+                            f"Restore a working Codex CLI and retry: {exc}"
+                        ) from exc
             try:
                 change = disable_codex(apply=True)
                 result["codex_config_restored"] = not change.conflicts
