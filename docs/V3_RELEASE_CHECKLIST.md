@@ -50,7 +50,7 @@ Updated: 2026-08-12
 - [x] Architecture and third-party provenance documentation exists; no competitor source is silently vendored.
 - [x] Issue, feature and pull-request templates exist.
 - [x] CI, security checks and release workflow exist.
-- [x] The publishing job accepts only `v0.9.0-rc.*` candidates and the owner-approved `v1.0.0` tag.
+- [x] The publishing job accepts only version-aligned `v1.0.0-rc.*` candidates and the owner-approved `v1.0.0` tag.
 - [x] The clean release-assets job installs and validates the runtime dependency tree before building the dependency-version SBOM.
 - [x] Honest Plus calibration report exists.
 - [x] Public GitHub repository exists under `Drippinblood333/layman`.
@@ -58,5 +58,5 @@ Updated: 2026-08-12
 - [ ] The initial `main` branch is pushed and hosted CI completes successfully.
 - [ ] Dependabot vulnerability alerts/security updates are enabled after the default branch exists.
 - [ ] A `main` ruleset requires the verified hosted CI checks after their check names exist.
-- [ ] `v0.9.0-rc.1` is tested by 5–10 invited users with no unresolved P0/P1 issue.
+- [ ] `v1.0.0-rc.1` is tested by 5–10 invited users with no unresolved P0/P1 issue.
 - [ ] Owner approves and publishes `v1.0.0`.

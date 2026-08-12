@@ -14,7 +14,7 @@ This snapshot records verified local evidence and keeps external release gates s
 - Fresh virtual environments installed the wheel and sdist independently. Both exposed the CLI, passed `doctor`, and contained all 19 bundled marketplace/plugin files with hashes matching the repository sources.
 - All 19 entries in `SHA256SUMS.json` were rehashed successfully; the SBOM contains seven dependency components.
 - The public-release staging step produced 13 allowlisted payload assets plus two checksum manifests at one flat directory level. Platform ZIP validation rejects missing executables, incorrect `BUILD.json` metadata and incomplete five-platform tagged releases.
-- Release publishing is limited to `v0.9.0-rc.*` candidates and the owner-approved `v1.0.0` tag; unrelated `v*` tags cannot invoke the publishing job.
+- Release publishing is limited to version-aligned `v1.0.0-rc.*` candidates and the owner-approved `v1.0.0` tag; unrelated `v*` tags cannot invoke the publishing job.
 - The isolated release-assets job installs the local package and its resolved runtime dependencies before generating the SBOM, then runs `pip check`; this prevents a clean runner from failing when dependency versions are read for provenance.
 
 ## Isolated Windows smoke test
@@ -57,6 +57,6 @@ The estimator applies long-context rates to the full request when input exceeds 
 - The public GitHub repository exists, but it has no pushed default branch, workflow run, tag or release yet.
 - Dependabot vulnerability alerts/security updates and a required-check branch ruleset must be enabled after the initial branch and check names exist.
 - macOS x64/arm64 and Linux x64/arm64 builds must pass hosted CI.
-- Published one-line installers must be tested against an actual `v0.9.0-rc.1` prerelease.
+- Published one-line installers must be tested against an actual `v1.0.0-rc.1` prerelease.
 - Human semantic scoring and invited-user acceptance by 5–10 testers remain open.
 - Creating `v1.0.0` requires explicit owner approval after every blocking gate closes.

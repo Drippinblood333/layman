@@ -7,7 +7,7 @@
 5. Build the wheel, source archive, unified Codex plugin, CycloneDX SBOM and SHA-256 manifest. Confirm the legacy v1 ZIP hash is unchanged.
 6. Test Codex enable, repeated enable, disable, conflict handling and backup restore against a temporary `CODEX_HOME`.
 7. Scan archives and fixtures for API keys, credentials, raw private prompts, project code and stored response text.
-8. Publish `v0.9.0-rc.1` to 5–10 invited testers. Do not create `v1.0.0` while a P0/P1 issue remains.
+8. Publish `v1.0.0-rc.1` to 5–10 invited testers. Do not create `v1.0.0` while a P0/P1 issue remains.
 9. Re-run every gate after candidate fixes. Create public `v1.0.0` only after explicit owner approval.
 
 API routing remains labeled Beta until a release-grade live API benchmark exists. Dashboard savings are counterfactual estimates; ChatGPT Plus results are subscription calibration, not an API invoice.

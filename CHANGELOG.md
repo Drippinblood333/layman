@@ -19,7 +19,7 @@
 - Made uninstall remove the Codex plugin and local marketplace before optional data purging.
 - Raised pytest, pytest-asyncio, PyInstaller and Pillow development floors after the 2026-08-12 OSV audit found fixed vulnerabilities in the previous pytest/Pillow range.
 - Updated release workflows to current action majors pinned to full commit SHAs, added an OSV dependency-audit gate, and enabled weekly Dependabot updates for Python and GitHub Actions.
-- Restricted automated release publishing to the documented candidate series and final `v1.0.0` tag.
+- Restricted automated release publishing to the version-aligned `v1.0.0-rc.*` candidate series and final `v1.0.0` tag.
 - Made the clean release job install and validate runtime dependencies before generating the resolved-version SBOM.
 - Expanded the CI secret scan from selected public directories to the complete checked-out source tree.
 - Bundled the complete local Codex marketplace inside wheel and source distributions so clean package installs can run `layman setup`.
