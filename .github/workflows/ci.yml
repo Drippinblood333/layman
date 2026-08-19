@@ -115,7 +115,7 @@ jobs:
       - run: python scripts/scan-release.py release/layman-v1.0.0
       - run: python scripts/stage-release-assets.py --require-all-platforms
       - run: python scripts/scan-release.py build/release-assets
-      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
+      - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           prerelease: ${{ contains(github.ref_name, '-rc.') }}
           fail_on_unmatched_files: true
