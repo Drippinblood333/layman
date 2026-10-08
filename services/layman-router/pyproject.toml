@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling==1.32.3"]
+requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [project]
@@ -28,10 +28,10 @@ dev = [
   "pytest==9.1.1",
   "pytest-asyncio==1.4.0",
   "pyinstaller==6.22.3",
-  "pyinstaller-hooks-contrib==2026.7",
+  "pyinstaller-hooks-contrib==2026.8",
   "build==1.6.1",
   "Pillow==12.3.0",
-  "ruff==0.16.8",
+  "ruff==0.16.10",
   "bandit==1.9.4",
   "pip-audit==2.10.1",
 ]
