@@ -24,6 +24,12 @@ The Windows x64 artifact downloaded from [CI run 37823153836](https://github.com
 
 An active Codex heartbeat checks this project daily at 09:00 Asia/Shanghai, subject to the local scheduler and device being available. It advances bounded, verifiable fixes and reports meaningful progress, failures or required decisions. Dependabot checks Python dependencies and GitHub Actions weekly. Neither mechanism guarantees unattended release approval or safe automatic adoption of every upstream change.
 
+## Dependency self-update follow-up
+
+Dependabot PR [#4](https://github.com/Drippinblood333/layman/pull/4) proposes five development-tool upgrades. Its historical three-platform failures occurred in the version-pin test: the test required literal `ruff==0.15.21`, rejecting the proposed exact `ruff==0.16.8` pin. The test now validates the actual reproducibility contract instead of one obsolete version: each required quality tool must have one unconditional exact version requirement, with no ranges, wildcards, URLs or duplicate declarations. Ten regression cases verify acceptance of updated exact pins and rejection of weakened declarations. The complete local router and adaptive harness suites pass 240 tests after this change.
+
+This does not approve or merge PR #4. The proposed PyInstaller and build upgrades still require synchronized workflow and inventory versions, provenance review and fresh package/standalone smoke checks. Runtime hash locks and artifact integrity checks remain unchanged.
+
 ## Remaining public-release gates
 
 - Fresh release-candidate Plus calibration and human semantic-quality scoring.

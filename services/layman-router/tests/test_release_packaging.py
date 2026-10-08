@@ -6,12 +6,14 @@ import json
 import stat
 import subprocess
 import sys
+import tomllib
 import types
 import zipfile
 from pathlib import Path
 
 import pytest
 import yaml
+from packaging.requirements import Requirement
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -285,25 +287,52 @@ def test_docker_build_uses_repository_context_and_includes_plugin_sources():
     assert "plugins/layman" in dockerfile
 
 
+def assert_quality_tool_pins(dependencies):
+    requirements = [Requirement(item) for item in dependencies]
+    for name in ("pytest", "pytest-asyncio", "pillow", "ruff", "bandit", "pip-audit"):
+        matching = [item for item in requirements if item.name.lower() == name]
+        assert len(matching) == 1, f"{name} must have exactly one dev requirement"
+        requirement = matching[0]
+        pins = list(requirement.specifier)
+        assert requirement.url is None and requirement.marker is None
+        assert len(pins) == 1 and pins[0].operator == "==" and "*" not in pins[0].version, (
+            f"{name} must have an exact version pin"
+        )
+
+
 def test_ci_quality_tools_are_version_pinned_in_the_dev_extra():
-    pyproject = (ROOT / "services" / "layman-router" / "pyproject.toml").read_text(
-        encoding="utf-8"
+    pyproject = tomllib.loads(
+        (ROOT / "services" / "layman-router" / "pyproject.toml").read_text(encoding="utf-8")
     )
-    for requirement in (
-        "pytest==9.1.1",
-        "pytest-asyncio==1.4.0",
-        "Pillow==12.3.0",
-        "ruff==0.15.21",
-        "bandit==1.9.4",
-        "pip-audit==2.10.1",
-    ):
-        assert f'"{requirement}"' in pyproject
+    assert_quality_tool_pins(pyproject["project"]["optional-dependencies"]["dev"])
 
     workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(
         encoding="utf-8"
     )
     assert 'python -m pip install -e "./services/layman-router[dev]"' in workflow
     assert '"./services/layman-router[dev]" ruff bandit pip-audit' not in workflow
+
+
+@pytest.mark.parametrize("ruff_requirement", ["ruff==0.16.8", "ruff==0.17.0"])
+def test_quality_pin_contract_accepts_reviewable_version_updates(ruff_requirement):
+    assert_quality_tool_pins([
+        "pytest==9.1.1", "pytest-asyncio==1.4.0", "Pillow==12.3.0",
+        ruff_requirement, "bandit==1.9.4", "pip-audit==2.10.1",
+    ])
+
+
+@pytest.mark.parametrize("ruff_requirements", [
+    [], ["ruff"], ["ruff>=0.16.8"], ["ruff==0.16.*"],
+    ["ruff==0.16.8", "ruff==0.17.0"], ["ruff>=0.16.8,<0.18"],
+    ["ruff==0.16.8; python_version >= '3.14'"],
+    ["ruff @ https://example.com/ruff.whl"],
+])
+def test_quality_pin_contract_rejects_unpinned_or_ambiguous_tools(ruff_requirements):
+    with pytest.raises(AssertionError):
+        assert_quality_tool_pins([
+            "pytest==9.1.1", "pytest-asyncio==1.4.0", "Pillow==12.3.0",
+            *ruff_requirements, "bandit==1.9.4", "pip-audit==2.10.1",
+        ])
 
 
 def test_hatch_build_finds_plugin_bundle_in_shallow_project_root(
