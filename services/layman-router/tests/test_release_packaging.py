@@ -315,6 +315,20 @@ def test_ci_quality_tools_are_version_pinned_in_the_dev_extra():
     assert {"E4", "E7", "E9", "F"} <= set(lint_policy["lint"]["extend-select"])
 
 
+def test_shebang_helpers_have_git_executable_permissions():
+    tracked = subprocess.run(
+        ["git", "ls-files", "--stage", "scripts", "evals"],
+        cwd=ROOT, capture_output=True, text=True, check=True,
+    )
+    checked = []
+    for record in tracked.stdout.splitlines():
+        metadata, path = record.split("\t", 1)
+        if path.endswith(".py") and (ROOT / path).read_text(encoding="utf-8").startswith("#!"):
+            assert metadata.split()[0] == "100755", f"shebang helper is not executable: {path}"
+            checked.append(path)
+    assert len(checked) >= 12
+
+
 def test_build_tool_pins_match_workflow_and_artifact_inventory():
     pyproject = tomllib.loads(
         (ROOT / "services" / "layman-router" / "pyproject.toml").read_text(encoding="utf-8")

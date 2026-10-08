@@ -36,6 +36,8 @@ The local download limitation was subsequently resolved by downloading complete 
 
 Hosted run [37824537148](https://github.com/Drippinblood333/layman/actions/runs/37824537148) passed all five platform builds and Docker but failed all three test jobs at the expanded Ruff checks. Ruff 0.16 expands its default rule set ([upstream migration guide](https://astral.sh/blog/ruff-v0.16.0)). The follow-up applies safe import/type-annotation cleanups, explicitly marks intentional regex concatenation, and documents narrow compatibility exceptions for existing validation errors and fail-closed benchmark boundaries. The root lint policy adds the former `E4`, `E7`, `E9`, and `F` checks to the new defaults and targets Python 3.11, so upgrading does not silently discard the old checks. Fresh hosted validation of this follow-up remains required.
 
+The Linux test job in [follow-up run 37825669212](https://github.com/Drippinblood333/layman/actions/runs/37825669212) then identified only `EXE001`: twelve checked helpers had shebangs but lacked Git executable permissions. Windows does not enforce this POSIX check. All seventeen tracked shebang-bearing Python helpers under `scripts` and `evals` now have mode `100755`, including five additional helpers found by the regression audit. A portable test checks the Git index rather than Windows filesystem permission emulation. The full local suite now passes 242 tests and the updated linter; hosted verification of the permission fix remains pending. No production application behavior was changed by this follow-up.
+
 ## Remaining public-release gates
 
 - Fresh release-candidate Plus calibration and human semantic-quality scoring.
