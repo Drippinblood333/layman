@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import platform
@@ -68,7 +69,10 @@ def main() -> int:
         "--exclude-module", "_pytest",
         "--exclude-module", "requests",
         "--exclude-module", "rich",
-        "--exclude-module", "tomli",
+        # Only exclude a separately installed tomli. When it is absent,
+        # PyInstaller's setuptools hook aliases it to a vendored module and
+        # rejects an already-excluded target. Python 3.11+ uses tomllib.
+        *(["--exclude-module", "tomli"] if importlib.util.find_spec("tomli") else []),
         "--exclude-module", "urllib3",
         "--add-data", f"{ROOT / '.agents' / 'plugins' / 'marketplace.json'}{separator}layman-bundle/.agents/plugins",
         "--add-data", f"{ROOT / 'plugins' / 'layman'}{separator}layman-bundle/plugins/layman",

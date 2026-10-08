@@ -115,7 +115,7 @@ def test_direct_spawn_preserves_space_chinese_and_special_character_cwd(tmp_path
     cwd = tmp_path / "有 空格 & (stage-a0)"
     cwd.mkdir()
     completed = benchmark.CodexCliBackend._capture(
-        [sys.executable, "-c", "import os,sys;print(os.getcwd());sys.stderr.write('captured')"],
+        [sys.executable, "-X", "utf8", "-c", "import os,sys;print(os.getcwd());sys.stderr.write('captured')"],
         cwd=cwd, timeout=10, env=os.environ.copy(),
     )
     assert completed.returncode == 0
