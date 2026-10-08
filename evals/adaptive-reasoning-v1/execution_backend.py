@@ -364,6 +364,7 @@ class CodexCliBackend(ExecutionBackend):
     def _capture(command: Sequence[str], *, cwd: Path, timeout: float, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
             list(command), cwd=str(cwd), env=env, capture_output=True, text=True,
+            encoding="utf-8", errors="replace",
             timeout=timeout, check=False, shell=False,
         )
 
@@ -389,7 +390,7 @@ class CodexCliBackend(ExecutionBackend):
         process = subprocess.Popen(
             [executable, "mcp-server"], cwd=str(cwd), env=env,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, shell=False,
+            text=True, encoding="utf-8", errors="replace", shell=False,
         )
         try:
             time.sleep(0.15)
@@ -737,7 +738,8 @@ class CodexCliBackend(ExecutionBackend):
         try:
             process = subprocess.Popen(
                 command, cwd=contract.cwd, env=env, stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                encoding="utf-8", errors="replace", shell=False,
             )
         except OSError as exc:
             stderr = str(exc)
