@@ -38,6 +38,14 @@ Hosted run [37824537148](https://github.com/Drippinblood333/layman/actions/runs/
 
 The Linux test job in [follow-up run 37825669212](https://github.com/Drippinblood333/layman/actions/runs/37825669212) then identified only `EXE001`: twelve checked helpers had shebangs but lacked Git executable permissions. Windows does not enforce this POSIX check. All seventeen tracked shebang-bearing Python helpers under `scripts` and `evals` now have mode `100755`, including five additional helpers found by the regression audit. A portable test checks the Git index rather than Windows filesystem permission emulation. The full local suite passes 242 tests and the updated linter; hosted run 37826073731 subsequently passed all nine jobs, closing this toolchain and permission-fix validation gate. No production application behavior was changed by this permission follow-up.
 
+## Cross-platform release assembly follow-up
+
+All five artifacts from run 37826073731 downloaded successfully. Combining them with the strict platform packager exposed a release blocker not exercised by the previous nine jobs: Windows' checked-out runtime lock used CRLF, and two wheel-supplied license notices also used CRLF rather than POSIX LF. Their dependency identities, versions and notice text were equal, but their byte digests differed. The existing artifact files were preserved unchanged; packaging stopped instead of bypassing the manifest-equality check.
+
+The fix marks `*.lock` as LF in Git and canonicalizes CRLF to LF only in generated license-notice copies, preserving installed source notices and every other byte. Tests check source preservation, exact bundled notice digests, retention of other whitespace, and rejection of substantive content differences. The Windows-generated canonical runtime manifest now matches the original macOS x64/arm64 and Linux x64/arm64 manifests byte for byte. The local suite passes 244 tests and the updated linter.
+
+The read-only `release-assets` job now runs on ordinary CI and combines all five platforms, validates runtime inventories/SBOMs, smoke-installs Python packages, scans and stages flat checksummed assets. Publication is a separate job with write permission, dependent on successful assembly and restricted to the existing owner-approved version-tag series. No release tag or GitHub Release was created. Fresh hosted assembly verification remains required; the earlier nine-job green checkpoint alone is not evidence that the combined release assets can ship.
+
 ## Remaining public-release gates
 
 - Fresh release-candidate Plus calibration and human semantic-quality scoring.

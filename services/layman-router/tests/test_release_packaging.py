@@ -509,6 +509,51 @@ def test_runtime_inventory_matches_lock_and_emits_traceable_spdx_licenses(tmp_pa
         inventory.validate_sbom(manifest, sbom)
 
 
+def test_license_notice_line_endings_are_canonical_without_altering_sources(tmp_path, monkeypatch):
+    inventory = runtime_inventory_module()
+    source = tmp_path / "example.dist-info" / "licenses" / "LICENSE"
+    source.parent.mkdir(parents=True)
+    original = b"Copyright holder\r\n\r\nTerms  \r\nKeep this lone CR\rbyte\n"
+    source.write_bytes(original)
+
+    class FakeDistribution:
+        files = (Path("example.dist-info/licenses/LICENSE"),)
+        version = "1.0"
+
+        def locate_file(self, entry):
+            return tmp_path / entry
+
+    distribution = FakeDistribution()
+    canonical = original.replace(b"\r\n", b"\n")
+    assert inventory._distribution_license_payloads(distribution) == [("LICENSE", canonical)]
+    notices = inventory._notice_records(distribution, "example", "1.0")
+    assert notices[0]["sha256"] == hashlib.sha256(canonical).hexdigest()
+    monkeypatch.setattr(inventory.importlib.metadata, "distribution", lambda name: distribution)
+    manifest = {"dependencies": [{"name": "example", "version": "1.0", "license": {"notices": notices}}]}
+    inventory.write_runtime_license_bundle(manifest, tmp_path / "bundle")
+    assert (tmp_path / "bundle" / notices[0]["path"]).read_bytes() == canonical
+    assert source.read_bytes() == original
+    source.write_bytes(canonical)
+    assert inventory._notice_records(distribution, "example", "1.0") == notices
+    source.write_bytes(canonical.replace(b"Terms", b"Different terms"))
+    assert inventory._notice_records(distribution, "example", "1.0") != notices
+
+
+def test_assembly_runs_before_tag_guarded_publication():
+    workflow = yaml.safe_load((ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
+    assembly = workflow["jobs"]["release-assets"]
+    publish = workflow["jobs"]["publish"]
+    assert "if" not in assembly
+    assert assembly["permissions"] == {"contents": "read"}
+    assert set(assembly["needs"]) == {"test", "docker", "standalone"}
+    assert not any("softprops/action-gh-release" in step.get("uses", "") for step in assembly["steps"])
+    assert publish["needs"] == "release-assets"
+    assert publish["if"] == "startsWith(github.ref, 'refs/tags/v1.0.0-rc.') || github.ref == 'refs/tags/v1.0.0'"
+    assert publish["permissions"] == {"contents": "write"}
+    assert any("softprops/action-gh-release" in step.get("uses", "") for step in publish["steps"])
+    assert "*.lock text eol=lf" in (ROOT / ".gitattributes").read_text(encoding="utf-8")
+
+
 def test_runtime_inventory_rejects_unknown_license_metadata():
     inventory = runtime_inventory_module()
     with pytest.raises(RuntimeError, match="unknown license"):

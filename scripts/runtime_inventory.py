@@ -417,7 +417,9 @@ def _distribution_license_payloads(
         source = distribution.locate_file(entry)
         if not source.is_file():
             continue
-        content = source.read_bytes()
+        # Canonicalize only bundled-copy line endings across platform wheels;
+        # preserve the installed source and all other notice bytes.
+        content = source.read_bytes().replace(b"\r\n", b"\n")
         content_digest = digest_bytes(content)
         if content_digest in seen:
             continue

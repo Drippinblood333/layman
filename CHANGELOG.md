@@ -2,6 +2,7 @@
 
 ## 1.0.0 - Unreleased
 
+- Made cross-platform release assembly a read-only ordinary-CI gate, keeping publication separately tag-guarded; standardized lock-file and bundled license-notice line endings without bypassing integrity checks.
 - Coordinated development-tool updates with CI and artifact-audit pins (PyInstaller 6.22.3, hooks 2026.7, build 1.6.1, Ruff 0.16.8 and Hatchling 1.32.3), adding a cross-file pin-consistency gate.
 - Reject malformed Responses `text` options before routing or forwarding, avoiding explicit-model crashes and silent automatic replacement; valid formats and explicit-model verbosity remain preserved.
 - Reframed Layman as a Codex optimization and execution layer for beginners and developers.

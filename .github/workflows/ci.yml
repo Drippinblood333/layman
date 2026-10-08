@@ -92,11 +92,10 @@ jobs:
           compression-level: 0
 
   release-assets:
-    if: startsWith(github.ref, 'refs/tags/v1.0.0-rc.') || github.ref == 'refs/tags/v1.0.0'
     needs: [test, docker, standalone]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
@@ -117,6 +116,23 @@ jobs:
       - run: python scripts/scan-release.py release/layman-v1.0.0
       - run: python scripts/stage-release-assets.py --require-all-platforms
       - run: python scripts/scan-release.py build/release-assets
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-assets
+          path: build/release-assets/*
+          if-no-files-found: error
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v1.0.0-rc.') || github.ref == 'refs/tags/v1.0.0'
+    needs: release-assets
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: release-assets
+          path: build/release-assets
       - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
         with:
           prerelease: ${{ contains(github.ref_name, '-rc.') }}
