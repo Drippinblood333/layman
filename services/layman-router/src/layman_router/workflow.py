@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from .models import TaskType
 
-
 WORKFLOWS = {
     TaskType.DEBUGGING: "reproduce-fix-verify",
     TaskType.TESTING: "discover-test-gaps-verify",

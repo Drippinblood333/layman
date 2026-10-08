@@ -6,7 +6,6 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-
 OWNERSHIP_MARKER = ".layman-owned.json"
 OWNERSHIP_FORMAT = 1
 

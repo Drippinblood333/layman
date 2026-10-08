@@ -12,11 +12,11 @@ import statistics
 import time
 import uuid
 from collections import defaultdict
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 import httpx
-
 from layman_router.config import (
     load_config,
     routing_config_sha256,
@@ -74,9 +74,9 @@ def unsupported_live_cases(selected_cases: list[dict[str, Any]]) -> dict[str, li
     unsupported = {"previous_response_id": [], "tools": []}
     for case in selected_cases:
         request_payload = case.get("request") or {}
-        for field in unsupported:
+        for field, ids in unsupported.items():
             if request_payload.get(field):
-                unsupported[field].append(str(case["id"]))
+                ids.append(str(case["id"]))
     return {field: ids for field, ids in unsupported.items() if ids}
 
 

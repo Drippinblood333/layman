@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 
 import pytest
-
 from layman_router.plus_eval import (
     PlusEvalArm,
     build_plan,

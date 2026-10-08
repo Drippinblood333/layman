@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import layman_router.cli as cli
+from layman_router import cli
 
 
 def test_clipboard_input_preserves_unicode(monkeypatch):

@@ -5,7 +5,6 @@ from typing import Any
 
 from .models import RouteDecision, RouterConfig, RouteTier, TaskFeatures, TaskType
 
-
 FAST_TASKS = {
     TaskType.SUMMARY,
     TaskType.REWRITE,

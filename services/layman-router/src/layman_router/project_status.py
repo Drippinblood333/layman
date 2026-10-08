@@ -4,7 +4,6 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-
 IGNORED_TOP_LEVEL = {
     ".git",
     ".idea",

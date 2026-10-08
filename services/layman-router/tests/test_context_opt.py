@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from layman_router.context_opt import optimize_payload
 
-
 LONG = "重复的历史说明。" * 40
 
 

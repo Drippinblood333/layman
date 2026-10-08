@@ -4,9 +4,8 @@ import json
 import time
 
 import httpx
-import pytest
-
 import layman_router.app as app_module
+import pytest
 from layman_router.app import create_app
 from layman_router.telemetry import estimate_cost, extract_usage
 

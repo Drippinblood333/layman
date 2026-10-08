@@ -10,7 +10,6 @@ import yaml
 
 from .models import ProjectConfig, RouterConfig
 
-
 REPO_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "projects.yaml"
 BUNDLED_CONFIG_PATH = Path(__file__).with_name("default_config.yaml")
 
@@ -36,7 +35,7 @@ def load_config(path: str | Path | None = None) -> RouterConfig:
     config_path = Path(configured).expanduser().resolve()
     data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
-        raise ValueError(f"Router config must be a YAML object: {config_path}")
+        raise ValueError(f"Router config must be a YAML object: {config_path}")  # noqa: TRY004 - preserve the CLI's config-error contract.
     config = RouterConfig.model_validate(data)
     if os.getenv("LAYMAN_ROUTER_UPSTREAM_BASE_URL"):
         config.upstream_base_url = os.environ["LAYMAN_ROUTER_UPSTREAM_BASE_URL"]

@@ -4,7 +4,6 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
-
 CONTROL_METADATA_PREFIX = "layman_"
 CACHE_MODE_METADATA = "layman_prompt_cache"
 CACHE_KEY_METADATA = "layman_prompt_cache_key"

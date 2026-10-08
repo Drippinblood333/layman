@@ -10,7 +10,6 @@ from pathlib import Path
 from release_archives import write_platform_archive
 from runtime_inventory import BUNDLE_AUDIT_NAME, STANDALONE_MANIFEST_NAME
 
-
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
     "layman-windows-x64": ("windows-x64", "layman.exe"),

@@ -6,7 +6,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 PATTERNS = {
     "OpenAI-style secret": re.compile(rb"sk-[A-Za-z0-9_-]{20,}"),

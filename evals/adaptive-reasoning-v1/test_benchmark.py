@@ -10,7 +10,6 @@ from pathlib import Path
 
 import pytest
 
-
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("adaptive_reasoning_v1_benchmark", HERE / "benchmark.py")
 assert SPEC and SPEC.loader

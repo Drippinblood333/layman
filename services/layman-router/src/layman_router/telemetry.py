@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from .models import ModelPricing, RouterConfig, RouteTier, UsageRecord
 from .paths import layman_home, mark_layman_home_owned
-
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS usage_log (
@@ -97,7 +96,7 @@ class UsageStore:
             pass
 
     def prune(self) -> int:
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=self.config.telemetry_retention_days)).isoformat()
+        cutoff = (datetime.now(UTC) - timedelta(days=self.config.telemetry_retention_days)).isoformat()
         with sqlite3.connect(self.path) as connection:
             cursor = connection.execute("DELETE FROM usage_log WHERE created_at < ?", (cutoff,))
             return cursor.rowcount
@@ -130,7 +129,7 @@ class UsageStore:
                     "metadata_json": json.dumps(values.pop("metadata"), ensure_ascii=False),
                     "fallback_used": int(record.fallback_used),
                     "validator_passed": None if record.validator_passed is None else int(record.validator_passed),
-                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_at": datetime.now(UTC).isoformat(),
                 },
             )
 

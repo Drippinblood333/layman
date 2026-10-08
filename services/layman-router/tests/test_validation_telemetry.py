@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from layman_router.demo import seed_demo
 from layman_router.models import UsageRecord
 from layman_router.telemetry import UsageStore, estimate_cost, extract_usage
 from layman_router.validation import validate_response
-from layman_router.demo import seed_demo
 
 
 def completed(text: str = "ok"):

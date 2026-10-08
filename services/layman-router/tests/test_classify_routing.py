@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import pytest
-
 from layman_router.classify import classify_task
 from layman_router.models import ProjectConfig, RouteTier, TaskType, TierConfig
-from layman_router.routing import apply_route, decide_route, explicit_model_decision, fallback_decision
+from layman_router.routing import (
+    apply_route,
+    decide_route,
+    explicit_model_decision,
+    fallback_decision,
+)
 
 
 def test_summary_routes_fast(router_config):

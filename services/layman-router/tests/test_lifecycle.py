@@ -1,20 +1,25 @@
 from __future__ import annotations
 
-import os
 import json
+import os
 import subprocess
 from pathlib import Path
 
 from layman_router.cli import build_parser, main
-from layman_router.paths import OWNERSHIP_MARKER, mark_layman_home_owned, migrate_legacy_data, read_state
 from layman_router.lifecycle import (
     _is_running,
     detect_user_mode,
     install_codex_plugin,
-    remove_codex_plugin,
     process_status,
+    remove_codex_plugin,
     setup_state,
     stop_router,
+)
+from layman_router.paths import (
+    OWNERSHIP_MARKER,
+    mark_layman_home_owned,
+    migrate_legacy_data,
+    read_state,
 )
 
 

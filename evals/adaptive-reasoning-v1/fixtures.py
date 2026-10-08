@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 FIXTURES: dict[str, dict[str, str]] = {
     "mech-incident-timeline": {
         "inputs/incident.log": """2026-08-14T10:03:00Z | api | WARN | queue lag 42s

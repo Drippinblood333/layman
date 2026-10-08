@@ -13,7 +13,6 @@ from .plus_run import run_plus_task
 from .project_status import inspect_project
 from .task_plan import create_task_plan
 
-
 PROTOCOL_VERSION = "2025-06-18"
 
 

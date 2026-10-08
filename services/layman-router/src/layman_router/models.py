@@ -52,7 +52,7 @@ class TierConfig(BaseModel):
     pricing: ModelPricing
 
     @model_validator(mode="after")
-    def validate_gpt6_effort(self) -> "TierConfig":
+    def validate_gpt6_effort(self) -> TierConfig:
         if self.model in {"gpt-6-astra", "gpt-6.1-sol"} and self.reasoning_effort == "none":
             raise ValueError(f"{self.model} does not support reasoning effort 'none'")
         return self
@@ -82,7 +82,7 @@ class RouterConfig(BaseModel):
     projects: dict[str, ProjectConfig] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def require_all_tiers(self) -> "RouterConfig":
+    def require_all_tiers(self) -> RouterConfig:
         missing = set(RouteTier) - set(self.tiers)
         if missing:
             raise ValueError(f"Missing route tiers: {sorted(item.value for item in missing)}")

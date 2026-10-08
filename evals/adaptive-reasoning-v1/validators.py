@@ -11,7 +11,6 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-
 MECHANICAL_EXPECTED: dict[str, Any] = {
     "mech-incident-timeline": [
         {"timestamp": "2026-08-14T09:59:00Z", "service": "auth", "severity": "error", "event": "token verification unavailable"},
@@ -238,7 +237,7 @@ def _run_hidden(case_id: str, workspace: Path) -> tuple[bool, str]:
                 assert main([]) == 2
                 assert main(["x"]) == 3
             return True, "hidden_cli_checks_passed"
-        except Exception:
+        except Exception:  # noqa: BLE001 - fixture code may raise any exception; fail closed.
             return False, "hidden_cli_checks_failed"
         finally:
             sys.path.pop(0)

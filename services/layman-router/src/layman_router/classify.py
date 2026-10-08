@@ -3,11 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from .config import project_settings
 from .models import RouterConfig, TaskFeatures, TaskType
-
 
 INTENT_PATTERNS: list[tuple[TaskType, tuple[str, ...]]] = [
     (TaskType.DEBUGGING, (r"^(请|帮我|please\s+)?(debug|排查|定位)", r"(bug|traceback|报错|为什么失败|失败|内存泄漏|崩溃|异常).*(分析|原因|定位|排查|root cause|debug)")),
@@ -83,8 +83,10 @@ CONTINUATION_PATTERN = re.compile(
 )
 
 INHERITED_DATA_DELETION_PATTERNS = (
-    r"\b(?:delete|remove|purge|erase)\b[^.;\n]{0,48}"
-    r"\b(?:users?|accounts?|data|records?|database)\b",
+    (
+        r"\b(?:delete|remove|purge|erase)\b[^.;\n]{0,48}"
+        r"\b(?:users?|accounts?|data|records?|database)\b"
+    ),
     r"(?:删除|清空|移除|销毁)[^。；\n]{0,32}(?:用户|账户|账号|数据|记录|数据库)",
 )
 
@@ -96,11 +98,15 @@ ACTIONABLE_OPERATION_PATTERNS = (
 )
 
 NON_ACTION_CONTEXT_PATTERNS = (
-    r"\b(?:article|documentation|example|history|discussion|report)\b.*\b(?:mentions?|describes?|about)\b|"
-    r"\b(?:mentions?|mentioned|describes?|described|discuss(?:es|ed)?)\b.*"
-    r"\b(?:production|payment|secret|security|auth)\b",
-    r"(?:文章|文档|示例|历史|讨论|报告).{0,24}(?:提到|描述|涉及)|"
-    r"(?:提到|描述|讨论了).{0,24}(?:生产|支付|密钥|安全|认证)",
+    (
+        r"\b(?:article|documentation|example|history|discussion|report)\b.*\b(?:mentions?|describes?|about)\b|"
+        r"\b(?:mentions?|mentioned|describes?|described|discuss(?:es|ed)?)\b.*"
+        r"\b(?:production|payment|secret|security|auth)\b"
+    ),
+    (
+        r"(?:文章|文档|示例|历史|讨论|报告).{0,24}(?:提到|描述|涉及)|"
+        r"(?:提到|描述|讨论了).{0,24}(?:生产|支付|密钥|安全|认证)"
+    ),
 )
 
 DESTRUCTIVE_PATTERNS: tuple[tuple[str, str], ...] = (
@@ -108,11 +114,13 @@ DESTRUCTIVE_PATTERNS: tuple[tuple[str, str], ...] = (
     (r"\bremove-item\b(?=[^\n;&|]*(?:-recurse\b|-r\b))[^\n;&|]+", "recursive deletion"),
     (r"\b(?:rmdir|rd)\s+/s\b|\bdel\s+/(?:s|q|f)", "recursive deletion"),
     (
-        r"\bgit\s+reset\s+--hard\b|"
-        r"\bgit\s+clean\b(?![^\n;&|]*(?:--dry-run\b|-[a-z]*n[a-z]*\b))"
-        r"(?=[^\n;&|]*(?:--force\b|-[a-z]*f[a-z]*\b))[^\n;&|]*|"
-        r"\bgit\s+restore\b|\bgit\s+checkout\s+(?:--\s+|\.\s*(?:$|[;&|]))|"
-        r"\bgit\s+branch\s+-D\b",
+        (
+            r"\bgit\s+reset\s+--hard\b|"
+            r"\bgit\s+clean\b(?![^\n;&|]*(?:--dry-run\b|-[a-z]*n[a-z]*\b))"
+            r"(?=[^\n;&|]*(?:--force\b|-[a-z]*f[a-z]*\b))[^\n;&|]*|"
+            r"\bgit\s+restore\b|\bgit\s+checkout\s+(?:--\s+|\.\s*(?:$|[;&|]))|"
+            r"\bgit\s+branch\s+-D\b"
+        ),
         "destructive git history or worktree rewrite",
     ),
     (r"\bgit\s+push\b[^\n;&|]*(?:--force(?:-with-lease)?\b|-f\b)|\bforce\s+push\b", "forced remote history rewrite"),
@@ -137,9 +145,10 @@ def _text_parts(value: Any) -> Iterable[str]:
             yield from _text_parts(item)
     elif isinstance(value, dict):
         for key, item in value.items():
-            if key in {"text", "content", "input", "instructions", "arguments"}:
-                yield from _text_parts(item)
-            elif key not in {"tools", "metadata"} and isinstance(item, (list, dict)):
+            if (
+                key in {"text", "content", "input", "instructions", "arguments"}
+                or (key not in {"tools", "metadata"} and isinstance(item, (list, dict)))
+            ):
                 yield from _text_parts(item)
 
 

@@ -8,7 +8,6 @@ from typing import Any
 
 from .cases import BenchmarkCase
 
-
 TEST_MUTANTS = {
     "testing-01": (
         "def is_even(value):\n    return value > 0 and value % 2 == 0\n",

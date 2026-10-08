@@ -658,11 +658,11 @@ def validate_runtime_manifest(lock_path: Path, manifest: Mapping[str, Any]) -> N
         raise RuntimeError("runtime dependency manifest lock path is unexpected")
     dependencies = manifest.get("dependencies")
     if not isinstance(dependencies, list):
-        raise RuntimeError("runtime dependency manifest dependencies must be a list")
+        raise RuntimeError("runtime dependency manifest dependencies must be a list")  # noqa: TRY004 - release evidence failures consistently use RuntimeError.
     manifest_map: dict[str, Mapping[str, Any]] = {}
     for dependency in dependencies:
         if not isinstance(dependency, dict):
-            raise RuntimeError("runtime dependency manifest contains a non-object dependency")
+            raise RuntimeError("runtime dependency manifest contains a non-object dependency")  # noqa: TRY004 - preserve release validation errors.
         name = canonical_name(str(dependency.get("name", "")))
         if not name or name in manifest_map:
             raise RuntimeError(f"invalid or duplicate runtime dependency: {name!r}")
@@ -684,7 +684,7 @@ def validate_runtime_manifest(lock_path: Path, manifest: Mapping[str, Any]) -> N
                 raise RuntimeError(f"runtime dependency {url_field} is not traceable for {name}")
         license_record = dependency.get("license")
         if not isinstance(license_record, dict):
-            raise RuntimeError(f"runtime dependency license is missing for {name}")
+            raise RuntimeError(f"runtime dependency license is missing for {name}")  # noqa: TRY004 - preserve release validation errors.
         expression = _validate_spdx(str(license_record.get("expression", "")), package=name)
         if expression != APPROVED_RUNTIME_LICENSES[(name, version)]:
             raise RuntimeError(f"runtime dependency license differs from reviewed policy for {name}")
@@ -697,7 +697,7 @@ def validate_runtime_manifest(lock_path: Path, manifest: Mapping[str, Any]) -> N
             raise RuntimeError(f"runtime dependency license notice files are missing for {name}")
         for notice in notices:
             if not isinstance(notice, dict):
-                raise RuntimeError(f"invalid runtime dependency notice for {name}")
+                raise RuntimeError(f"invalid runtime dependency notice for {name}")  # noqa: TRY004 - preserve release validation errors.
             path = str(notice.get("path", ""))
             if not path.startswith(f"{LICENSE_ROOT}/python/") or Path(path).is_absolute() or ".." in Path(path).parts:
                 raise RuntimeError(f"unsafe runtime dependency notice path for {name}")
@@ -710,7 +710,7 @@ def validate_standalone_manifest(manifest: Mapping[str, Any]) -> None:
         raise RuntimeError("standalone component manifest schema_version must be 1")
     components = manifest.get("components")
     if not isinstance(components, list):
-        raise RuntimeError("standalone component manifest components must be a list")
+        raise RuntimeError("standalone component manifest components must be a list")  # noqa: TRY004 - preserve release validation errors.
     component_names = [
         str(component.get("name"))
         for component in components
@@ -814,11 +814,11 @@ def validate_bundle_audit(
     expected.update({"layman-codex": VERSION, "pyinstaller": PYINSTALLER_VERSION})
     distributions = audit.get("distributions")
     if not isinstance(distributions, list):
-        raise RuntimeError("standalone bundle audit distributions must be a list")
+        raise RuntimeError("standalone bundle audit distributions must be a list")  # noqa: TRY004 - preserve release validation errors.
     audited: dict[str, str] = {}
     for distribution in distributions:
         if not isinstance(distribution, dict):
-            raise RuntimeError("standalone bundle audit contains an invalid distribution")
+            raise RuntimeError("standalone bundle audit contains an invalid distribution")  # noqa: TRY004 - preserve release validation errors.
         name = canonical_name(str(distribution.get("name", "")))
         version = str(distribution.get("version", ""))
         file_count = distribution.get("file_count")
@@ -833,7 +833,7 @@ def validate_bundle_audit(
 
     archive = audit.get("archive")
     if not isinstance(archive, dict):
-        raise RuntimeError("standalone executable archive audit is missing")
+        raise RuntimeError("standalone executable archive audit is missing")  # noqa: TRY004 - preserve release validation errors.
     for field in ("carchive_entries", "pyz_entries", "python_roots"):
         if not isinstance(archive.get(field), int) or archive[field] <= 0:
             raise RuntimeError(f"standalone executable archive has an invalid {field}")
@@ -852,7 +852,7 @@ def validate_bundle_audit(
 
     build_tools = audit.get("build_tools")
     if not isinstance(build_tools, list):
-        raise RuntimeError("standalone bundle audit build tools are missing")
+        raise RuntimeError("standalone bundle audit build tools are missing")  # noqa: TRY004 - preserve release validation errors.
     tool_names = [
         str(tool.get("name"))
         for tool in build_tools
@@ -892,11 +892,11 @@ def validate_sbom(manifest: Mapping[str, Any], sbom: Mapping[str, Any]) -> None:
     manifest_map = {dependency["name"]: dependency for dependency in manifest["dependencies"]}
     components = sbom.get("components")
     if not isinstance(components, list):
-        raise RuntimeError("SBOM components must be a list")
+        raise RuntimeError("SBOM components must be a list")  # noqa: TRY004 - preserve release validation errors.
     sbom_map: dict[str, Mapping[str, Any]] = {}
     for component in components:
         if not isinstance(component, dict):
-            raise RuntimeError("SBOM contains a non-object component")
+            raise RuntimeError("SBOM contains a non-object component")  # noqa: TRY004 - preserve release validation errors.
         name = canonical_name(str(component.get("name", "")))
         if not name or name in sbom_map:
             raise RuntimeError(f"invalid or duplicate SBOM component: {name!r}")
@@ -953,7 +953,7 @@ def validate_platform_archives(
                 raise RuntimeError(f"platform BUILD.json identity is invalid: {archive_path.name}")
             inventory = build.get("runtime_dependencies")
             if not isinstance(inventory, dict):
-                raise RuntimeError(f"platform BUILD.json lacks runtime dependency identity: {archive_path.name}")
+                raise RuntimeError(f"platform BUILD.json lacks runtime dependency identity: {archive_path.name}")  # noqa: TRY004 - preserve release validation errors.
             if inventory.get("path") != MANIFEST_NAME:
                 raise RuntimeError(f"platform runtime manifest path mismatch: {archive_path.name}")
             if inventory.get("sha256") != digest_bytes(archived_manifest.encode("utf-8")):
@@ -975,7 +975,7 @@ def validate_platform_archives(
             validate_standalone_manifest(standalone_manifest)
             standalone_identity = build.get("standalone_components")
             if not isinstance(standalone_identity, dict):
-                raise RuntimeError(f"platform BUILD.json lacks standalone component identity: {archive_path.name}")
+                raise RuntimeError(f"platform BUILD.json lacks standalone component identity: {archive_path.name}")  # noqa: TRY004 - preserve release validation errors.
             if standalone_identity.get("path") != STANDALONE_MANIFEST_NAME:
                 raise RuntimeError(f"platform standalone manifest path mismatch: {archive_path.name}")
             if standalone_identity.get("sha256") != digest_bytes(standalone_content):
@@ -1024,7 +1024,7 @@ def validate_platform_archives(
             )
             audit_identity = build.get("bundle_audit")
             if not isinstance(audit_identity, dict):
-                raise RuntimeError(
+                raise RuntimeError(  # noqa: TRY004 - preserve release validation errors.
                     f"platform BUILD.json lacks bundle audit identity: {archive_path.name}"
                 )
             if audit_identity.get("path") != BUNDLE_AUDIT_NAME:

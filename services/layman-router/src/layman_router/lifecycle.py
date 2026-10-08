@@ -3,16 +3,23 @@ from __future__ import annotations
 import json
 import os
 import secrets
-import signal
 import shutil
+import signal
 import subprocess
 import sys
 import time
 import webbrowser
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
-from .paths import layman_home, mark_layman_home_owned, migrate_legacy_data, read_state, write_state
+from .paths import (
+    layman_home,
+    mark_layman_home_owned,
+    migrate_legacy_data,
+    read_state,
+    write_state,
+)
 from .plus_eval import codex_login_status, find_codex
 
 
@@ -266,7 +273,7 @@ def detect_user_mode() -> tuple[str, dict[str, Any]]:
 
 def _bundle_root() -> Path:
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-        return Path(getattr(sys, "_MEIPASS")) / "layman-bundle"
+        return Path(sys._MEIPASS) / "layman-bundle"
     packaged = Path(__file__).resolve().parent / "bundle"
     if packaged.is_dir():
         return packaged
@@ -291,7 +298,7 @@ def install_codex_plugin() -> dict[str, Any]:
     add_marketplace = subprocess.run(
         [executable, "plugin", "marketplace", "add", str(root)], capture_output=True, text=True, check=False,
     )
-    marketplace_output = " ".join((add_marketplace.stdout, add_marketplace.stderr)).strip()
+    marketplace_output = f"{add_marketplace.stdout} {add_marketplace.stderr}".strip()
     if add_marketplace.returncode != 0 and "already" not in marketplace_output.lower():
         raise RuntimeError(marketplace_output or "Codex marketplace installation failed")
     add_plugin = subprocess.run(
@@ -310,7 +317,7 @@ def remove_codex_plugin(
         [executable, "plugin", "remove", "layman@layman-local", "--json"],
         capture_output=True, text=True, timeout=30, check=False,
     )
-    plugin_output = " ".join((remove_plugin.stdout, remove_plugin.stderr)).strip()
+    plugin_output = f"{remove_plugin.stdout} {remove_plugin.stderr}".strip()
     if remove_plugin.returncode != 0 and not any(
         marker in plugin_output.lower() for marker in ("not installed", "not found")
     ):
@@ -320,7 +327,7 @@ def remove_codex_plugin(
         [executable, "plugin", "marketplace", "remove", "layman-local", "--json"],
         capture_output=True, text=True, timeout=30, check=False,
     )
-    marketplace_output = " ".join((remove_marketplace.stdout, remove_marketplace.stderr)).strip()
+    marketplace_output = f"{remove_marketplace.stdout} {remove_marketplace.stderr}".strip()
     marketplace_absent = any(
         marker in marketplace_output.lower() for marker in ("not configured", "not installed", "not found")
     )

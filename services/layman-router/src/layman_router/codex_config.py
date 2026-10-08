@@ -6,12 +6,11 @@ import os
 import shutil
 import tempfile
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import tomlkit
-
 
 PROVIDER_ID = "layman-router"
 
@@ -92,7 +91,7 @@ def enable_codex(*, apply: bool, home: Path | None = None) -> ConfigChange:
         if not state_path.exists():
             _atomic_write(state_path, json.dumps(state, indent=2, ensure_ascii=False, default=str))
         if config_path.exists():
-            stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
             backup = config_path.with_name(f"config.toml.layman-router.{stamp}.bak")
             shutil.copy2(config_path, backup)
         _atomic_write(config_path, after)
@@ -147,7 +146,7 @@ def disable_codex(*, apply: bool, home: Path | None = None) -> ConfigChange:
     diff = _render_change(before, after, config_path)
     backup: Path | None = None
     if apply and before != after:
-        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         backup = config_path.with_name(f"config.toml.layman-router-disable.{stamp}.bak")
         if config_path.exists():
             shutil.copy2(config_path, backup)
@@ -175,7 +174,7 @@ def restore_backup(backup: str | Path, *, apply: bool, home: Path | None = None)
     diff = _render_change(before, after, config_path)
     safety_backup = None
     if apply and before != after:
-        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         safety_backup = config_path.with_name(f"config.toml.layman-router-pre-restore.{stamp}.bak")
         if config_path.exists():
             shutil.copy2(config_path, safety_backup)

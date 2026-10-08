@@ -3,10 +3,15 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from evals.token_optimization.benchmark import _completed_keys, _public_record, run_benchmark
+from layman_router.plus_run import plus_task_plan
+
+from evals.token_optimization.benchmark import (
+    _completed_keys,
+    _public_record,
+    run_benchmark,
+)
 from evals.token_optimization.cases import CASES
 from evals.token_optimization.fixture import prepare_workspace, validate_workspace
-from layman_router.plus_run import plus_task_plan
 
 
 def test_benchmark_has_exact_category_distribution():
@@ -20,7 +25,7 @@ def test_benchmark_expected_tiers_match_current_lean_policy(router_config):
         for case in CASES
     }
     assert all(routes[case.id] == case.expected_tier for case in CASES)
-    assert {tier: list(routes.values()).count(tier) for tier in {"fast", "balanced", "deep"}} == {
+    assert {tier: list(routes.values()).count(tier) for tier in ("fast", "balanced", "deep")} == {
         "fast": 4,
         "balanced": 22,
         "deep": 4,

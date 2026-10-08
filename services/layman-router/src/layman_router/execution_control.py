@@ -9,10 +9,10 @@ import subprocess
 import threading
 import time
 from collections import deque
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, IO, Sequence
-
+from typing import IO, Any
 
 USAGE_KEYS = ("input_tokens", "cached_input_tokens", "output_tokens", "reasoning_tokens")
 _USAGE_ALIASES = {

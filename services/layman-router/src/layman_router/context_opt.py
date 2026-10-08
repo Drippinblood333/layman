@@ -5,7 +5,6 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
-
 MIN_DUPLICATE_CHARS = 200
 TEXT_ITEM_TYPES = {"input_text", "output_text", "text"}
 

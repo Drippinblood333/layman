@@ -4,19 +4,26 @@ import json
 import subprocess
 import tempfile
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from .classify import classify_task
 from .config import load_config
-from .execution_control import CancellationToken, USAGE_KEYS, run_streaming_process
+from .execution_control import USAGE_KEYS, CancellationToken, run_streaming_process
 from .models import RouteTier, TaskType
-from .plus_eval import _safe_error, _usage_from_events, codex_login_status, event_metrics, find_codex, subscription_environment
+from .plus_eval import (
+    _safe_error,
+    _usage_from_events,
+    codex_login_status,
+    event_metrics,
+    find_codex,
+    subscription_environment,
+)
 from .project_status import inspect_project
 from .routing import decide_route, router_overhead, structured_decision
 from .workflow import select_workflow
-
 
 COMPACT_PROMPT = (
     "Compress the active task history. Preserve the objective, explicit user decisions, current scope, "

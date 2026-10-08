@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from layman_router.cache_policy import prepare_upstream_payload
 
 

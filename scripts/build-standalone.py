@@ -11,7 +11,6 @@ import shutil
 from pathlib import Path
 
 import PyInstaller.__main__
-
 from runtime_inventory import (
     BUNDLE_AUDIT_NAME,
     MANIFEST_NAME,
@@ -24,7 +23,6 @@ from runtime_inventory import (
     write_runtime_license_bundle,
     write_standalone_component_bundle,
 )
-
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "1.0.0"

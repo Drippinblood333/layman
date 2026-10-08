@@ -14,10 +14,10 @@ import tempfile
 import time
 import uuid
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from collections.abc import Iterable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable
-
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -26,22 +26,34 @@ for path in (HERE, ROOT, SERVICE_SRC):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from execution_backend import (  # noqa: E402
+# ruff: disable[E402] Local benchmark imports require the path bootstrap above.
+from execution_backend import (
     CodexCliBackend,
     CodexExecutionRequest,
-    ExecutableIdentity as ExecutableIdentity,
+    ExecutableIdentity,  # noqa: F401 - retained as the benchmark's public launcher-identity export.
     LauncherCandidate,
 )
-from fixtures import FIXTURES  # noqa: E402
-from validators import HIDDEN_TESTS, MECHANICAL_EXPECTED, SEMANTIC_EVIDENCE, snapshot_workspace, validate_case  # noqa: E402
-from layman_router.classify import classify_task  # noqa: E402
-from layman_router.config import load_config  # noqa: E402
-from layman_router.execution_control import run_streaming_process  # noqa: E402
-from layman_router.models import ModelPricing  # noqa: E402
-from layman_router.plus_eval import codex_login_status, find_codex, subscription_environment  # noqa: E402
-from layman_router.routing import decide_route  # noqa: E402
-from layman_router.telemetry import estimate_cost  # noqa: E402
+from fixtures import FIXTURES
+from layman_router.classify import classify_task
+from layman_router.config import load_config
+from layman_router.execution_control import run_streaming_process
+from layman_router.models import ModelPricing
+from layman_router.plus_eval import (
+    codex_login_status,
+    find_codex,
+    subscription_environment,
+)
+from layman_router.routing import decide_route
+from layman_router.telemetry import estimate_cost
+from validators import (
+    HIDDEN_TESTS,
+    MECHANICAL_EXPECTED,
+    SEMANTIC_EVIDENCE,
+    snapshot_workspace,
+    validate_case,
+)
 
+# ruff: enable[E402]
 
 DEFAULT_RESULTS = ROOT / "build" / "adaptive-reasoning-v1" / "results.jsonl"
 DEFAULT_REVIEWS = ROOT / "build" / "adaptive-reasoning-v1" / "semantic-reviews.jsonl"
@@ -513,7 +525,7 @@ def public_result(
         "stores_tool_arguments": False,
         "cache_state": load_protocol()["cache_state"],
         "experiment_fingerprint": fingerprint,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "execution_error": final["execution_error"],
         "execution_diagnostic": final.get("execution_diagnostic"),
     }
@@ -827,7 +839,7 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
             "reserved_cost_usd": reservation, "experiment_fingerprint": fingerprint,
             "execution_fingerprint": execution_fingerprint_value,
             "execution_runtime_metadata": execution_metadata,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         })
         router_arm, router_compute_ms, router_preflight_ms = current_router_arm(case, arms)
         attempts: list[dict[str, Any]] = []
@@ -844,7 +856,7 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
             attempt["lifecycle"]["validator_started"] = True
             try:
                 attempt["validation"] = validate_case(case, workspace, attempt["answer"], before)
-            except Exception as exc:  # pragma: no cover - defensive durable-result path
+            except Exception as exc:  # noqa: BLE001 - any validator failure must produce a durable failed result.
                 attempt["validation"] = {
                     "validator_success": False,
                     "safety_passed": False,
@@ -1082,7 +1094,7 @@ def judge(args: argparse.Namespace) -> dict[str, Any]:
         append_event(args.reviews, {
             "event_type": "judge_reservation", "case_id": entry["case_id"],
             "blind_label": entry["blind_label"], "reserved_cost_usd": reservation,
-            "experiment_fingerprint": fingerprint, "timestamp": datetime.now(timezone.utc).isoformat(),
+            "experiment_fingerprint": fingerprint, "timestamp": datetime.now(UTC).isoformat(),
         })
         attempts = []
         answer = entry["answer_path"].read_text(encoding="utf-8")
@@ -1106,7 +1118,7 @@ def judge(args: argparse.Namespace) -> dict[str, Any]:
                 "retry_count": len(attempts) - 1,
                 "latency_ms": round(sum(attempt["latency_ms"] for attempt in attempts), 3),
                 "estimated_cost_usd": round(cost, 9), "experiment_fingerprint": fingerprint,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             })
             completed_now += 1
         else:
@@ -1114,7 +1126,7 @@ def judge(args: argparse.Namespace) -> dict[str, Any]:
                 "event_type": "judge_failure", "case_id": entry["case_id"],
                 "blind_label": entry["blind_label"], "execution_error": final["error"] if final else "max_calls",
                 "retry_count": max(0, len(attempts) - 1), "estimated_cost_usd": round(cost, 9),
-                "experiment_fingerprint": fingerprint, "timestamp": datetime.now(timezone.utc).isoformat(),
+                "experiment_fingerprint": fingerprint, "timestamp": datetime.now(UTC).isoformat(),
             })
             if final and final.get("infrastructure_error"):
                 break

@@ -11,7 +11,14 @@ from typing import Any
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    RedirectResponse,
+    Response,
+    StreamingResponse,
+)
 
 from .cache_policy import PromptCachePolicy, prepare_upstream_payload
 from .classify import classify_task
@@ -30,7 +37,6 @@ from .routing import (
 from .streaming import SSECapture
 from .telemetry import UsageStore, estimate_cost, extract_usage, price_for_model
 from .validation import validate_response
-
 
 RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost", "testclient"}
@@ -516,7 +522,7 @@ async def _stream_response(
         except httpx.HTTPError as exc:
             stream_error = "stream_interrupted_after_first_event"
             error = json.dumps({"type": "error", "error": {"type": "layman_router_stream_error", "message": str(exc)}})
-            yield f"event: error\ndata: {error}\n\n".encode("utf-8")
+            yield f"event: error\ndata: {error}\n\n".encode()
         finally:
             await handle.close()
             terminal = capture.completed_response

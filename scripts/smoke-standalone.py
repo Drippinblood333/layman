@@ -12,7 +12,6 @@ import time
 import urllib.request
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "1.0.0"
 
@@ -57,7 +56,7 @@ def parse_json(result: subprocess.CompletedProcess[str], command: str) -> dict[s
     except json.JSONDecodeError as exc:
         raise RuntimeError(f"{command} did not return JSON: {result.stdout!r}") from exc
     if not isinstance(value, dict):
-        raise RuntimeError(f"{command} returned a non-object JSON value")
+        raise RuntimeError(f"{command} returned a non-object JSON value")  # noqa: TRY004 - smoke failures consistently use RuntimeError.
     return value
 
 

@@ -8,10 +8,10 @@ import re
 import shutil
 import subprocess
 import time
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Sequence
-
+from typing import Any
 
 API_BILLING_ENV_VARS = {
     "OPENAI_API_KEY", "AZURE_OPENAI_API_KEY", "OPENAI_ORG_ID", "OPENAI_PROJECT_ID",

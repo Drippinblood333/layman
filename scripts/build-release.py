@@ -9,6 +9,7 @@ import sys
 import zipfile
 from pathlib import Path
 
+from release_archives import write_platform_archive
 from runtime_inventory import (
     MANIFEST_NAME,
     PLATFORM_ARCHIVE_PATTERN,
@@ -17,8 +18,6 @@ from runtime_inventory import (
     validate_release_runtime,
     write_json,
 )
-from release_archives import write_platform_archive
-
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "1.0.0"

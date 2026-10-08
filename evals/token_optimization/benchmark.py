@@ -14,10 +14,9 @@ import tempfile
 import time
 import uuid
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parents[2]
 SERVICE_SRC = ROOT / "services" / "layman-router" / "src"
@@ -26,10 +25,9 @@ if str(ROOT) not in sys.path:
 if str(SERVICE_SRC) not in sys.path:
     sys.path.insert(0, str(SERVICE_SRC))
 
-from evals.token_optimization.cases import CASES, BenchmarkCase  # noqa: E402
-from evals.token_optimization.fixture import prepare_workspace, validate_workspace  # noqa: E402
-from layman_router.config import load_config  # noqa: E402
-from layman_router.plus_eval import (  # noqa: E402
+# ruff: disable[E402] Local benchmark imports require the path bootstrap above.
+from layman_router.config import load_config
+from layman_router.plus_eval import (
     _safe_error,
     _usage_from_events,
     codex_login_status,
@@ -37,8 +35,20 @@ from layman_router.plus_eval import (  # noqa: E402
     find_codex,
     subscription_environment,
 )
-from layman_router.plus_run import COMPACT_PROMPT, POLICIES, _execution_contract, run_plus_task  # noqa: E402
+from layman_router.plus_run import (
+    COMPACT_PROMPT,
+    POLICIES,
+    _execution_contract,
+    run_plus_task,
+)
 
+from evals.token_optimization.cases import CASES, BenchmarkCase
+from evals.token_optimization.fixture import (
+    prepare_workspace,
+    validate_workspace,
+)
+
+# ruff: enable[E402]
 
 DEFAULT_OUTPUT = Path.home() / ".layman" / "token-benchmark.jsonl"
 DEFAULT_WORK = ROOT / "build" / "token-benchmark-work"
@@ -198,7 +208,7 @@ def _public_record(
         "answer_chars": len(answer),
         "validation": validation,
         "stores_answer_text": False,
-        "recorded_at": datetime.now(timezone.utc).isoformat(),
+        "recorded_at": datetime.now(UTC).isoformat(),
     }
     if experiment is not None:
         record.update(experiment)

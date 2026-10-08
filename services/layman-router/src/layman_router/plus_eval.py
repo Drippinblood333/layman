@@ -8,15 +8,15 @@ import shutil
 import subprocess
 import tempfile
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from .classify import classify_task
 from .config import load_config
 from .models import RouteTier
 from .routing import decide_route
-
 
 DEFAULT_CASES_PATH = Path(__file__).with_name("plus_release_cases.jsonl")
 EXTENDED_CASES_PATH = Path(__file__).with_name("plus_cases.jsonl")

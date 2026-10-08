@@ -8,8 +8,11 @@ import shutil
 import zipfile
 from pathlib import Path
 
-from runtime_inventory import MANIFEST_NAME, STANDALONE_MANIFEST_NAME, validate_release_runtime
-
+from runtime_inventory import (
+    MANIFEST_NAME,
+    STANDALONE_MANIFEST_NAME,
+    validate_release_runtime,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "1.0.0"

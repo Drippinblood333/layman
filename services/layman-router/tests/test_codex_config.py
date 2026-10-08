@@ -3,8 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import tomlkit
-
-from layman_router.codex_config import disable_codex, enable_codex, list_backups, restore_backup
+from layman_router.codex_config import (
+    disable_codex,
+    enable_codex,
+    list_backups,
+    restore_backup,
+)
 
 
 def test_codex_enable_dry_run_does_not_write(tmp_path: Path):

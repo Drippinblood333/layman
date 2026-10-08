@@ -15,7 +15,6 @@ import pytest
 import yaml
 from packaging.requirements import Requirement
 
-
 ROOT = Path(__file__).resolve().parents[3]
 PLATFORMS = {
     "layman-windows-x64": ("windows-x64", "layman.exe"),
@@ -311,6 +310,9 @@ def test_ci_quality_tools_are_version_pinned_in_the_dev_extra():
     )
     assert 'python -m pip install -e "./services/layman-router[dev]"' in workflow
     assert '"./services/layman-router[dev]" ruff bandit pip-audit' not in workflow
+    lint_policy = tomllib.loads((ROOT / "ruff.toml").read_text(encoding="utf-8"))
+    assert lint_policy["target-version"] == "py311"
+    assert {"E4", "E7", "E9", "F"} <= set(lint_policy["lint"]["extend-select"])
 
 
 def test_build_tool_pins_match_workflow_and_artifact_inventory():
