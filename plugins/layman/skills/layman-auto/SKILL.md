@@ -11,7 +11,7 @@ Use the local `layman` MCP tool named `run` exactly once with the user's origina
 
 1. Pass the original user task unchanged in `task`. Do not summarize, rewrite, duplicate, or place it in a shell command.
 2. Pass the absolute current workspace path in `workspace`.
-3. The tool verifies ChatGPT login, removes API billing environment variables, selects Luna/low, Terra/medium, or Sol/high, and starts an ephemeral Codex task.
+3. The tool verifies ChatGPT login, removes API billing environment variables, selects the configured fast, balanced, or deep route (by default GPT-6 Luna/low, GPT-6.1 Sol/medium, or GPT-6 Astra/high), and starts an ephemeral Codex task.
 4. Return the child task's outcome, reported verification evidence, remaining risk, and a short route summary. Do not repeat logs or full metadata, and do not strengthen a reported check into a guarantee.
 5. If the tool reports a missing ChatGPT login, model unavailability, subscription limit, or timeout, report that exact category. Never retry through an API key.
 6. High-risk tasks run read-only on the deep tier. Explain that a separate reviewed implementation task is required.
