@@ -23,10 +23,10 @@ Updated: 2026-10-09
 - [x] 30-task/60-call token benchmark completed; the savings gate failed and the negative result is published.
 - [x] GPT-6 model identifiers, reasoning efforts and 2026-10-09 short/long-context standard prices match current official documentation.
 - [x] The installed dependency tree passes `pip check`; the 2026-08-12 OSV audit reports no known vulnerabilities after upgrading pytest and Pillow.
-- [x] Strict hashed runtime installation and the 125-test pre-audit suite passed under a clean Python 3.14 environment; the 149-test baseline passed in the primary Python 3.14.3 environment, and the earlier 90-test baseline passed under independent Python 3.12.13. The current 212-test GPT-6 change set is locally green and awaits hosted Python 3.11/platform verification.
+- [x] Strict hashed runtime installation and the 125-test pre-audit suite passed under a clean Python 3.14 environment; the 149-test baseline passed in the primary Python 3.14.3 environment, and the earlier 90-test baseline passed under independent Python 3.12.13. The current 212-test GPT-6 change set passes locally and in the hosted three-platform Python 3.11 matrix at commit `52ce59f` ([CI run 37822090216](https://github.com/Drippinblood333/layman/actions/runs/37822090216)).
 - [x] CI uses current action majors pinned to full commit SHAs and runs `pip check`, OSV audit, tests, Python package build/install smoke checks, static analysis, plugin validation, whole-checkout secret scanning and a digest-pinned Docker build/health smoke; Dependabot covers Python and GitHub Actions.
 - [ ] Human semantic-quality scoring is complete.
-- [ ] The prior public baseline is green on macOS and Linux; the current GPT-6 change set still needs hosted CI.
+- [x] The current GPT-6 change set passes hosted Windows, macOS and Linux tests, all five standalone build/lifecycle jobs and Docker at commit `52ce59f`.
 - [ ] The live API benchmark runner exists, but a paid release-grade calibration and human scoring are still incomplete; API routing remains Beta.
 
 ## Phase 3 — No-code installation
