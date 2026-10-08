@@ -47,8 +47,15 @@ class ModelPricing(TokenPricing):
 class TierConfig(BaseModel):
     model: str
     reasoning_effort: Literal["none", "low", "medium", "high", "xhigh", "max"]
+    verbosity: Literal["low", "medium", "high"] = "low"
     max_output_tokens: int = Field(gt=0)
     pricing: ModelPricing
+
+    @model_validator(mode="after")
+    def validate_gpt6_effort(self) -> "TierConfig":
+        if self.model in {"gpt-6-astra", "gpt-6.1-sol"} and self.reasoning_effort == "none":
+            raise ValueError(f"{self.model} does not support reasoning effort 'none'")
+        return self
 
 
 class ProjectConfig(BaseModel):
@@ -101,10 +108,23 @@ class TaskFeatures(BaseModel):
 class RouteDecision(BaseModel):
     selected_model: str
     reasoning_effort: str
+    output_verbosity: str = "low"
     max_output_tokens: int
     route_tier: RouteTier
     route_reason: list[str]
     automatic: bool = True
+    task_type: TaskType = TaskType.GENERAL
+    risk: Literal["low", "medium", "high"] = "low"
+    complexity: Literal["low", "medium", "high"] = "low"
+    policy_version: str = "heuristic-v1"
+    objective: str = "balanced"
+    model_reason: str = "route preset model"
+    effort_reason: str = "route preset reasoning effort"
+    calibration_state: Literal["heuristic_uncalibrated"] = "heuristic_uncalibrated"
+    router_compute_ms: float = Field(default=0, ge=0)
+    feature_extraction_ms: float = Field(default=0, ge=0)
+    policy_decision_ms: float = Field(default=0, ge=0)
+    total_routing_preflight_ms: float = Field(default=0, ge=0)
 
 
 class ValidationResult(BaseModel):

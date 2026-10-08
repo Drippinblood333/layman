@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "core": [
+    {"arm_id": "luna-none", "model": "gpt-6-luna", "reasoning_effort": "none", "compute_rank": 0},
+    {"arm_id": "luna-low", "model": "gpt-6-luna", "reasoning_effort": "low", "compute_rank": 1},
+    {"arm_id": "sol-low", "model": "gpt-6.1-sol", "reasoning_effort": "low", "compute_rank": 2},
+    {"arm_id": "sol-medium", "model": "gpt-6.1-sol", "reasoning_effort": "medium", "compute_rank": 3},
+    {"arm_id": "astra-medium", "model": "gpt-6-astra", "reasoning_effort": "medium", "compute_rank": 4},
+    {"arm_id": "astra-high", "model": "gpt-6-astra", "reasoning_effort": "high", "compute_rank": 5}
+  ],
+  "optional": [
+    {"arm_id": "luna-medium", "model": "gpt-6-luna", "reasoning_effort": "medium", "compute_rank": 2},
+    {"arm_id": "sol-high", "model": "gpt-6.1-sol", "reasoning_effort": "high", "compute_rank": 4},
+    {"arm_id": "astra-xhigh", "model": "gpt-6-astra", "reasoning_effort": "xhigh", "compute_rank": 6}
+  ]
+}

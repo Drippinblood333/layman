@@ -41,7 +41,7 @@ class ProbeHandler(BaseHTTPRequestHandler):
             "incomplete_details": None,
             "instructions": request.get("instructions"),
             "max_output_tokens": request.get("max_output_tokens"),
-            "model": "gpt-5.6-luna",
+            "model": "gpt-6-luna",
             "output": [{"id": "msg_probe", "type": "message", "status": "completed", "role": "assistant", "content": [{"type": "output_text", "text": "OK", "annotations": []}]}],
             "parallel_tool_calls": True,
             "previous_response_id": request.get("previous_response_id"),

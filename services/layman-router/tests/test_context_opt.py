@@ -30,7 +30,7 @@ def test_default_and_explicit_models_are_unchanged():
     assert optimized == payload
     assert report.mode == "off"
 
-    explicit = {**payload, "model": "gpt-5.6-sol", "metadata": {"layman_context_mode": "safe"}}
+    explicit = {**payload, "model": "gpt-6-astra", "metadata": {"layman_context_mode": "safe"}}
     optimized, report = optimize_payload(explicit)
     assert optimized == explicit
     assert report.mode == "off"

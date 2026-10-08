@@ -19,7 +19,14 @@ from .config import load_config, routing_config_sha256, upstream_identity_sha256
 from .context_opt import ContextOptimization, optimize_payload
 from .models import RouteDecision, RouterConfig, RouteTier, TaskFeatures, UsageRecord
 from .provider import StreamHandle, UpstreamProvider
-from .routing import apply_route, decide_route, explicit_model_decision, fallback_decision
+from .routing import (
+    apply_route,
+    decide_route,
+    explicit_model_decision,
+    fallback_decision,
+    router_overhead,
+    structured_decision,
+)
 from .streaming import SSECapture
 from .telemetry import UsageStore, estimate_cost, extract_usage, price_for_model
 from .validation import validate_response
@@ -140,6 +147,8 @@ def _usage_record(
             "context_duplicate_blocks_removed": optimization.duplicate_blocks_removed,
             "prompt_cache_mode": cache_policy.mode,
             "prompt_cache_breakpoints": cache_policy.breakpoints,
+            "routing_decision": structured_decision(decision),
+            "router_overhead": router_overhead(decision),
         },
     )
 
@@ -274,14 +283,19 @@ def create_app(
         if not request.headers.get("authorization"):
             raise HTTPException(status_code=401, detail="Authorization header is required")
 
+        preflight_started_ns = time.perf_counter_ns()
         optimized_payload, optimization = optimize_payload(payload)
+        feature_started_ns = time.perf_counter_ns()
         features = classify_task(optimized_payload, settings)
+        feature_finished_ns = time.perf_counter_ns()
         metadata = optimized_payload.get("metadata") if isinstance(optimized_payload.get("metadata"), dict) else {}
+        policy_started_ns = time.perf_counter_ns()
         decision = (
             decide_route(features, settings, metadata)
             if optimized_payload["model"] == "auto"
-            else explicit_model_decision(optimized_payload, settings)
+            else explicit_model_decision(optimized_payload, settings, features)
         )
+        policy_finished_ns = time.perf_counter_ns()
         try:
             upstream_payload, cache_policy = prepare_upstream_payload(
                 optimized_payload,
@@ -290,6 +304,15 @@ def create_app(
             )
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        preflight_finished_ns = time.perf_counter_ns()
+        feature_extraction_ms = (feature_finished_ns - feature_started_ns) / 1_000_000
+        policy_decision_ms = (policy_finished_ns - policy_started_ns) / 1_000_000
+        decision = decision.model_copy(update={
+            "feature_extraction_ms": feature_extraction_ms,
+            "policy_decision_ms": policy_decision_ms,
+            "router_compute_ms": feature_extraction_ms + policy_decision_ms,
+            "total_routing_preflight_ms": (preflight_finished_ns - preflight_started_ns) / 1_000_000,
+        })
         headers = provider.request_headers(request.headers)
         request_id = str(uuid.uuid4())
         started = time.perf_counter()

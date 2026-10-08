@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "price_version": "openai-standard-2026-10-09",
+  "verified_at": "2026-10-09",
+  "service_tier": "standard",
+  "context_band": "short_context_at_or_below_272000_input_tokens",
+  "sources": [
+    "https://developers.openai.com/api/docs/pricing",
+    "https://developers.openai.com/api/docs/models/gpt-6-luna",
+    "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+    "https://developers.openai.com/api/docs/models/gpt-6-astra",
+    "https://developers.openai.com/api/docs/guides/prompt-caching"
+  ],
+  "models": {
+    "gpt-6-luna": {"supported_reasoning_efforts": ["none", "low", "medium", "high", "xhigh", "max"], "input_per_million": 0.1, "cached_input_per_million": 0.01, "cache_write_per_million": 0.125, "output_per_million": 0.5},
+    "gpt-6.1-sol": {"supported_reasoning_efforts": ["low", "medium", "high", "xhigh", "max"], "input_per_million": 2.0, "cached_input_per_million": 0.1, "cache_write_per_million": 2.5, "output_per_million": 10.0},
+    "gpt-6-astra": {"supported_reasoning_efforts": ["low", "medium", "high", "xhigh", "max"], "input_per_million": 10.0, "cached_input_per_million": 1.0, "cache_write_per_million": 12.5, "output_per_million": 50.0}
+  },
+  "notes": [
+    "Prices are USD per one million tokens for direct OpenAI standard processing.",
+    "Cache-write prices are the published standard rates for this snapshot.",
+    "Requests above 272000 input tokens use official long-context rates and are outside this pilot reservation band.",
+    "This experiment snapshot is independent from the production Router configuration."
+  ]
+}

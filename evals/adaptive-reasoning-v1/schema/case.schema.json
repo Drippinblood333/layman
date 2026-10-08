@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Adaptive Reasoning v1 Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "category", "task", "fixture_id", "tools", "risk_class", "validator", "acceptance_criteria", "semantic_rubric", "high_risk_safety_envelope", "notes", "execution_policy"],
+  "properties": {
+    "case_id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "category": {"enum": ["mechanical", "single_file_coding", "multi_file_tool_use", "debugging", "architecture_semantic", "high_risk_read_only"]},
+    "task": {"type": "string", "minLength": 20},
+    "fixture_id": {"type": "string"},
+    "tools": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "risk_class": {"enum": ["low", "medium", "high"]},
+    "validator": {
+      "type": "object",
+      "required": ["type", "target"],
+      "properties": {
+        "type": {"enum": ["deterministic", "hybrid", "semantic"]},
+        "target": {"type": "string"},
+        "requires_semantic_review": {"type": "boolean"}
+      }
+    },
+    "acceptance_criteria": {"type": "array", "items": {"type": "string"}, "minItems": 2},
+    "semantic_rubric": {"type": "array", "items": {"type": "string"}},
+    "high_risk_safety_envelope": {
+      "type": "object",
+      "required": ["mode", "mutation_allowed", "network_allowed"],
+      "properties": {
+        "mode": {"enum": ["workspace-write", "read-only"]},
+        "mutation_allowed": {"type": "boolean"},
+        "network_allowed": {"const": false}
+      }
+    },
+    "notes": {"type": "string"},
+    "execution_policy": {
+      "type": "object",
+      "required": ["max_tool_calls", "max_files_read", "allowed_paths", "required_evidence"],
+      "properties": {
+        "max_tool_calls": {"type": "integer", "minimum": 0},
+        "max_files_read": {"type": "integer", "minimum": 0},
+        "allowed_paths": {"type": "array", "items": {"type": "string"}},
+        "required_evidence": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

@@ -59,6 +59,50 @@ READ_ONLY_PATTERNS = (
     r"(?:只读|仅评审|不要|不得)[^。；\n]{0,20}(?:执行|运行|修改|删除|改动)",
 )
 
+INHERITANCE_READ_ONLY_PATTERNS = (
+    *READ_ONLY_PATTERNS,
+    r"\bdry[- ]run\b",
+    r"\b(?:review|explanation|analysis)\s+only\b",
+    r"\bdo\s+not\s+(?:run|execute|modify|change|delete|remove|rotate|deploy|migrate|reset|drop|truncate)\b",
+    r"^(?:请)?(?:只解释|只分析|仅解释|仅分析)\b",
+    r"(?:不要|不得)[^。；\n]{0,20}(?:轮换|旋转|重置|清空|部署|迁移)",
+)
+
+CONTINUATION_MAX_CHARS = 40
+CONVERSATION_LOOKBACK_ITEMS = 8
+USER_INTENT_LOOKBACK = 3
+CONTINUATION_PATTERN = re.compile(
+    r"(?:"
+    r"(?:yes\s*[,，]?\s*)?(?:please\s+)?"
+    r"(?:do\s+it(?:\s+now)?|go\s+ahead|proceed|continue|execute\s+it|run\s+it)"
+    r"(?:\s+please)?|"
+    r"(?:(?:好的?|是的?|对)\s*[,，]?\s*)?"
+    r"(?:继续|继续执行|执行吧|确认执行|开始吧|就这么做)"
+    r")[.!。！]?",
+    re.IGNORECASE,
+)
+
+INHERITED_DATA_DELETION_PATTERNS = (
+    r"\b(?:delete|remove|purge|erase)\b[^.;\n]{0,48}"
+    r"\b(?:users?|accounts?|data|records?|database)\b",
+    r"(?:删除|清空|移除|销毁)[^。；\n]{0,32}(?:用户|账户|账号|数据|记录|数据库)",
+)
+
+ACTIONABLE_OPERATION_PATTERNS = (
+    r"^(?:please\s+)?(?:run|execute|delete|remove|purge|erase|drop|truncate|reset|clean|restore|checkout|rotate|change|modify|update|deploy|migrate|push|revoke|grant|apply|start|stop|restart|scale|replace)\b",
+    r"^(?:请|帮我)?(?:执行|运行|删除|清空|移除|销毁|修改|更改|更新|部署|迁移|轮换|旋转|重置|清理|撤销|授予|应用|开始|启动|停止|重启|扩缩容|替换)",
+    r"\b(?:rotation|migration|deployment|deletion|mutation|revocation)\b",
+    r"(?:轮换|旋转|迁移|部署|删除|变更|撤销)操作?$",
+)
+
+NON_ACTION_CONTEXT_PATTERNS = (
+    r"\b(?:article|documentation|example|history|discussion|report)\b.*\b(?:mentions?|describes?|about)\b|"
+    r"\b(?:mentions?|mentioned|describes?|described|discuss(?:es|ed)?)\b.*"
+    r"\b(?:production|payment|secret|security|auth)\b",
+    r"(?:文章|文档|示例|历史|讨论|报告).{0,24}(?:提到|描述|涉及)|"
+    r"(?:提到|描述|讨论了).{0,24}(?:生产|支付|密钥|安全|认证)",
+)
+
 DESTRUCTIVE_PATTERNS: tuple[tuple[str, str], ...] = (
     (r"\b(?:sudo\s+)?rm\s+(?=[^\n;&|]*-[^\s;&|]*r)[^\n;&|]+", "recursive deletion"),
     (r"\bremove-item\b(?=[^\n;&|]*(?:-recurse\b|-r\b))[^\n;&|]+", "recursive deletion"),
@@ -120,11 +164,21 @@ def _latest_task_text(payload: dict[str, Any]) -> str:
 
 
 def _active_call_text(payload: dict[str, Any]) -> str:
+    def argument_parts(value: Any) -> Iterable[str]:
+        if isinstance(value, str):
+            yield value
+        elif isinstance(value, list):
+            for item in value:
+                yield from argument_parts(item)
+        elif isinstance(value, dict):
+            for item in value.values():
+                yield from argument_parts(item)
+
     calls: list[str] = []
     value = payload.get("input")
     for item in value if isinstance(value, list) else []:
         if isinstance(item, dict) and item.get("type") in {"function_call", "tool_call", "computer_call"}:
-            calls.extend(_text_parts(item.get("arguments")))
+            calls.extend(argument_parts(item.get("arguments")))
     return "\n".join(calls)
 
 
@@ -134,9 +188,93 @@ def _without_negated_risk(text: str) -> str:
     return text
 
 
+def _is_read_only_intent(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", text).strip().lower()
+    return any(re.search(pattern, normalized, re.IGNORECASE) for pattern in READ_ONLY_PATTERNS)
+
+
+def _is_inheritance_read_only_intent(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", text).strip().lower()
+    return any(
+        re.search(pattern, normalized, re.IGNORECASE)
+        for pattern in INHERITANCE_READ_ONLY_PATTERNS
+    )
+
+
+def _is_short_continuation(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", text).strip()
+    if not normalized or len(normalized) > CONTINUATION_MAX_CHARS:
+        return False
+    return CONTINUATION_PATTERN.fullmatch(normalized) is not None
+
+
+def _has_actionable_operation(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", text).strip().lower()
+    if any(re.search(pattern, normalized, re.IGNORECASE) for pattern in NON_ACTION_CONTEXT_PATTERNS):
+        return False
+    return any(re.search(pattern, normalized, re.IGNORECASE) for pattern in ACTIONABLE_OPERATION_PATTERNS)
+
+
+def _recent_user_intent_for_continuation(payload: dict[str, Any], task_text: str) -> str | None:
+    if not _is_short_continuation(task_text):
+        return None
+    value = payload.get("input")
+    if not isinstance(value, list):
+        return None
+
+    latest_user_index: int | None = None
+    for index in range(len(value) - 1, -1, -1):
+        item = value[index]
+        if isinstance(item, dict) and item.get("role") == "user":
+            message = "\n".join(_text_parts(item)).strip()
+            if message:
+                latest_user_index = index
+                break
+    if latest_user_index is None:
+        return None
+
+    lower_bound = max(0, latest_user_index - CONVERSATION_LOOKBACK_ITEMS)
+    prior_user_messages = 0
+    for index in range(latest_user_index - 1, lower_bound - 1, -1):
+        item = value[index]
+        if not isinstance(item, dict) or item.get("role") != "user":
+            continue
+        message = "\n".join(_text_parts(item)).strip()
+        if not message:
+            continue
+        prior_user_messages += 1
+        if prior_user_messages > USER_INTENT_LOOKBACK:
+            return None
+        if _is_short_continuation(message):
+            continue
+        return message
+    return None
+
+
+def _inherited_conversational_risk(
+    payload: dict[str, Any],
+    task_text: str,
+) -> tuple[bool, str | None]:
+    prior_intent = _recent_user_intent_for_continuation(payload, task_text)
+    if not prior_intent or _is_inheritance_read_only_intent(prior_intent):
+        return False, None
+
+    destructive, reason = destructive_intent(prior_intent)
+    positive_text = _without_negated_risk(prior_intent).lower()
+    if not destructive and any(
+        re.search(pattern, positive_text, re.IGNORECASE)
+        for pattern in INHERITED_DATA_DELETION_PATTERNS
+    ):
+        destructive = True
+        reason = "inherited destructive data mutation"
+    high_risk_terms = any(_contains_term(positive_text, term.lower()) for term in HIGH_RISK_TERMS)
+    high_risk = destructive or (high_risk_terms and _has_actionable_operation(prior_intent))
+    return high_risk, reason if destructive else None
+
+
 def destructive_intent(text: str) -> tuple[bool, str | None]:
     normalized = re.sub(r"\s+", " ", text).strip().lower()
-    read_only = any(re.search(pattern, normalized, re.IGNORECASE) for pattern in READ_ONLY_PATTERNS)
+    read_only = _is_read_only_intent(normalized)
     positive_text = _without_negated_risk(normalized)
     explicitly_executes = bool(re.search(r"\b(?:run|execute)\b|(?:并执行|然后执行|执行该|运行该)", positive_text))
     for pattern, reason in DESTRUCTIVE_PATTERNS:
@@ -186,7 +324,11 @@ def classify_task(payload: dict[str, Any], config: RouterConfig) -> TaskFeatures
     risk_source = "\n".join(filter(None, (task_text, _active_call_text(payload))))
     risk_text = _without_negated_risk(risk_source).lower()
     destructive, destructive_reason = destructive_intent(risk_source)
-    if destructive or any(_contains_term(risk_text, term.lower()) for term in HIGH_RISK_TERMS):
+    inherited_high_risk, inherited_destructive_reason = _inherited_conversational_risk(payload, task_text)
+    if inherited_destructive_reason and not destructive:
+        destructive = True
+        destructive_reason = inherited_destructive_reason
+    if destructive or inherited_high_risk or any(_contains_term(risk_text, term.lower()) for term in HIGH_RISK_TERMS):
         risk = "high"
     elif any(_contains_term(risk_text, term.lower()) for term in MEDIUM_RISK_TERMS) or task_type in {TaskType.DEBUGGING, TaskType.ARCHITECTURE}:
         risk = "medium"

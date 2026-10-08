@@ -33,14 +33,14 @@ def test_incomplete_and_empty_fail_validation():
 def test_cost_counts_cached_tokens_once(router_config):
     usage = extract_usage(completed())
     price = router_config.tiers["fast"].pricing
-    expected = ((600 * 0.2) + (400 * 0.02) + (100 * 1.2)) / 1_000_000
+    expected = ((600 * 0.1) + (400 * 0.01) + (100 * 0.5)) / 1_000_000
     assert estimate_cost(usage, price) == expected
 
 
 def test_cost_replaces_uncached_rate_with_cache_write_rate(router_config):
     usage = {"input_tokens": 1000, "cached_tokens": 200, "cache_write_tokens": 300, "output_tokens": 0}
     price = router_config.tiers["fast"].pricing
-    expected = ((500 * 0.2) + (200 * 0.02) + (300 * 0.25)) / 1_000_000
+    expected = ((500 * 0.1) + (200 * 0.01) + (300 * 0.125)) / 1_000_000
     assert estimate_cost(usage, price) == expected
 
 
@@ -48,16 +48,16 @@ def test_cost_uses_long_context_rates_above_272k(router_config):
     price = router_config.tiers["fast"].pricing
     short = {"input_tokens": 272_000, "cached_tokens": 0, "cache_write_tokens": 0, "output_tokens": 1000}
     long = {"input_tokens": 272_001, "cached_tokens": 0, "cache_write_tokens": 0, "output_tokens": 1000}
-    assert estimate_cost(short, price) == round(((272_000 * 0.2) + (1000 * 1.2)) / 1_000_000, 9)
-    assert estimate_cost(long, price) == round(((272_001 * 0.4) + (1000 * 1.8)) / 1_000_000, 9)
+    assert estimate_cost(short, price) == round(((272_000 * 0.1) + (1000 * 0.5)) / 1_000_000, 9)
+    assert estimate_cost(long, price) == round(((272_001 * 0.2) + (1000 * 0.75)) / 1_000_000, 9)
 
 
-def test_official_2026_07_30_standard_prices_are_loaded(router_config):
-    assert router_config.price_version == "openai-standard-2026-07-30"
+def test_official_2026_10_09_standard_prices_are_loaded(router_config):
+    assert router_config.price_version == "openai-standard-2026-10-09"
     expected = {
-        "fast": (0.2, 0.02, 0.25, 1.2, 0.4, 0.04, 0.5, 1.8),
-        "balanced": (2.0, 0.2, 2.5, 12.0, 4.0, 0.4, 5.0, 18.0),
-        "deep": (5.0, 0.5, 6.25, 30.0, 10.0, 1.0, 12.5, 45.0),
+        "fast": (0.1, 0.01, 0.125, 0.5, 0.2, 0.02, 0.25, 0.75),
+        "balanced": (2.0, 0.1, 2.5, 10.0, 4.0, 0.2, 5.0, 15.0),
+        "deep": (10.0, 1.0, 12.5, 50.0, 20.0, 2.0, 25.0, 75.0),
     }
     for tier, values in expected.items():
         price = router_config.tiers[tier].pricing
@@ -81,7 +81,7 @@ def test_store_summary_has_estimate_label(router_config):
     store.add(UsageRecord(
         request_id="one", project_id="default", prompt_hash="a" * 64,
         task_type="summary", complexity="low", risk="low", route_tier="fast",
-        selected_model="gpt-5.6-luna", reasoning_effort="low", route_reason=["test"],
+        selected_model="gpt-6-luna", reasoning_effort="low", route_reason=["test"],
         input_tokens=1000, output_tokens=100, latency_ms=10,
         estimated_cost_usd=0.0016, estimated_always_deep_cost_usd=0.008,
     ))
@@ -104,7 +104,7 @@ def test_summary_uses_priced_automatic_cohort_and_signed_savings(router_config):
         "complexity": "low",
         "risk": "low",
         "route_tier": "fast",
-        "selected_model": "gpt-5.6-luna",
+        "selected_model": "gpt-6-luna",
         "reasoning_effort": "low",
         "route_reason": ["test"],
     }

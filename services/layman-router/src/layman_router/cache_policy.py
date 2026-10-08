@@ -68,8 +68,8 @@ def prepare_upstream_payload(payload: dict[str, Any], *, automatic: bool, select
         return prepared, PromptCachePolicy()
     if requested_mode != "explicit":
         raise ValueError("layman_prompt_cache must be 'explicit' or 'off'")
-    if not automatic or not selected_model.startswith("gpt-5.6"):
-        raise ValueError("layman_prompt_cache=explicit is available only for automatic GPT-5.6 routes")
+    if not automatic or not selected_model.startswith("gpt-6"):
+        raise ValueError("layman_prompt_cache=explicit is available only for automatic GPT-6 routes")
     if not isinstance(cache_key, str) or not cache_key.strip():
         raise ValueError("layman_prompt_cache_key must be a non-empty string")
     if "prompt_cache_key" in prepared or "prompt_cache_options" in prepared:

@@ -25,7 +25,7 @@ def test_release_plan_is_eighteen_cases_and_thirty_six_calls(router_config):
     assert len(plan) == 36
     assert sum(arm.label == "always_deep" for arm in plan) == 18
     assert {arm.label for arm in plan} == {"auto", "always_deep"}
-    assert all(arm.model == "gpt-5.6-sol" for arm in plan if arm.label == "always_deep")
+    assert all(arm.model == "gpt-6-astra" for arm in plan if arm.label == "always_deep")
     assert next(arm for arm in plan if arm.case_id == "plus-summary-001" and arm.label == "auto").route_tier == "fast"
     assert next(arm for arm in plan if arm.case_id == "plus-debugging-001" and arm.label == "auto").route_tier == "deep"
 

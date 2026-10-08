@@ -14,7 +14,7 @@ from .execution_control import CancellationToken, USAGE_KEYS, run_streaming_proc
 from .models import RouteTier, TaskType
 from .plus_eval import _safe_error, _usage_from_events, codex_login_status, event_metrics, find_codex, subscription_environment
 from .project_status import inspect_project
-from .routing import decide_route
+from .routing import decide_route, router_overhead, structured_decision
 from .workflow import select_workflow
 
 
@@ -114,11 +114,25 @@ def plus_task_plan(
         raise ValueError("Task from stdin must not be empty")
     config = config or load_config()
     payload = {"model": "auto", "input": task}
+    preflight_started_ns = time.perf_counter_ns()
+    feature_started_ns = time.perf_counter_ns()
     features = classify_task(payload, config)
+    feature_finished_ns = time.perf_counter_ns()
+    policy_started_ns = time.perf_counter_ns()
     decision = decide_route(features, config)
+    policy_finished_ns = time.perf_counter_ns()
     policy = POLICIES[decision.route_tier]
     destructive_blocked = features.destructive and not allow_destructive
     read_only = features.risk == "high" and not (features.destructive and allow_destructive)
+    preflight_finished_ns = time.perf_counter_ns()
+    feature_extraction_ms = (feature_finished_ns - feature_started_ns) / 1_000_000
+    policy_decision_ms = (policy_finished_ns - policy_started_ns) / 1_000_000
+    decision = decision.model_copy(update={
+        "feature_extraction_ms": feature_extraction_ms,
+        "policy_decision_ms": policy_decision_ms,
+        "router_compute_ms": feature_extraction_ms + policy_decision_ms,
+        "total_routing_preflight_ms": (preflight_finished_ns - preflight_started_ns) / 1_000_000,
+    })
     return {
         "route_tier": decision.route_tier.value,
         "model": decision.selected_model,
@@ -138,6 +152,8 @@ def plus_task_plan(
         "final_output_token_target": policy.final_output_token_target,
         "compact_token_limit": policy.compact_tokens,
         "stores_prompt_or_answer": False,
+        "routing_decision": structured_decision(decision),
+        "router_overhead": router_overhead(decision),
     }
 
 

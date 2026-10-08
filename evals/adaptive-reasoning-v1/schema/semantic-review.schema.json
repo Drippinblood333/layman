@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Blind Semantic Review",
+  "type": "object",
+  "required": ["case_id", "reviewer_id", "reviewer_type", "blind_label", "score", "rubric_passed", "borderline", "timestamp"],
+  "properties": {
+    "case_id": {"type": "string"},
+    "reviewer_id": {"type": "string"},
+    "reviewer_type": {"enum": ["blind_judge", "human"]},
+    "blind_label": {"type": "string"},
+    "score": {"type": "number", "minimum": 1, "maximum": 5},
+    "rubric_passed": {"type": "boolean"},
+    "borderline": {"type": "boolean"},
+    "timestamp": {"type": "string"},
+    "notes": {"type": "string", "maxLength": 500}
+  }
+}

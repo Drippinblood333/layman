@@ -15,7 +15,7 @@ from layman_router.plus_run import plus_task_plan, run_plus_task
 def test_plan_uses_deep_read_only_for_high_risk(router_config):
     plan = plus_task_plan("请分析生产支付数据库迁移风险", config=router_config)
     assert plan["route_tier"] == "deep"
-    assert plan["model"] == "gpt-5.6-sol"
+    assert plan["model"] == "gpt-6-astra"
     assert plan["sandbox"] == "read-only"
     assert plan["expanded_file_budget"] == 20
 
@@ -25,6 +25,23 @@ def test_plan_uses_fast_budget_for_simple_summary(router_config):
     assert plan["route_tier"] == "fast"
     assert plan["initial_file_budget"] == 3
     assert plan["tool_output_token_limit"] == 2000
+
+
+def test_plan_reports_structured_uncalibrated_decision_and_router_overhead(router_config):
+    plan = plus_task_plan("请总结这段普通文字", config=router_config)
+    decision = plan["routing_decision"]
+    overhead = plan["router_overhead"]
+    assert decision["task_type"] == "summary"
+    assert decision["selected_model"] == "gpt-6-luna"
+    assert decision["reasoning_effort"] == "low"
+    assert decision["calibration_state"] == "heuristic_uncalibrated"
+    assert "confidence" not in decision
+    assert overhead["feature_extraction_ms"] >= 0
+    assert overhead["policy_decision_ms"] >= 0
+    assert overhead["router_compute_ms"] == (
+        overhead["feature_extraction_ms"] + overhead["policy_decision_ms"]
+    )
+    assert overhead["total_routing_preflight_ms"] >= overhead["router_compute_ms"]
 
 
 def test_destructive_task_is_blocked_before_codex_without_explicit_authorization(tmp_path: Path):
@@ -101,7 +118,7 @@ def test_model_unavailable_only_falls_upward(tmp_path: Path):
         return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
 
     result = run_plus_task("请总结内容", cwd=tmp_path, codex_path=sys.executable, runner=fake_runner)
-    assert models == ["gpt-5.6-luna", "gpt-5.6-terra"]
+    assert models == ["gpt-6-luna", "gpt-6.1-sol"]
     assert result["route_tier"] == "balanced"
     assert result["fallback_used"] is True
     assert result["usage_incomplete"] is True

@@ -26,7 +26,7 @@ Layman composes only the modules needed for the task: context selection, workflo
 | Understand project progress | Yes | Yes |
 | Turn an idea into a scoped outcome | Yes | Yes |
 | One-task automatic Codex execution | Yes, Experimental | Requires ChatGPT login |
-| Context, compaction, file/tool limits, and final-output target | Yes, Experimental | For `model="auto"`: exact-text dedup opt-in and hard output cap only |
+| Context, compaction, file/tool limits, and final-output target | Yes, Experimental | For `model="auto"`: exact-text dedup opt-in, route-specific verbosity, and hard output cap |
 | Transparent Responses `model="auto"` routing | No | Yes, Beta |
 | Local usage and fallback dashboard | Demo only | Yes |
 
@@ -89,9 +89,11 @@ layman start
 
 API context deduplication remains opt-in with `metadata.layman_context_mode="safe"`. It removes only exact old prose duplicates and preserves the current user message, system/developer instructions, code blocks, and tool content. Telemetry excludes prompts, code, tool arguments, API keys, and answer text.
 
-### GPT-5.6 stable-prefix caching (opt-in)
+The current automatic API route maps fast tasks to GPT-6 Luna at low effort/verbosity, balanced tasks to GPT-6.1 Sol at medium effort and low verbosity, and deep tasks to GPT-6 Astra at high effort and medium verbosity. This heuristic is deliberately marked uncalibrated until the repository's 30-case blinded adaptive-reasoning protocol is run with explicit spend approval and human review.
 
-GPT-5.6 cache writes cost money, so Layman does not guess what is stable or enable explicit caching globally. For a repeated API workload, put the shared prefix first, mark its final `input_text`, `input_image`, or `input_file` block, and supply a non-secret key. Layman removes its own control metadata before forwarding the request, adds the 30-minute explicit policy, and reports cache reads/writes in the local dashboard.
+### GPT-6 stable-prefix caching (opt-in)
+
+GPT-6 cache writes cost money, so Layman does not guess what is stable or enable explicit caching globally. For a repeated API workload, put the shared prefix first, mark its final `input_text`, `input_image`, or `input_file` block, and supply a non-secret key. Layman removes its own control metadata before forwarding the request, adds the 30-minute explicit policy, and reports cache reads/writes in the local dashboard.
 
 ```json
 {

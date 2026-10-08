@@ -239,6 +239,8 @@ class UsageStore:
             item["attempt_count"] = int(metadata.get("attempt_count", 1))
             item["unpriced_attempts"] = int(metadata.get("unpriced_attempts", 0))
             item["attempts"] = metadata.get("attempts", [])
+            item["routing_decision"] = metadata.get("routing_decision", {})
+            item["router_overhead"] = metadata.get("router_overhead", {})
             result.append(item)
         return result
 

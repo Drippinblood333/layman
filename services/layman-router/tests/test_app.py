@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 
 import httpx
 import pytest
@@ -22,7 +23,7 @@ class ChunkStream(httpx.AsyncByteStream):
             raise httpx.ReadError("interrupted")
 
 
-def response_body(model: str = "gpt-5.6-luna"):
+def response_body(model: str = "gpt-6-luna"):
     return {
         "id": "resp_test",
         "status": "completed",
@@ -55,9 +56,99 @@ async def test_auto_routes_and_preserves_fields(router_config):
     assert result.status_code == 200
     assert result.headers["x-layman-route-tier"] == "fast"
     assert result.headers["x-layman-validator-passed"] == "true"
-    assert seen[0]["model"] == "gpt-5.6-luna"
+    assert seen[0]["model"] == "gpt-6-luna"
+    assert seen[0]["reasoning"]["effort"] == "low"
+    assert seen[0]["text"]["verbosity"] == "low"
     assert seen[0]["previous_response_id"] == "resp_old"
     assert seen[0]["tools"][0]["name"] == "read"
+
+
+@pytest.mark.asyncio
+async def test_router_overhead_is_measured_and_telemetry_remains_plaintext_free(
+    router_config, monkeypatch
+):
+    prompt_secret = "PRIVATE_PROMPT_alpha_7261"
+    code_secret = "SECRET_CODE_beta_4829"
+    tool_argument_secret = "TOOL_ARGUMENT_gamma_1537"
+    original_classify = app_module.classify_task
+
+    def measurable_classify(payload, settings):
+        time.sleep(0.002)
+        return original_classify(payload, settings)
+
+    monkeypatch.setattr(app_module, "classify_task", measurable_classify)
+
+    async def upstream(request: httpx.Request):
+        payload = json.loads(request.content)
+        return httpx.Response(200, json=response_body(payload["model"]))
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post(
+            "/v1/responses",
+            headers={"Authorization": "Bearer test-secret"},
+            json={
+                "model": "auto",
+                "input": f"Summarize {prompt_secret}\n```python\n{code_secret}\n```",
+                "tools": [{
+                    "type": "function",
+                    "name": "lookup",
+                    "description": tool_argument_secret,
+                }],
+            },
+        )
+
+    assert result.status_code == 200
+    recent = app.state.store.recent()[0]
+    structured = recent["routing_decision"]
+    overhead = recent["router_overhead"]
+    assert structured["calibration_state"] == "heuristic_uncalibrated"
+    assert structured["selected_model"] == "gpt-6-luna"
+    assert overhead["feature_extraction_ms"] >= 2
+    assert overhead["policy_decision_ms"] >= 0
+    assert overhead["router_compute_ms"] == pytest.approx(
+        overhead["feature_extraction_ms"] + overhead["policy_decision_ms"]
+    )
+    assert overhead["total_routing_preflight_ms"] >= overhead["router_compute_ms"]
+    serialized = json.dumps(recent, ensure_ascii=False)
+    assert prompt_secret not in serialized
+    assert code_secret not in serialized
+    assert tool_argument_secret not in serialized
+
+
+@pytest.mark.asyncio
+async def test_conversational_destructive_confirmation_routes_deep_without_plaintext_telemetry(
+    router_config,
+):
+    destructive_secret = "PRIVATE_PRODUCTION_USER_DELETE_8194"
+    seen = []
+
+    async def upstream(request: httpx.Request):
+        payload = json.loads(request.content)
+        seen.append(payload)
+        return httpx.Response(200, json=response_body(payload["model"]))
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post(
+            "/v1/responses",
+            headers={"Authorization": "Bearer test-secret"},
+            json={
+                "model": "auto",
+                "input": [
+                    {"role": "user", "content": f"删除生产用户数据 {destructive_secret}"},
+                    {"role": "assistant", "content": "需要确认。"},
+                    {"role": "user", "content": "确认执行"},
+                ],
+            },
+        )
+
+    assert result.status_code == 200
+    assert result.headers["x-layman-route-tier"] == "deep"
+    assert seen[0]["model"] == "gpt-6-astra"
+    recent = app.state.store.recent()[0]
+    assert recent["risk"] == "high"
+    assert destructive_secret not in json.dumps(recent, ensure_ascii=False)
 
 
 @pytest.mark.asyncio
@@ -229,7 +320,7 @@ async def test_retryable_error_falls_back_once(router_config):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         result = await client.post("/v1/responses", headers={"Authorization": "Bearer secret"}, json={"model": "auto", "input": "总结"})
     assert result.status_code == 200
-    assert seen == ["gpt-5.6-luna", "gpt-5.6-terra"]
+    assert seen == ["gpt-6-luna", "gpt-6.1-sol"]
     assert result.headers["x-layman-fallback-used"] == "true"
     recent = app.state.store.recent()[0]
     assert recent["attempt_count"] == 2
@@ -241,9 +332,9 @@ async def test_retryable_error_falls_back_once(router_config):
 @pytest.mark.asyncio
 async def test_validation_fallback_accumulates_and_prices_each_attempt(router_config):
     calls = []
-    first = response_body("gpt-5.6-luna")
+    first = response_body("gpt-6-luna")
     first["status"] = "incomplete"
-    second = response_body("gpt-5.6-terra")
+    second = response_body("gpt-6.1-sol")
     for response in (first, second):
         response["usage"]["input_tokens"] = 200_000
         response["usage"]["input_tokens_details"]["cached_tokens"] = 20_000
@@ -289,7 +380,7 @@ async def test_all_retryable_http_statuses_fall_back_once(router_config, status)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         result = await client.post("/v1/responses", headers={"Authorization": "Bearer secret"}, json={"model": "auto", "input": "总结"})
     assert result.status_code == 200
-    assert calls == ["gpt-5.6-luna", "gpt-5.6-terra"]
+    assert calls == ["gpt-6-luna", "gpt-6.1-sol"]
 
 
 @pytest.mark.asyncio
@@ -312,7 +403,7 @@ async def test_transport_timeout_falls_back_once(router_config):
 
 @pytest.mark.asyncio
 async def test_streaming_is_forwarded_in_order(router_config):
-    terminal = response_body("gpt-5.6-luna")
+    terminal = response_body("gpt-6-luna")
     body = (
         b'event: response.output_text.delta\ndata: {"type":"response.output_text.delta","delta":"hi"}\n\n'
         + f'event: response.completed\ndata: {json.dumps({"type": "response.completed", "response": terminal})}\n\n'.encode()
@@ -332,7 +423,7 @@ async def test_streaming_is_forwarded_in_order(router_config):
 async def test_streaming_prefetches_one_complete_sse_event(router_config):
     first = b'event: response.output_text.delta\ndata: {"type":"response.output_text.delta",'
     second = b'"delta":"hi"}\n\n'
-    terminal = response_body("gpt-5.6-luna")
+    terminal = response_body("gpt-6-luna")
     last = f'event: response.completed\ndata: {json.dumps({"type": "response.completed", "response": terminal})}\n\n'.encode()
 
     async def upstream(_request: httpx.Request):
@@ -347,7 +438,7 @@ async def test_streaming_prefetches_one_complete_sse_event(router_config):
 @pytest.mark.asyncio
 async def test_stream_retry_before_first_event(router_config):
     calls = []
-    terminal = response_body("gpt-5.6-terra")
+    terminal = response_body("gpt-6.1-sol")
     success = f'event: response.completed\ndata: {json.dumps({"type": "response.completed", "response": terminal})}\n\n'.encode()
 
     async def upstream(request: httpx.Request):
@@ -360,7 +451,7 @@ async def test_stream_retry_before_first_event(router_config):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         result = await client.post("/v1/responses", headers={"Authorization": "Bearer secret"}, json={"model": "auto", "input": "总结", "stream": True})
     assert result.status_code == 200
-    assert calls == ["gpt-5.6-luna", "gpt-5.6-terra"]
+    assert calls == ["gpt-6-luna", "gpt-6.1-sol"]
     assert result.content == success
     recent = app.state.store.recent()[0]
     assert recent["attempt_count"] == 2
@@ -371,7 +462,7 @@ async def test_stream_retry_before_first_event(router_config):
 @pytest.mark.asyncio
 async def test_empty_stream_falls_back_before_forwarding(router_config):
     calls = []
-    terminal = response_body("gpt-5.6-terra")
+    terminal = response_body("gpt-6.1-sol")
     success = f'event: response.completed\ndata: {json.dumps({"type": "response.completed", "response": terminal})}\n\n'.encode()
 
     async def upstream(request: httpx.Request):
@@ -384,7 +475,7 @@ async def test_empty_stream_falls_back_before_forwarding(router_config):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         result = await client.post("/v1/responses", headers={"Authorization": "Bearer secret"}, json={"model": "auto", "input": "总结", "stream": True})
     assert result.status_code == 200
-    assert calls == ["gpt-5.6-luna", "gpt-5.6-terra"]
+    assert calls == ["gpt-6-luna", "gpt-6.1-sol"]
     assert result.content == success
 
 

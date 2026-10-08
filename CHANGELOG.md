@@ -13,8 +13,9 @@
 - Added Experimental `$layman-auto` routing through an existing ChatGPT login, with no API-key fallback.
 - Added adaptive file-reading, tool-output, final-answer and native compaction budgets.
 - Added opt-in exact context deduplication for automatic API requests and privacy-minimized optimization metrics.
-- Added opt-in GPT-5.6 stable-prefix caching with caller-marked API blocks, local cache read/write visibility, and stripping of Layman-only metadata before upstream forwarding.
-- Updated GPT-5.6 standard pricing to the official 2026-07-30 rates and added 272K-threshold long-context cost estimation.
+- Added opt-in GPT-6 stable-prefix caching with caller-marked API blocks, local cache read/write visibility, and stripping of Layman-only metadata before upstream forwarding.
+- Migrated the automatic route to GPT-6 Luna, GPT-6.1 Sol and GPT-6 Astra, refreshed the official 2026-10-09 standard prices, and retained 272K-threshold long-context cost estimation.
+- Made standalone builds exclude development-only packages discovered by local PyInstaller hooks, so the embedded-distribution audit matches the hash-locked runtime set in contributor and clean-CI environments.
 - Made Windows Codex discovery probe real executability and fall back to healthy VS Code/Cursor bundled CLIs when wrappers are broken.
 - Made uninstall remove the Codex plugin and local marketplace before optional data purging.
 - Raised pytest, pytest-asyncio, PyInstaller and Pillow development floors after the 2026-08-12 OSV audit found fixed vulnerabilities in the previous pytest/Pillow range.

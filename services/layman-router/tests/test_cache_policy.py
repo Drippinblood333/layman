@@ -33,7 +33,7 @@ def test_explicit_cache_is_opt_in_and_does_not_forward_layman_metadata():
             "layman_project_id": "internal",
         },
     }
-    prepared, policy = prepare_upstream_payload(payload, automatic=True, selected_model="gpt-5.6-terra")
+    prepared, policy = prepare_upstream_payload(payload, automatic=True, selected_model="gpt-6.1-sol")
     assert policy.mode == "explicit"
     assert policy.breakpoints == 1
     assert prepared["prompt_cache_key"] == "docs-v1"
@@ -44,7 +44,7 @@ def test_explicit_cache_is_opt_in_and_does_not_forward_layman_metadata():
 
 def test_router_control_metadata_is_not_sent_upstream_when_cache_is_off():
     payload = {"model": "auto", "input": "hello", "metadata": {"layman_route": "fast", "note": "keep"}}
-    prepared, policy = prepare_upstream_payload(payload, automatic=True, selected_model="gpt-5.6-luna")
+    prepared, policy = prepare_upstream_payload(payload, automatic=True, selected_model="gpt-6-luna")
     assert policy.mode == "off"
     assert prepared["metadata"] == {"note": "keep"}
 
@@ -52,10 +52,10 @@ def test_router_control_metadata_is_not_sent_upstream_when_cache_is_off():
 @pytest.mark.parametrize(
     ("payload", "automatic", "model", "message"),
     [
-        ({"model": "auto", "input": explicit_prefix(), "metadata": {"layman_prompt_cache": "explicit"}}, True, "gpt-5.6-luna", "cache_key"),
-        ({"model": "auto", "input": "hello", "metadata": {"layman_prompt_cache": "explicit", "layman_prompt_cache_key": "key"}}, True, "gpt-5.6-luna", "requires"),
-        ({"model": "gpt-5.6-sol", "input": explicit_prefix(), "metadata": {"layman_prompt_cache": "explicit", "layman_prompt_cache_key": "key"}}, False, "gpt-5.6-sol", "automatic"),
-        ({"model": "auto", "input": explicit_prefix(), "prompt_cache_key": "native", "metadata": {"layman_prompt_cache": "explicit", "layman_prompt_cache_key": "key"}}, True, "gpt-5.6-terra", "either"),
+        ({"model": "auto", "input": explicit_prefix(), "metadata": {"layman_prompt_cache": "explicit"}}, True, "gpt-6-luna", "cache_key"),
+        ({"model": "auto", "input": "hello", "metadata": {"layman_prompt_cache": "explicit", "layman_prompt_cache_key": "key"}}, True, "gpt-6-luna", "requires"),
+        ({"model": "gpt-6-astra", "input": explicit_prefix(), "metadata": {"layman_prompt_cache": "explicit", "layman_prompt_cache_key": "key"}}, False, "gpt-6-astra", "automatic"),
+        ({"model": "auto", "input": explicit_prefix(), "prompt_cache_key": "native", "metadata": {"layman_prompt_cache": "explicit", "layman_prompt_cache_key": "key"}}, True, "gpt-6.1-sol", "either"),
     ],
 )
 def test_explicit_cache_rejects_ambiguous_or_unsupported_requests(payload, automatic, model, message):

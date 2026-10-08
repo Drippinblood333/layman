@@ -54,6 +54,22 @@ def main() -> int:
         "--exclude-module", "packaging",
         "--exclude-module", "_distutils_hack",
         "--exclude-module", "pkg_resources",
+        # Development and optional presentation stacks can be discovered by
+        # PyInstaller hooks when the build runs from a contributor environment.
+        # None is present in the hash-locked runtime set, so exclude them to
+        # keep local and clean-CI bundles equivalent.
+        "--exclude-module", "charset_normalizer",
+        "--exclude-module", "defusedxml",
+        "--exclude-module", "markdown_it",
+        "--exclude-module", "mdurl",
+        "--exclude-module", "PIL",
+        "--exclude-module", "pygments",
+        "--exclude-module", "pytest",
+        "--exclude-module", "_pytest",
+        "--exclude-module", "requests",
+        "--exclude-module", "rich",
+        "--exclude-module", "tomli",
+        "--exclude-module", "urllib3",
         "--add-data", f"{ROOT / '.agents' / 'plugins' / 'marketplace.json'}{separator}layman-bundle/.agents/plugins",
         "--add-data", f"{ROOT / 'plugins' / 'layman'}{separator}layman-bundle/plugins/layman",
         "--distpath", str(target), "--workpath", str(work / "work"), "--specpath", str(work),

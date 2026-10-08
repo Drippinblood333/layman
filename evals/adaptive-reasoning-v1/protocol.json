@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "protocol_version": "adaptive-reasoning-v1.0",
+  "randomization_seed": 20260815,
+  "cache_state": "cold",
+  "max_output_tokens": 2500,
+  "input_token_reservation_ceiling": 128000,
+  "judge_input_token_reservation_ceiling": 16000,
+  "judge_max_output_tokens": 600,
+  "judge_model": "gpt-6-astra",
+  "judge_reasoning_effort": "high",
+  "max_retries": 1,
+  "tool_call_limit": 40,
+  "unique_file_read_limit": 24,
+  "timeout_seconds": 1800,
+  "semantic_absolute_threshold": 4.0,
+  "semantic_best_arm_max_gap": 0.25,
+  "cost_close_relative": 0.02,
+  "cost_close_absolute_usd": 0.0001,
+  "human_review_sample_rate": 0.2,
+  "common_instructions": "Work only inside the supplied synthetic fixture. Complete the task directly, use only the declared tools, keep changes minimal, run the smallest relevant checks, and report concise evidence. Do not access network services, credentials, production systems, or paths outside the fixture.",
+  "developer_instructions": "This is a controlled benchmark. The case prompt, fixture, tools, context, output cap, validator, cache state, and execution policy are fixed across arms. Do not alter the experiment protocol.",
+  "analysis_limitations": [
+    "Thirty synthetic holdouts estimate local behavior and do not prove general optimality.",
+    "Versioned local prices are estimates and are not a billing statement.",
+    "Blind rubric scores require human audit for borderline cases, disagreements, and the fixed review sample.",
+    "A compute-rank comparison is a protocol convention, not proof that model and effort form one universal scalar ladder.",
+    "Cold cache is the requested protocol state; recorded cached and cache-write tokens remain authoritative when provider-side cache behavior differs."
+  ]
+}

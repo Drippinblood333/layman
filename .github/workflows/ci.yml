@@ -23,12 +23,14 @@ jobs:
       - name: Audit locked runtime dependencies
         run: python -m pip_audit --require-hashes -r services/layman-router/requirements.lock --progress-spinner off --vulnerability-service osv
       - run: python -m pytest ./services/layman-router
+      - run: python -m pytest evals/adaptive-reasoning-v1/test_benchmark.py
+      - run: python evals/adaptive-reasoning-v1/benchmark.py validate-only
       - run: python evals/check_router_v2.py
       - run: python evals/check_release.py
       - run: python scripts/validate-public-plugin.py
       - run: python -m build services/layman-router --outdir build/python-packages
       - run: python scripts/smoke-python-packages.py --packages build/python-packages
-      - run: ruff check services/layman-router/src services/layman-router/tests scripts evals/token_optimization evals/router-v2/benchmark.py
+      - run: ruff check services/layman-router/src services/layman-router/tests scripts evals/token_optimization evals/router-v2/benchmark.py evals/adaptive-reasoning-v1
       - run: bandit -q -ll -r services/layman-router/src -x services/layman-router/tests
       - run: python scripts/scan-release.py
 
