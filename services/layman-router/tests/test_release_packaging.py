@@ -106,7 +106,7 @@ def fake_standalone_compliance() -> tuple[bytes, dict[str, bytes]]:
             },
             {
                 "name": "PyInstaller",
-                "version": "6.22.0",
+                "version": inventory.PYINSTALLER_VERSION,
                 "role": "embedded-bootloader-loader-and-runtime-hooks",
                 "licenses": [
                     {
@@ -311,6 +311,33 @@ def test_ci_quality_tools_are_version_pinned_in_the_dev_extra():
     )
     assert 'python -m pip install -e "./services/layman-router[dev]"' in workflow
     assert '"./services/layman-router[dev]" ruff bandit pip-audit' not in workflow
+
+
+def test_build_tool_pins_match_workflow_and_artifact_inventory():
+    pyproject = tomllib.loads(
+        (ROOT / "services" / "layman-router" / "pyproject.toml").read_text(encoding="utf-8")
+    )
+    dependencies = pyproject["project"]["optional-dependencies"]["dev"]
+    workflow = yaml.safe_load((ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
+    standalone_commands = "\n".join(
+        step.get("run", "") for step in workflow["jobs"]["standalone"]["steps"]
+    )
+    release_commands = "\n".join(
+        step.get("run", "") for step in workflow["jobs"]["release-assets"]["steps"]
+    )
+    inventory = runtime_inventory_module()
+    for name, version in (
+        ("pyinstaller", inventory.PYINSTALLER_VERSION),
+        ("pyinstaller-hooks-contrib", inventory.PYINSTALLER_HOOKS_CONTRIB_VERSION),
+    ):
+        requirement = f"{name}=={version}"
+        assert dependencies.count(requirement) == 1
+        assert requirement in standalone_commands
+    build_requirements = [item for item in dependencies if Requirement(item).name == "build"]
+    assert len(build_requirements) == 1
+    pins = list(Requirement(build_requirements[0]).specifier)
+    assert len(pins) == 1 and pins[0].operator == "==" and "*" not in pins[0].version
+    assert build_requirements[0] in release_commands
 
 
 @pytest.mark.parametrize("ruff_requirement", ["ruff==0.16.8", "ruff==0.17.0"])
