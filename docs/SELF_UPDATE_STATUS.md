@@ -10,6 +10,10 @@ Automatic routing now uses GPT-6 Luna / GPT-6.1 Sol / GPT-6 Astra with low / med
 
 ## Continuing updates
 
+### Request validation follow-up
+
+The output-options audit reproduced malformed `text` values causing explicit-model crashes or silent replacement in automatic mode. The API now returns a clear HTTP 400 before contacting the upstream model. Eighteen regression cases cover five malformed shapes across automatic, configured-explicit and custom-explicit models, plus preservation of valid format and verbosity options. The updated local suite passes 189 router tests and 41 adaptive harness tests (230 total), lint and secret scanning. Hosted validation for this follow-up is pending; the green checkpoint above refers to the preceding code, not this new change.
+
 An active Codex heartbeat checks this project daily at 09:00 Asia/Shanghai, subject to the local scheduler and device being available. It advances bounded, verifiable fixes and reports meaningful progress, failures or required decisions. Dependabot checks Python dependencies and GitHub Actions weekly. Neither mechanism guarantees unattended release approval or safe automatic adoption of every upstream change.
 
 ## Remaining public-release gates

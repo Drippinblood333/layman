@@ -274,6 +274,8 @@ def create_app(
             raise HTTPException(status_code=400, detail="Request must contain a string model")
         if "reasoning" in payload and not isinstance(payload["reasoning"], dict):
             raise HTTPException(status_code=400, detail="reasoning must be an object")
+        if "text" in payload and not isinstance(payload["text"], dict):
+            raise HTTPException(status_code=400, detail="text must be an object")
         if "max_output_tokens" in payload and (
             isinstance(payload["max_output_tokens"], bool)
             or not isinstance(payload["max_output_tokens"], int)

@@ -204,6 +204,51 @@ async def test_invalid_policy_fields_return_400(router_config, field, value, mes
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("model", ["auto", "gpt-6-luna", "custom-model"])
+@pytest.mark.parametrize("text", ["low", [], 1, True, None])
+async def test_invalid_text_options_rejected_before_upstream(router_config, model, text):
+    seen = []
+
+    def upstream(request):
+        seen.append(request)
+        return httpx.Response(200, json=response_body(model))
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post(
+            "/v1/responses",
+            headers={"Authorization": "Bearer secret"},
+            json={"model": model, "input": "Summarize this note", "text": text},
+        )
+    assert result.status_code == 400
+    assert result.json()["detail"] == "text must be an object"
+    assert seen == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model", ["auto", "gpt-6-luna", "custom-model"])
+async def test_valid_text_options_keep_format_and_explicit_verbosity(router_config, model):
+    seen = []
+    text_options = {"format": {"type": "text"}, "verbosity": "high"}
+
+    def upstream(request):
+        payload = json.loads(request.content)
+        seen.append(payload)
+        return httpx.Response(200, json=response_body(payload["model"]))
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post(
+            "/v1/responses",
+            headers={"Authorization": "Bearer secret"},
+            json={"model": model, "input": "Summarize this note", "text": text_options},
+        )
+    assert result.status_code == 200
+    assert seen[0]["text"]["format"] == text_options["format"]
+    assert seen[0]["text"]["verbosity"] == ("low" if model == "auto" else "high")
+
+
+@pytest.mark.asyncio
 async def test_safe_context_mode_is_applied_before_classification(router_config, monkeypatch):
     repeated = "同一段较长的历史上下文。" * 30
     classified = []

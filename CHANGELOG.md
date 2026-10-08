@@ -2,6 +2,7 @@
 
 ## 1.0.0 - Unreleased
 
+- Reject malformed Responses `text` options before routing or forwarding, avoiding explicit-model crashes and silent automatic replacement; valid formats and explicit-model verbosity remain preserved.
 - Reframed Layman as a Codex optimization and execution layer for beginners and developers.
 - Added `$layman-status` and bounded, content-free project-stage inspection.
 - Added `layman status`, `layman plan`, and `layman run` outcome-oriented entry points.
