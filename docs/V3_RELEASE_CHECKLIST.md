@@ -16,7 +16,7 @@ Updated: 2026-10-09
 
 ## Phase 2 — Validation
 
-- [x] The current 189-test router suite and 41-test adaptive-reasoning harness pass locally and in hosted Windows/macOS/Linux CI at commit `abe6c52` ([CI run 37823153836](https://github.com/Drippinblood333/layman/actions/runs/37823153836)).
+- [x] The current 201-test router suite and 41-test adaptive-reasoning harness pass locally and in hosted Windows/macOS/Linux CI at commit `1f0b178` ([CI run 37826073731](https://github.com/Drippinblood333/layman/actions/runs/37826073731)), including the upgraded development tools and expanded lint policy.
 - [x] 300-case deterministic routing matrix passes.
 - [x] 401, 429, 5xx, timeout, empty stream and interrupted stream paths are covered.
 - [ ] Fresh fingerprinted 18-case/36-call Plus calibration is complete for the current release candidate; the 2026-07-16 historical run completed without execution errors but cannot close this gate.
