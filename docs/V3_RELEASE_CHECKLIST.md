@@ -16,7 +16,7 @@ Updated: 2026-10-09
 
 ## Phase 2 — Validation
 
-- [x] The current 201-test router suite and 41-test adaptive-reasoning harness pass locally and in hosted Windows/macOS/Linux CI at commit `1f0b178` ([CI run 37826073731](https://github.com/Drippinblood333/layman/actions/runs/37826073731)), including the upgraded development tools and expanded lint policy.
+- [x] The current 203-test router suite and 41-test adaptive-reasoning harness pass locally and in hosted Windows/macOS/Linux CI at commit `e10cc2d` ([CI run 37828989982](https://github.com/Drippinblood333/layman/actions/runs/37828989982)), including the upgraded development tools and expanded lint policy.
 - [x] 300-case deterministic routing matrix passes.
 - [x] 401, 429, 5xx, timeout, empty stream and interrupted stream paths are covered.
 - [ ] Fresh fingerprinted 18-case/36-call Plus calibration is complete for the current release candidate; the 2026-07-16 historical run completed without execution errors but cannot close this gate.
@@ -43,6 +43,7 @@ Updated: 2026-10-09
 - [x] GitHub Release assets are staged as a flat allowlisted set with checksums that match their public filenames.
 - [x] One-line installers require and verify `SHA256SUMS.txt` before extraction.
 - [x] Windows x64, macOS x64/arm64 and Linux x64/arm64 artifacts pass hosted CI.
+- [x] Ordinary CI also combines all five platform artifacts, verifies their identical canonical runtime inventories, validates SBOM/license and executable digests, smoke-installs Python packages and stages flat checksummed release assets. The read-only assembly job passed at `e10cc2d`; actual publication remains separately tag-guarded and was skipped.
 - [ ] Published one-line installers are tested against an actual GitHub prerelease.
 
 ## Phase 4 — Public release

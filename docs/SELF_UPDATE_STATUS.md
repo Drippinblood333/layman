@@ -4,7 +4,7 @@ Updated: 2026-10-09
 
 ## Verified checkpoint
 
-Code commit `1f0b17814432021ff20186b29a144701270d4f15` passed all nine jobs in [CI run 37826073731](https://github.com/Drippinblood333/layman/actions/runs/37826073731): Windows/macOS/Linux tests, five standalone build and installation lifecycle jobs, and Docker. The current suite contains 201 router tests and 41 adaptive-reasoning harness tests (242 total). Hosted checks include dependency vulnerability auditing, distribution installation, static analysis and secret scanning, using the upgraded development tools and the expanded lint policy.
+Code commit `e10cc2d01a9d1b2596fd14c0d20fb0947735b658` passed all ten validation jobs in [CI run 37828989982](https://github.com/Drippinblood333/layman/actions/runs/37828989982): Windows/macOS/Linux tests, five standalone build and installation lifecycle jobs, Docker, and combined release assembly. The current suite contains 203 router tests and 41 adaptive-reasoning harness tests (244 total). Hosted checks include dependency vulnerability auditing, distribution installation, static analysis and secret scanning, using the upgraded development tools and the expanded lint policy. The `release-assets` artifact is available in this run (artifact ID `11572444225`, 117,750,379 bytes); the tag-guarded `publish` job was skipped.
 
 Automatic routing now uses GPT-6 Luna / GPT-6.1 Sol / GPT-6 Astra with low / medium / high reasoning respectively. Output verbosity and output caps are configured to limit unnecessary generation. These controls are implemented, but measured token savings and task-quality equivalence are not yet established.
 
@@ -44,7 +44,7 @@ All five artifacts from run 37826073731 downloaded successfully. Combining them 
 
 The fix marks `*.lock` as LF in Git and canonicalizes CRLF to LF only in generated license-notice copies, preserving installed source notices and every other byte. Tests check source preservation, exact bundled notice digests, retention of other whitespace, and rejection of substantive content differences. The Windows-generated canonical runtime manifest now matches the original macOS x64/arm64 and Linux x64/arm64 manifests byte for byte. The local suite passes 244 tests and the updated linter.
 
-The read-only `release-assets` job now runs on ordinary CI and combines all five platforms, validates runtime inventories/SBOMs, smoke-installs Python packages, scans and stages flat checksummed assets. Publication is a separate job with write permission, dependent on successful assembly and restricted to the existing owner-approved version-tag series. No release tag or GitHub Release was created. Fresh hosted assembly verification remains required; the earlier nine-job green checkpoint alone is not evidence that the combined release assets can ship.
+The read-only `release-assets` job now runs on ordinary CI and combines all five platforms, validates runtime inventories/SBOMs, smoke-installs Python packages, scans and stages flat checksummed assets. Publication is a separate job with write permission, dependent on successful assembly and restricted to the existing owner-approved version-tag series. Run 37828989982 passed the complete ten-job validation including combined assembly and saved the release-assets artifact; `publish` was skipped. No release tag or GitHub Release was created. This closes technical artifact assembly verification, not the separate live-quality, prerelease-installer, invited-tester or owner-approval gates.
 
 ## Remaining public-release gates
 
