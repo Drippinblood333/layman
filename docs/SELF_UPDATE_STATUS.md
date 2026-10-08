@@ -4,7 +4,7 @@ Updated: 2026-10-09
 
 ## Verified checkpoint
 
-Code commit `52ce59fbaba1470ca90ff6c09ea642b2e37bca43` passed all nine jobs in [CI run 37822090216](https://github.com/Drippinblood333/layman/actions/runs/37822090216): Windows/macOS/Linux tests, five standalone build and installation lifecycle jobs, and Docker. The current suite contains 171 router tests and 41 adaptive-reasoning harness tests. Hosted checks include dependency vulnerability auditing, distribution installation, static analysis and secret scanning.
+Code commit `abe6c52ada2110cdabf72a84d3003b1966f202f1` passed all nine jobs in [CI run 37823153836](https://github.com/Drippinblood333/layman/actions/runs/37823153836): Windows/macOS/Linux tests, five standalone build and installation lifecycle jobs, and Docker. The current suite contains 189 router tests and 41 adaptive-reasoning harness tests (230 total). Hosted checks include dependency vulnerability auditing, distribution installation, static analysis and secret scanning.
 
 Automatic routing now uses GPT-6 Luna / GPT-6.1 Sol / GPT-6 Astra with low / medium / high reasoning respectively. Output verbosity and output caps are configured to limit unnecessary generation. These controls are implemented, but measured token savings and task-quality equivalence are not yet established.
 
@@ -12,11 +12,15 @@ Automatic routing now uses GPT-6 Luna / GPT-6.1 Sol / GPT-6 Astra with low / med
 
 ### Request validation follow-up
 
-The output-options audit reproduced malformed `text` values causing explicit-model crashes or silent replacement in automatic mode. The API now returns a clear HTTP 400 before contacting the upstream model. Eighteen regression cases cover five malformed shapes across automatic, configured-explicit and custom-explicit models, plus preservation of valid format and verbosity options. The updated local suite passes 189 router tests and 41 adaptive harness tests (230 total), lint and secret scanning. Hosted validation for this follow-up is pending; the green checkpoint above refers to the preceding code, not this new change.
+The output-options audit reproduced malformed `text` values causing explicit-model crashes or silent replacement in automatic mode. The API now returns a clear HTTP 400 before contacting the upstream model. Eighteen regression cases cover five malformed shapes across automatic, configured-explicit and custom-explicit models, plus preservation of valid format and verbosity options. The updated suite passes 189 router tests and 41 adaptive harness tests (230 total), lint and secret scanning locally and in the hosted three-platform matrix. The checkpoint above includes this code change.
 
 ### Local installation drift
 
 A zero-call dry run on 2026-10-09 found the installed `layman` executable still selecting `gpt-5.6-luna`, with a 2,000-token final-answer target and a 4,000-token tool-output limit. This differs from the updated source defaults. A repository push does not replace an already installed executable or refresh the Codex plugin cache. Local installation synchronization is awaiting the owner's choice; preserve an old-installation backup, account configuration and data when performing it. The bundled `layman-auto` instructions now name the configured routes and current GPT-6 defaults rather than the old Terra/Sol presets.
+
+### Downloaded Windows candidate verification
+
+The Windows x64 artifact downloaded from [CI run 37823153836](https://github.com/Drippinblood333/layman/actions/runs/37823153836), code commit `abe6c52`, passed the local isolated standalone smoke: setup with plugin skipped, doctor, planning, zero-call dry run, HTTP health, MCP tools and clean uninstall. Its executable SHA-256 is `5c0512a17dc486cd0845a9409d353759d153f1eb90aaa1db2697a410f42cff03`, matching `BUILD.json`. Health reported all three GPT-6 routes and the 2026-10-09 price version. The artifact is staged under `build/ci-abe6c52/windows-x64`; the existing user installation was not replaced. Temporary smoke-test data was removed by the test's isolated uninstall and temporary-directory cleanup, with no user data removed. This does not replace an actual published-prerelease installer test.
 
 An active Codex heartbeat checks this project daily at 09:00 Asia/Shanghai, subject to the local scheduler and device being available. It advances bounded, verifiable fixes and reports meaningful progress, failures or required decisions. Dependabot checks Python dependencies and GitHub Actions weekly. Neither mechanism guarantees unattended release approval or safe automatic adoption of every upstream change.
 
