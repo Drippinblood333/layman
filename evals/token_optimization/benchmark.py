@@ -193,6 +193,7 @@ def _startup_diagnostics(stdout: str, stderr: str, returncode: int) -> dict[str,
 
 
 def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[str, Any]:
+    workspace = workspace.expanduser().resolve()
     config = load_config()
     spec = config.tiers["balanced"]
     with tempfile.TemporaryDirectory(prefix="layman-direct-") as directory:

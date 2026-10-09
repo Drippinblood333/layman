@@ -65,3 +65,18 @@ The tested artifact SHA-256 values for code `8981319` are:
 - `layman_codex-1.0.0.tar.gz`: `206baf41a1433e767034b6efdbf4b52494b8074b99a0b7578c7c680376b1d0d2`
 
 Artifacts remain under ignored `build/launch-parity-python-packages`; no release or installation replacement occurred. The authorized task budget remains 3/12 used and 9 remaining. No runtime task was retried in this follow-up, and no token-saving claim is supported.
+
+## Fourth reserved attempt and relative-path defect
+
+Commit `80c1a4d67c67872bf514ac5b01753c342e02bb14` passed all ten jobs in [CI run 37917059279](https://github.com/Drippinblood333/layman/actions/runs/37917059279), including hardened clean-install smoke and release assembly; publication was skipped. After that verification, exactly one direct diagnostic was reserved under the original cap, with seed `20261010`, maximum one execution and fingerprint `58a1de9c8f14413d1a77c4bc75bbd3425943a37736b8b723ec51b300af12a1bc`. It failed after 55 ms, exit 1, stderr present, zero observed lifecycle events and incomplete usage. A transient wrapper reported only fixed keyword-presence booleans; all were false and no raw error text was retained. Process-group parity therefore did not resolve the failure in this setup. No second arm or retry was launched. The original journal now has **4/12 attempts used, 8 remaining**.
+
+Source inspection identified an independent concrete defect in the direct arm: when `--work-root` is relative, it supplies a relative task directory both as subprocess `cwd` and CLI `-C`. Codex then resolves `-C` again from within that task directory. Layman already resolves its directory to an absolute path.
+
+Two zero-model prompt-render probes from a clean synthetic fixture verified the actual rendered directory, not merely a hypothesized path:
+
+| CLI directory argument | Renderer exit | Rendered directory equals fixture | Rendered directory exists |
+| --- | ---: | --- | --- |
+| original relative path | 0 | no | no |
+| resolved absolute path | 0 | yes | yes |
+
+The debug renderer itself does not reject the nonexistent directory. This reproduces incorrect path resolution, but is not a successful runtime task or retrospective proof that no other startup error occurred. The direct arm now resolves the workspace before setting both subprocess `cwd` and CLI `-C`. A regression exercises a relative work root and checks both absolute launch arguments and usage availability with a fake process, without model calls. Local suites pass 264 router plus 41 adaptive tests (305 total), lint and secret scanning. The path repair still needs hosted verification and a separately budgeted runtime retest. No fifth attempt was made in this batch, and no token-saving claim is supported.

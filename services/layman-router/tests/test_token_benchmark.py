@@ -184,6 +184,27 @@ def test_direct_failure_publishes_stage_and_missing_usage_not_raw_diagnostics(tm
     assert "private-file-path" not in json.dumps(record)
 
 
+def test_relative_workspace_is_resolved_before_setting_subprocess_cwd(tmp_path, monkeypatch, router_config):
+    monkeypatch.chdir(tmp_path)
+    workspace = Path("work") / "fixture"
+    workspace.mkdir(parents=True)
+    expected = workspace.resolve()
+    monkeypatch.setattr(benchmark, "load_config", lambda: router_config)
+
+    def runner(command, **kwargs):
+        assert kwargs["cwd"] == expected
+        assert Path(command[command.index("-C") + 1]) == expected
+        assert expected.is_dir()
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps({
+            "type": "turn.completed", "usage": {"input_tokens": 100, "output_tokens": 10},
+        }), stderr="")
+
+    monkeypatch.setattr(benchmark.subprocess, "run", runner)
+    result = benchmark._direct_run(CASES[0], workspace, "fake")
+    assert result["status"] == "completed"
+    assert result["usage_incomplete"] is False
+
+
 def test_checkpoint_does_not_reuse_a_result_from_another_policy(tmp_path: Path):
     output = tmp_path / "results.jsonl"
     output.write_text(
