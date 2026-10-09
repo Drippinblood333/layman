@@ -159,3 +159,22 @@ The remaining four attempts are preselected for existing `feature-01` (feature i
 All 320 local tests (279 router plus 41 adaptive), configured lint and secret scanning pass. No model call or new reservation occurred: **8/12 used, 4 remaining** in the original journal. This harness update awaits its own hosted validation before running the selected pairs. No paid API use, installed configuration change, tag or public release occurred.
 
 The previously live analyzer-repair run [37931775754](https://github.com/Drippinblood333/layman/actions/runs/37931775754), exact head `825149848fba0e2616d7dc439901e3a5dbc25f54`, reached terminal success during this follow-up: ten checks passed, publication skipped. No job was restarted; the source selector was not part of that older run.
+
+## Ninth through twelfth attempts: preselected feature and testing pairs
+
+Selector source `88ae42eb958016cc660070e378f4cbe3bed39500` passed all ten checks in [CI run 37932326230](https://github.com/Drippinblood333/layman/actions/runs/37932326230); publication was skipped. ChatGPT login and the eight existing reservations were verified before executing the already selected `feature-01` and `testing-01` corpus. Source and execution settings were unchanged during all four arms. The original output/journal and cap 12 were reused, seed `20261010`, maximum four executions, at most one model launch per arm. All four completed with no fallback, failure or extra retry. Runtime fingerprint including CLI version: `b7536fe926e9e7fc1104e1b2752065b13e1a0abf085ec9700fabd21526000631`.
+
+| Task / arm | Input | Cached input (subset) | Output | Reasoning (output subset) | Total | Time (ms) | Tool operations |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| feature / direct | 206,325 | 185,600 | 1,185 | 72 | 207,510 | 88,367 | 3 |
+| feature / Layman | 189,192 | 174,464 | 1,339 | 106 | 190,531 | 1,450,485 | 5 |
+| testing / Layman | 215,422 | 197,888 | 1,366 | 175 | 216,788 | 75,810 | 3 |
+| testing / direct | 243,418 | 221,824 | 1,041 | 87 | 244,459 | 65,966 | 3 |
+
+All arms used GPT-6.1 Sol / medium, report complete usage, one unique file and zero compactions. Feature arms passed hidden function/scope checks and changed only `src/target.py`. Testing arms passed mutation checks and changed only `tests/test_target.py`. These automatic validators are not human semantic-quality scores. Synthetic workspaces were cleaned by the runner, with no user data removed or raw prompts/answers/generated code/stderr retained.
+
+Feature total-token reduction is **8.18%**, testing **11.32%**, median over these two eligible pairs **9.75%**. Output instead increased 13.00% and 31.22%, median 22.11%. Layman's elapsed time was greater in both cases; the feature's reported 1,450,485 ms (about 24 minutes) is especially unfavorable. Both direct and Layman allow 1,800 seconds per execution; this completed result does not exceed that configured limit. No retained metadata identifies the delay's cause, so do not attribute it to provider queueing, local networking or the contract without separate evidence. Lower total tokens here do not establish faster completion, fewer tool calls, lower invoice cost or overall user benefit.
+
+The analyzer's two-pair descriptive bootstrap interval is [8.18%, 11.32%], but only two preselected synthetic calibration tasks are represented; this is not a robust population estimate. The public gate remains **false** (insufficient 30-pair coverage, median reduction below 15%, output-reduction gate failed, human/fresh-holdout quality absent). Do not combine these with the differently fingerprinted bugfix pairs or omit the first negative result and startup failures.
+
+The original journal now has **12/12 reserved executions, zero remaining**. The process is terminal and no thirteenth execution was started. Further model evaluation requires new explicit authorization; changing corpus/output/cap or restarting must not bypass this ceiling. No paid API, local installation replacement, release tag or public publication occurred. Candidate installer testing, participant acceptance and owner release approval remain open, regardless of green CI and these successful synthetic tasks.
