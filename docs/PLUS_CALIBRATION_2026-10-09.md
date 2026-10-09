@@ -8,7 +8,7 @@ New approval output/journal: `build/plus-calibration-2026-10-09/results.jsonl` a
 
 Before launch, 327 local tests pass. Three new regressions cover failure-inclusive cumulative limits, interrupted-reservation refusal and pre-Codex lock exclusion. Configured lint and secret scanning must pass before live execution. Human scores remain absent until actual review; completion of 36 executions alone cannot close the semantic-quality or public-release gates.
 
-Execution evidence will be appended after actual bounded runs; this document is not a completed-calibration claim.
+The following execution evidence was appended after the actual bounded runs; pre-launch planning alone was not treated as completion.
 
 ## Completed execution evidence
 
