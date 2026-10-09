@@ -124,6 +124,14 @@ def test_direct_baseline_is_balanced_medium_not_deep(tmp_path, monkeypatch, rout
     assert result["usage_incomplete"] is True
 
 
+def test_direct_error_classifies_structured_events_without_retaining_text():
+    diagnostic = json.dumps({"type": "turn.failed", "error": {"message": "usage limit reached private-data"}})
+    assert benchmark._execution_error(diagnostic, "", 1) == "subscription_limit"
+    assert benchmark._execution_error("", "Error loading config: private-path", 1) == "cli_configuration"
+    assert benchmark._execution_error("", "unexpected argument private-value", 2) == "cli_arguments"
+    assert benchmark._execution_error('{"type":"item.completed","message":"quota"}', "", 1) == "codex_exit_1"
+
+
 def test_checkpoint_does_not_reuse_a_result_from_another_policy(tmp_path: Path):
     output = tmp_path / "results.jsonl"
     output.write_text(

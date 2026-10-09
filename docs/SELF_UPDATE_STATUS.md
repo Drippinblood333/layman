@@ -10,6 +10,10 @@ Automatic routing now uses GPT-6 Luna / GPT-6.1 Sol / GPT-6 Astra with low / med
 
 ## Continuing updates
 
+### Authorized subscription pilot
+
+The owner-approved [bounded pilot](TOKEN_PILOT_2026-10-09.md) used two of at most twelve task executions. Layman passed the first hidden bug-fix validation with 277,114 total tokens (245,504 cached input included); the direct baseline exited after 54 ms without usable usage. The pilot stopped, leaving ten reserved-budget slots unspent and zero comparable pairs. No token savings or human quality equivalence is established. The benchmark now pins the balanced/medium baseline, prevents fallback beyond one launch per arm, persists attempt reservations across restarts, excludes incomplete usage, and classifies future errors without storing raw diagnostics. Local tests for the initial pilot code passed 239 router plus 41 adaptive tests; the follow-up adds one tested error-classification case. The hosted checkpoint above remains the last verified full CI, not proof for these new changes.
+
 ### Request validation follow-up
 
 The output-options audit reproduced malformed `text` values causing explicit-model crashes or silent replacement in automatic mode. The API now returns a clear HTTP 400 before contacting the upstream model. Eighteen regression cases cover five malformed shapes across automatic, configured-explicit and custom-explicit models, plus preservation of valid format and verbosity options. The updated suite passes 189 router tests and 41 adaptive harness tests (230 total), lint and secret scanning locally and in the hosted three-platform matrix. The checkpoint above includes this code change.
@@ -57,7 +61,7 @@ The [invited-user acceptance protocol](USER_ACCEPTANCE.md) is now prepared: exac
 ## Remaining public-release gates
 
 - Fresh release-candidate Plus calibration and human semantic-quality scoring.
-- Explicit approval before paid API calibration. No live model benchmark was executed in this update batch.
+- Explicit approval before paid API calibration. The approved subscription pilot stopped without a usable pair; paid API calibration was not run.
 - Complete six-arm adaptive comparison: local Codex CLI 0.160.0 passes zero-call preflight for five arms but does not expose Luna `none`. A five-arm subset cannot close the six-arm gate.
 - Published prerelease installer checks and 5–10 invited testers, with no unresolved P0/P1 issue.
 - Owner approval before a release tag or final public release.

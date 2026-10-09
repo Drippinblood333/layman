@@ -147,6 +147,31 @@ def _remove_workspace(workspace: Path, work_root: Path) -> None:
     shutil.rmtree(resolved, onerror=remove_readonly)
 
 
+def _execution_error(stdout: str, stderr: str, returncode: int) -> str:
+    """Classify diagnostics in memory; never retain their potentially private text."""
+    messages = [stderr]
+    for line in stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict) or event.get("type") not in {"error", "turn.failed"}:
+            continue
+        error = event.get("error", event)
+        if isinstance(error, dict) and isinstance(error.get("message"), str):
+            messages.append(error["message"])
+    for message in messages:
+        category = _safe_error(message, returncode)
+        if category != f"codex_exit_{returncode}":
+            return category
+    diagnostic = "\n".join(messages).lower()
+    if any(marker in diagnostic for marker in ("error loading config", "invalid configuration", "failed to parse", "toml parse")):
+        return "cli_configuration"
+    if any(marker in diagnostic for marker in ("unexpected argument", "invalid value", "required arguments")):
+        return "cli_arguments"
+    return f"codex_exit_{returncode}"
+
+
 def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[str, Any]:
     config = load_config()
     spec = config.tiers["balanced"]
@@ -174,7 +199,7 @@ def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[s
         answer = last_message.read_text(encoding="utf-8") if last_message.exists() else ""
         return {
             "status": "completed" if result.returncode == 0 else "failed",
-            "error_category": None if result.returncode == 0 else _safe_error(result.stderr, result.returncode),
+            "error_category": None if result.returncode == 0 else _execution_error(result.stdout, result.stderr, result.returncode),
             "route_tier": "direct",
             "model": spec.model,
             "effort": "medium",
