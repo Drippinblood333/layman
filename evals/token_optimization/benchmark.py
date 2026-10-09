@@ -268,7 +268,17 @@ def _public_record(
     return record
 
 
-def _selected_cases(pilot: bool) -> list[BenchmarkCase]:
+def _selected_cases(pilot: bool, case_ids: list[str] | None = None) -> list[BenchmarkCase]:
+    if case_ids is not None:
+        if pilot:
+            raise ValueError("--case-id cannot be combined with --pilot")
+        if not case_ids or len(set(case_ids)) != len(case_ids):
+            raise ValueError("--case-id requires a nonempty selection without duplicates")
+        unknown = set(case_ids) - {case.id for case in CASES}
+        if unknown:
+            raise ValueError(f"Unknown benchmark case IDs: {', '.join(sorted(unknown))}")
+        # Canonical corpus order makes selection independent of CLI ordering.
+        return [case for case in CASES if case.id in case_ids]
     if not pilot:
         return CASES
     seen: set[str] = set()
@@ -296,7 +306,7 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     total_call_cap = getattr(args, "total_call_cap", None)
     if total_call_cap is not None and (isinstance(total_call_cap, bool) or not isinstance(total_call_cap, int) or total_call_cap < 1):
         raise ValueError("total_call_cap must be a positive integer")
-    selected = _selected_cases(getattr(args, "pilot", False))
+    selected = _selected_cases(getattr(args, "pilot", False), getattr(args, "case_ids", None))
     experiment = _experiment_manifest(args.seed, selected)
     experiment_digest = experiment["experiment_digest"]
     plan = _ordered_arms(args.seed, selected)
@@ -379,7 +389,8 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             processed_now = completed_now + failed_now
             cumulative_total = baseline_total + processed_now
             cumulative_failed = baseline_failed + failed_now
-            if (getattr(args, "pilot", False) and record["execution_status"] != "completed") or record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"} or (
+            bounded_selection = getattr(args, "pilot", False) or getattr(args, "case_ids", None) is not None
+            if (bounded_selection and record["execution_status"] != "completed") or record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"} or (
                 cumulative_total >= 10 and cumulative_failed / cumulative_total > 0.10
             ):
                 break
@@ -475,6 +486,7 @@ def main() -> int:
     parser.add_argument("--max-calls", type=int, default=20)
     parser.add_argument("--allow-more-calls", action="store_true")
     parser.add_argument("--pilot", action="store_true", help="Preselect the first task in each of the six categories")
+    parser.add_argument("--case-id", dest="case_ids", action="append", help="Preselect a case ID; repeat for multiple cases, without --pilot")
     parser.add_argument("--total-call-cap", type=int, help="Persistent execution-attempt cap, including failures and across restarts")
     parser.add_argument("--seed", type=int, default=20260716)
     parser.add_argument("--run", action="store_true")

@@ -89,6 +89,14 @@ Here a "call" means one entire Codex task execution, which may contain multiple 
 
 Preview is the default. Add `--run` only after approval. Use a fresh output file for a new authorization and experiment; never increase the cap or remove the reservation journal to bypass an existing approval ceiling. Machine-readable records contain fingerprints, counts and validation outcomes, not answer text or generated code.
 
+For a bounded follow-up, preselect exact existing fixtures with repeatable `--case-id`, without `--pilot`. Unknown/duplicate IDs and conflicting selection modes are rejected before Codex resolution. Corpus order is canonical, the selected corpus is fingerprinted, and arms are randomized with the recorded seed. This option does not reset the shared reservation cap, bypass interrupted-attempt review or authorize model use. Like the pilot, it stops on the first execution failure. A subset is calibration evidence, not a fresh holdout or a way to close the 30-pair public gate; choose tasks before seeing outcomes and retain failures/negative results.
+
+The remaining four approved attempts in the current trial are preselected for `feature-01` and `testing-01`, each with direct/Layman arms. This broadens task types beyond repeatedly testing `bugfix-01`; it does not constitute an untouched evaluation corpus. Zero-call preview, reusing the original journal/output:
+
+```powershell
+.\.venv\Scripts\python -X utf8 evals\token_optimization\benchmark.py --case-id feature-01 --case-id testing-01 --max-calls 4 --total-call-cap 12 --seed 20261010 --output build/token-pilot-2026-10-09/results.jsonl --work-root build/token-pilot-2026-10-09/work
+```
+
 `evals/token_optimization` contains 30 synthetic repository tasks: six bug fixes, six features, five refactors, five testing tasks, four documentation/configuration tasks, and four high-risk read-only reviews. Each case runs from the same clean fixture in two randomized arms: direct Sol/medium and Layman context optimization plus automatic routing.
 
 ```powershell

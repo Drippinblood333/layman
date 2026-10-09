@@ -61,6 +61,41 @@ def test_pilot_selects_six_categories_before_execution():
     assert selected[-1].read_only is True
 
 
+def test_explicit_cases_preserve_corpus_order_and_original_fixtures():
+    selected = _selected_cases(False, ["testing-01", "feature-01"])
+    assert [case.id for case in selected] == ["feature-01", "testing-01"]
+    assert all(case is next(original for original in CASES if original.id == case.id) for case in selected)
+
+
+@pytest.mark.parametrize("pilot,case_ids", [
+    (True, ["feature-01"]), (False, ["unknown-01"]), (False, ["feature-01", "feature-01"]),
+])
+def test_invalid_case_selection_is_rejected_before_login_or_reservation(pilot, case_ids, monkeypatch):
+    def unexpected_launch(*args, **kwargs):
+        pytest.fail("Invalid selection must be rejected before Codex resolution")
+
+    monkeypatch.setattr(benchmark, "find_codex", unexpected_launch)
+    args = argparse.Namespace(max_calls=2, pilot=pilot, case_ids=case_ids, run=True)
+    with pytest.raises(ValueError):
+        run_benchmark(args)
+
+
+def test_explicit_case_preview_is_zero_call_and_fingerprinted(tmp_path):
+    args = argparse.Namespace(
+        output=tmp_path / "results.jsonl", work_root=tmp_path / "work", seed=20261010,
+        run=False, max_calls=4, case_ids=["feature-01", "testing-01"], codex_path="missing",
+    )
+    first = run_benchmark(args)
+    assert first["planned_calls"] == 4
+    assert {item["key"] for item in first["next"]} == {
+        "feature-01:direct", "feature-01:layman", "testing-01:direct", "testing-01:layman",
+    }
+    args.case_ids = ["feature-01"]
+    assert run_benchmark(args)["experiment_digest"] != first["experiment_digest"]
+    assert not args.output.exists()
+    assert not Path(str(args.output) + ".attempts.jsonl").exists()
+
+
 def test_invalid_batch_cap_is_rejected_before_launch(tmp_path):
     args = argparse.Namespace(max_calls=-1)
     with pytest.raises(ValueError, match="positive integer"):
@@ -86,6 +121,9 @@ def test_persistent_attempt_cap_counts_both_arms_and_survives_restart(tmp_path, 
     monkeypatch.setattr(benchmark, "_direct_run", execution)
     monkeypatch.setattr(benchmark, "run_plus_task", execution)
     first = run_benchmark(args)
+    # Choosing a different corpus/fingerprint cannot replenish authorization.
+    args.pilot = False
+    args.case_ids = ["feature-01"]
     second = run_benchmark(args)
     assert first["reserved_attempts_total"] == 2
     assert first["authorized_attempts_remaining"] == second["authorized_attempts_remaining"] == 0
@@ -93,6 +131,30 @@ def test_persistent_attempt_cap_counts_both_arms_and_survives_restart(tmp_path, 
     assert second["completed_now"] == 0
     assert len(launches) == 2
     assert any(call.get("max_model_attempts") == 1 for call in launches)
+
+
+def test_explicit_selection_stops_after_execution_failure(tmp_path, monkeypatch):
+    args = argparse.Namespace(
+        output=tmp_path / "results.jsonl", work_root=tmp_path / "work", seed=20261010,
+        run=True, max_calls=4, allow_more_calls=False, codex_path="fake",
+        case_ids=["feature-01", "testing-01"], total_call_cap=12,
+    )
+    monkeypatch.setattr(benchmark, "find_codex", lambda _: "fake")
+    monkeypatch.setattr(benchmark, "codex_login_status", lambda _: {"available": True, "chatgpt_login": True})
+    monkeypatch.setattr(benchmark.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a[0], 0, stdout="test-version", stderr=""))
+    monkeypatch.setattr(benchmark, "prepare_workspace", lambda case, path: path.mkdir(parents=True))
+    monkeypatch.setattr(benchmark, "validate_workspace", lambda *a: {"passed": False})
+    launches = []
+
+    def failed_execution(*args, **kwargs):
+        launches.append(1)
+        return {"status": "failed", "error_category": "codex_exit_1", "usage": {}, "answer": ""}
+
+    monkeypatch.setattr(benchmark, "_direct_run", failed_execution)
+    monkeypatch.setattr(benchmark, "run_plus_task", failed_execution)
+    result = run_benchmark(args)
+    assert len(launches) == result["failed_now"] == result["reserved_attempts_total"] == 1
+    assert result["authorized_attempts_remaining"] == 11
 
 
 def test_analysis_excludes_incomplete_usage_not_as_free_savings(tmp_path):
