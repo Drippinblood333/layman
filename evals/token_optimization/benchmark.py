@@ -54,7 +54,7 @@ from evals.token_optimization.fixture import (
 
 DEFAULT_OUTPUT = Path.home() / ".layman" / "token-benchmark.jsonl"
 DEFAULT_WORK = ROOT / "build" / "token-benchmark-work"
-BENCHMARK_SCHEMA_VERSION = 3
+BENCHMARK_SCHEMA_VERSION = 4
 
 
 def _execution_prompt(case: BenchmarkCase) -> str:
@@ -80,6 +80,12 @@ def _experiment_manifest(seed: int, selected: list[BenchmarkCase] | None = None)
         "randomization_seed": seed,
         "direct_baseline": "configured_balanced_medium",
         "max_model_attempts_per_arm": 1,
+        "usage_protocol_sha256": hashlib.sha256(
+            b"".join(
+                (SERVICE_SRC / "layman_router" / name).read_bytes()
+                for name in ("execution_control.py", "plus_eval.py", "plus_run.py")
+            )
+        ).hexdigest(),
         "cases_sha256": _stable_digest(cases),
         "routing_config_sha256": _stable_digest(config.model_dump(mode="json")),
         "execution_policies_sha256": _stable_digest(policies),
@@ -415,6 +421,11 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     gates = {
         "all_30_pairs_complete": len(complete) == 30,
         "all_30_pairs_usage_eligible": len(eligible) == 30,
+        "trusted_usage_protocol": bool(complete) and all(
+            record.get("schema_version") == BENCHMARK_SCHEMA_VERSION
+            and bool(record.get("usage_protocol_sha256"))
+            for arms in complete for record in arms.values()
+        ),
         "median_total_token_reduction_at_least_15_percent": median_reduction is not None and median_reduction >= 0.15,
         "bootstrap_95_percent_lower_bound_above_zero": ci_low is not None and ci_low > 0,
         "quality_not_lower": layman_success >= direct_success,

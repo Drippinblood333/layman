@@ -106,6 +106,7 @@ def test_analysis_excludes_incomplete_usage_not_as_free_savings(tmp_path):
     assert result["usage_eligible_pairs"] == 0
     assert result["median_total_token_reduction"] is None
     assert result["claim_token_savings"] is False
+    assert result["gates"]["trusted_usage_protocol"] is False
 
 
 def test_direct_baseline_is_balanced_medium_not_deep(tmp_path, monkeypatch, router_config):
@@ -130,6 +131,20 @@ def test_direct_error_classifies_structured_events_without_retaining_text():
     assert benchmark._execution_error("", "Error loading config: private-path", 1) == "cli_configuration"
     assert benchmark._execution_error("", "unexpected argument private-value", 2) == "cli_arguments"
     assert benchmark._execution_error('{"type":"item.completed","message":"quota"}', "", 1) == "codex_exit_1"
+
+
+def test_usage_implementation_change_invalidates_benchmark_fingerprint(monkeypatch):
+    original = Path.read_bytes
+    before = benchmark._experiment_manifest(20261009)
+
+    def changed_read(path):
+        value = original(path)
+        return value + b"\n# synthetic change" if path.name == "execution_control.py" else value
+
+    monkeypatch.setattr(Path, "read_bytes", changed_read)
+    after = benchmark._experiment_manifest(20261009)
+    assert before["usage_protocol_sha256"] != after["usage_protocol_sha256"]
+    assert before["experiment_digest"] != after["experiment_digest"]
 
 
 def test_checkpoint_does_not_reuse_a_result_from_another_policy(tmp_path: Path):

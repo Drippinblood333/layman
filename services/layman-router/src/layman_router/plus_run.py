@@ -11,7 +11,12 @@ from typing import Any
 
 from .classify import classify_task
 from .config import load_config
-from .execution_control import USAGE_KEYS, CancellationToken, run_streaming_process
+from .execution_control import (
+    USAGE_KEYS,
+    CancellationToken,
+    run_streaming_process,
+    usage_from_events,
+)
 from .models import RouteTier, TaskType
 from .plus_eval import (
     _safe_error,
@@ -56,24 +61,7 @@ def _toml_string(value: str) -> str:
 
 
 def _usage_available(stdout: str) -> bool:
-    aliases = {"input_tokens", "cached_input_tokens", "cached_tokens", "output_tokens", "reasoning_tokens"}
-
-    def visit(value: Any) -> bool:
-        if isinstance(value, dict):
-            return any(key in aliases and isinstance(child, int) for key, child in value.items()) or any(
-                visit(child) for child in value.values()
-            )
-        if isinstance(value, list):
-            return any(visit(child) for child in value)
-        return False
-
-    for line in stdout.splitlines():
-        try:
-            if visit(json.loads(line)):
-                return True
-        except json.JSONDecodeError:
-            continue
-    return False
+    return usage_from_events(stdout)[1]
 
 
 def _text_output(value: str | bytes | None) -> str:

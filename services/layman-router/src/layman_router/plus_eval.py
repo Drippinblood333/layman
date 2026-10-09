@@ -15,6 +15,7 @@ from typing import Any
 
 from .classify import classify_task
 from .config import load_config
+from .execution_control import CODEX_USAGE_PROTOCOL_VERSION, usage_from_events
 from .models import RouteTier
 from .routing import decide_route
 
@@ -30,7 +31,7 @@ DIRECT_ANSWER_PREFIX = (
     "This is an isolated quality evaluation. Answer the task directly without calling tools, "
     "reading files, or changing the computer. Be correct and concise.\n\nTASK:\n"
 )
-EVAL_PROTOCOL_VERSION = 2
+EVAL_PROTOCOL_VERSION = 3
 
 
 @dataclass(frozen=True)
@@ -207,6 +208,7 @@ def experiment_fingerprint(
 ) -> str:
     payload = {
         "protocol_version": EVAL_PROTOCOL_VERSION,
+        "usage_protocol_version": CODEX_USAGE_PROTOCOL_VERSION,
         "cases": cases,
         "routes": [
             {
@@ -266,30 +268,7 @@ def public_plan(
 
 
 def _usage_from_events(stdout: str) -> dict[str, int]:
-    usage = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0, "reasoning_tokens": 0}
-    aliases = {
-        "input_tokens": "input_tokens", "cached_input_tokens": "cached_input_tokens",
-        "cached_tokens": "cached_input_tokens", "output_tokens": "output_tokens",
-        "reasoning_tokens": "reasoning_tokens",
-    }
-
-    def visit(value: Any) -> None:
-        if isinstance(value, dict):
-            for key, child in value.items():
-                if key in aliases and isinstance(child, int):
-                    usage[aliases[key]] = max(usage[aliases[key]], child)
-                else:
-                    visit(child)
-        elif isinstance(value, list):
-            for child in value:
-                visit(child)
-
-    for line in stdout.splitlines():
-        try:
-            visit(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return usage
+    return usage_from_events(stdout)[0]
 
 
 def event_metrics(stdout: str) -> dict[str, Any]:
@@ -369,11 +348,13 @@ def run_arm(
                 "status": "failed", "error_category": "timeout", "latency_ms": 300_000,
             }
         answer = last_message.read_text(encoding="utf-8") if last_message.exists() else ""
+        usage, usage_available = usage_from_events(result.stdout)
         record: dict[str, Any] = {
             "key": arm.key, "case_id": arm.case_id, "category": arm.category, "label": arm.label,
             "model": arm.model, "effort": arm.effort, "route_tier": arm.route_tier,
             "route_reason": arm.route_reason, "status": "completed" if result.returncode == 0 else "failed",
-            "latency_ms": latency_ms, "usage": _usage_from_events(result.stdout),
+            "latency_ms": latency_ms, "usage": usage,
+            "usage_incomplete": not usage_available or result.returncode != 0,
             "prompt_sha256": hashlib.sha256(arm.prompt.encode("utf-8")).hexdigest(),
             "answer_sha256": hashlib.sha256(answer.encode("utf-8")).hexdigest() if answer else None,
             "answer_chars": len(answer), "human_score": None,

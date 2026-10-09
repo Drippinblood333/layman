@@ -15,13 +15,54 @@ from pathlib import Path
 from typing import IO, Any
 
 USAGE_KEYS = ("input_tokens", "cached_input_tokens", "output_tokens", "reasoning_tokens")
+CODEX_USAGE_PROTOCOL_VERSION = "completed-turn-usage-v1"
 _USAGE_ALIASES = {
     "input_tokens": "input_tokens",
     "cached_input_tokens": "cached_input_tokens",
     "cached_tokens": "cached_input_tokens",
     "output_tokens": "output_tokens",
     "reasoning_tokens": "reasoning_tokens",
+    "reasoning_output_tokens": "reasoning_tokens",
 }
+
+
+def completed_turn_usage(event: Any) -> dict[str, int] | None:
+    """Accept only the CLI's top-level completed-turn usage, never tool payloads."""
+    if not isinstance(event, dict) or event.get("type") != "turn.completed":
+        return None
+    raw = event.get("usage")
+    if not isinstance(raw, dict):
+        return None
+    if not {"input_tokens", "output_tokens"}.issubset(raw):
+        return None
+    usage = dict.fromkeys(USAGE_KEYS, 0)
+    for key, alias in _USAGE_ALIASES.items():
+        if key not in raw:
+            continue
+        value = raw[key]
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            return None
+        usage[alias] = max(usage[alias], value)
+    if usage["cached_input_tokens"] > usage["input_tokens"]:
+        return None
+    return usage
+
+
+def usage_from_events(stdout: str) -> tuple[dict[str, int], bool]:
+    usage = dict.fromkeys(USAGE_KEYS, 0)
+    available = False
+    for line in stdout.splitlines():
+        try:
+            turn = completed_turn_usage(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+        if turn is not None:
+            available = True
+            for key in USAGE_KEYS:
+                usage[key] += turn[key]
+    return usage, available
+
+
 _TOOL_TYPES = {"command_execution", "mcp_tool_call", "file_read", "tool_call"}
 _PATH_EXTENSIONS = (
     r"(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|go|rs|java|kt|kts|scala|c|h|cc|cpp|cxx|hpp|"
@@ -105,22 +146,13 @@ class EventBudgetTracker:
             event = json.loads(line)
         except json.JSONDecodeError:
             return
-        self._visit_usage(event)
+        turn = completed_turn_usage(event)
+        if turn is not None:
+            self.usage_available = True
+            for key in USAGE_KEYS:
+                self.usage[key] += turn[key]
         self._visit_paths(event)
         self._visit_operations(event, envelope=event if isinstance(event, dict) else {})
-
-    def _visit_usage(self, value: Any) -> None:
-        if isinstance(value, dict):
-            for key, child in value.items():
-                alias = _USAGE_ALIASES.get(key)
-                if alias is not None and isinstance(child, int):
-                    self.usage_available = True
-                    self.usage[alias] = max(self.usage[alias], child)
-                else:
-                    self._visit_usage(child)
-        elif isinstance(value, list):
-            for child in value:
-                self._visit_usage(child)
 
     def _visit_paths(self, value: Any) -> None:
         if isinstance(value, dict):

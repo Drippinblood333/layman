@@ -146,6 +146,9 @@ def experiment_fingerprint(
         "validators_sha256": hashlib.sha256((HERE / "validators.py").read_bytes()).hexdigest(),
         "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "execution_backend_sha256": hashlib.sha256((HERE / "execution_backend.py").read_bytes()).hexdigest(),
+        "usage_protocol_sha256": hashlib.sha256(
+            (SERVICE_SRC / "layman_router" / "execution_control.py").read_bytes()
+        ).hexdigest(),
         "execution_contract": CodexCliBackend.contract_semantics(),
         "execution_contract_sha256": CodexCliBackend.contract_semantics_sha256(),
         "price_version": pricing["price_version"],
