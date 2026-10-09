@@ -209,6 +209,7 @@ def build_parser() -> argparse.ArgumentParser:
     plus_eval.add_argument("--workspace", type=Path, default=layman_home() / "plus-workspace")
     plus_eval.add_argument("--codex-path")
     plus_eval.add_argument("--max-calls", type=int, default=SAFE_DEFAULT_CALL_LIMIT)
+    plus_eval.add_argument("--total-call-cap", type=int, help="Persistent execution cap across batches, including failures")
     plus_eval.add_argument("--run", action="store_true", help="Actually consume ChatGPT/Codex subscription usage")
     plus_eval.add_argument("--allow-more-calls", action="store_true", help="Permit a cap above the safe 12-call default")
     plus_eval.add_argument("--store-outputs", action="store_true", help="Opt in to saving answer text in the result JSONL")
@@ -453,6 +454,7 @@ def main(argv: list[str] | None = None) -> int:
                 cases_path=args.cases, output=args.output, workspace=args.workspace,
                 codex_path=args.codex_path, execute=args.run, max_calls=args.max_calls,
                 allow_more_calls=args.allow_more_calls, store_outputs=args.store_outputs,
+                total_call_cap=args.total_call_cap,
             )
             print(json.dumps(result, indent=2, ensure_ascii=False))
             if not args.run:

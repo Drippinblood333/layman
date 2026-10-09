@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from layman_router import plus_eval
 from layman_router.plus_eval import (
     PlusEvalArm,
     build_plan,
@@ -145,3 +146,53 @@ def test_experiment_fingerprint_changes_with_cases_routes_or_codex(router_config
     changed_cases = [*cases]
     changed_cases[0] = {**changed_cases[0], "input": changed_cases[0]["input"] + " changed"}
     assert current != experiment_fingerprint(changed_cases, plan, codex_version="codex 1")
+
+
+@pytest.fixture
+def fake_calibration(monkeypatch, tmp_path):
+    monkeypatch.setattr(plus_eval, "find_codex", lambda _: "fake")
+    monkeypatch.setattr(plus_eval, "codex_login_status", lambda _: {"available": True, "chatgpt_login": True})
+    monkeypatch.setattr(plus_eval.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a[0], 0, stdout="fake-version", stderr=""))
+    return {"cases_path": None, "output": tmp_path / "results.jsonl", "workspace": tmp_path / "workspace",
+            "codex_path": "fake", "execute": True, "max_calls": 1, "total_call_cap": 3}
+
+
+def test_calibration_cap_counts_failures_across_batches(fake_calibration, monkeypatch):
+    calls = []
+
+    def arm_runner(arm, **kwargs):
+        calls.append(arm.key)
+        return {"key": arm.key, "status": "failed" if len(calls) == 1 else "completed",
+                "experiment_fingerprint": kwargs["experiment_fingerprint_value"]}
+
+    monkeypatch.setattr(plus_eval, "run_arm", arm_runner)
+    results = [run_plus_eval(**fake_calibration) for _ in range(4)]
+    assert results[0]["failed_now"] == 1
+    assert results[-1]["completed_now"] == 0
+    assert results[-1]["authorized_attempts_remaining"] == 0
+    assert len(calls) == len(set(calls)) == 3
+    journal = fake_calibration["output"].with_name("results.jsonl.attempts.jsonl")
+    assert len(journal.read_text().splitlines()) == 3
+
+
+def test_interrupted_calibration_is_not_replayed(fake_calibration, monkeypatch):
+    def interrupted(*args, **kwargs):
+        raise RuntimeError("synthetic interruption")
+
+    monkeypatch.setattr(plus_eval, "run_arm", interrupted)
+    with pytest.raises(RuntimeError, match="synthetic interruption"):
+        run_plus_eval(**fake_calibration)
+    monkeypatch.setattr(plus_eval, "run_arm", lambda *a, **k: pytest.fail("No replay permitted"))
+    with pytest.raises(RuntimeError, match="Interrupted reserved"):
+        run_plus_eval(**fake_calibration)
+    assert not fake_calibration["output"].with_name("results.jsonl.lock").exists()
+
+
+def test_concurrent_calibration_is_blocked_before_codex(fake_calibration, monkeypatch):
+    output = fake_calibration["output"]
+    lock = output.with_name("results.jsonl.lock")
+    lock.write_text("existing-owner", encoding="utf-8")
+    monkeypatch.setattr(plus_eval, "find_codex", lambda _: pytest.fail("Locked runner must not reach Codex"))
+    with pytest.raises(RuntimeError, match="writer lock exists"):
+        run_plus_eval(**fake_calibration)
+    assert lock.read_text() == "existing-owner"

@@ -7,7 +7,9 @@ import shutil
 import subprocess
 import tempfile
 import time
+import uuid
 from collections.abc import Callable
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -34,7 +36,7 @@ DIRECT_ANSWER_PREFIX = (
     "This is an isolated quality evaluation. Answer the task directly without calling tools, "
     "reading files, or changing the computer. Be correct and concise.\n\nTASK:\n"
 )
-EVAL_PROTOCOL_VERSION = 3
+EVAL_PROTOCOL_VERSION = 4
 
 
 @dataclass(frozen=True)
@@ -342,12 +344,34 @@ def run_arm(
             "answer_chars": len(answer), "human_score": None,
             "experiment_fingerprint": experiment_fingerprint_value,
             "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            **event_metrics(result.stdout),
         }
         if result.returncode != 0:
             record["error_category"] = _safe_error(result.stderr, result.returncode)
         if store_outputs and answer:
             record["answer_text"] = answer
         return record
+
+
+@contextmanager
+def _evaluation_writer(output: Path):
+    resolved = output.resolve()
+    lock = resolved.with_name(resolved.name + ".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    owner = uuid.uuid4().hex
+    try:
+        handle = lock.open("x", encoding="utf-8")
+    except FileExistsError as exc:
+        raise RuntimeError("Evaluation writer lock exists; review active process or stale lock before retrying") from exc
+    try:
+        with handle:
+            handle.write(owner)
+            handle.flush()
+            os.fsync(handle.fileno())
+        yield
+    finally:
+        if lock.exists() and lock.read_text(encoding="utf-8") == owner:
+            lock.unlink()
 
 
 def run_plus_eval(
@@ -360,6 +384,34 @@ def run_plus_eval(
     max_calls: int = SAFE_DEFAULT_CALL_LIMIT,
     allow_more_calls: bool = False,
     store_outputs: bool = False,
+    total_call_cap: int | None = None,
+) -> dict[str, Any]:
+    if total_call_cap is not None and (
+        isinstance(total_call_cap, bool) or not isinstance(total_call_cap, int) or total_call_cap < 1
+    ):
+        raise ValueError("total_call_cap must be a positive integer")
+    arguments = {
+        "cases_path": cases_path, "output": output, "workspace": workspace, "codex_path": codex_path,
+        "execute": execute, "max_calls": max_calls, "allow_more_calls": allow_more_calls,
+        "store_outputs": store_outputs, "total_call_cap": total_call_cap,
+    }
+    if execute:
+        with _evaluation_writer(output):
+            return _run_plus_eval(**arguments)
+    return _run_plus_eval(**arguments)
+
+
+def _run_plus_eval(
+    *,
+    cases_path: str | Path | None,
+    output: Path,
+    workspace: Path,
+    codex_path: str | None,
+    execute: bool,
+    max_calls: int = SAFE_DEFAULT_CALL_LIMIT,
+    allow_more_calls: bool = False,
+    store_outputs: bool = False,
+    total_call_cap: int | None = None,
 ) -> dict[str, Any]:
     if max_calls < 1:
         raise ValueError("max_calls must be positive")
@@ -396,11 +448,24 @@ def run_plus_eval(
     if not login["chatgpt_login"]:
         raise RuntimeError("Codex is not logged in with ChatGPT. Refusing to risk API-key billing.")
     output.parent.mkdir(parents=True, exist_ok=True)
-    pending = [arm for arm in plan if arm.key not in done][:max_calls]
+    journal = output.with_name(output.name + ".attempts.jsonl")
+    reservations = [json.loads(line) for line in journal.read_text(encoding="utf-8").splitlines() if line.strip()] if journal.exists() else []
+    records = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines() if line.strip()] if output.exists() else []
+    recorded = {(record.get("experiment_fingerprint"), record.get("key")) for record in records}
+    if any((record.get("experiment_fingerprint"), record.get("key")) not in recorded for record in reservations):
+        raise RuntimeError("Interrupted reserved evaluation needs review; refusing automatic replay")
+    attempted = {record["key"] for record in reservations if record.get("experiment_fingerprint") == fingerprint}
+    remaining_budget = max(0, total_call_cap - len(reservations)) if total_call_cap is not None else max_calls
+    pending = [arm for arm in plan if arm.key not in done | attempted][:min(max_calls, remaining_budget)]
     completed_now = 0
     failed = 0
     with output.open("a", encoding="utf-8") as stream:
         for arm in pending:
+            with journal.open("a", encoding="utf-8") as budget_stream:
+                budget_stream.write(json.dumps({"key": arm.key, "experiment_fingerprint": fingerprint,
+                                               "reserved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}) + "\n")
+                budget_stream.flush()
+                os.fsync(budget_stream.fileno())
             record = run_arm(
                 arm,
                 codex_path=executable,
@@ -410,12 +475,12 @@ def run_plus_eval(
             )
             stream.write(json.dumps(record, ensure_ascii=False) + "\n")
             stream.flush()
+            os.fsync(stream.fileno())
             if record["status"] == "completed":
                 completed_now += 1
             else:
                 failed += 1
-                if record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"}:
-                    break
+                break
     return {
         "mode": "run", "output": str(output.resolve()), "requested_call_cap": max_calls,
         "completed_now": completed_now, "failed_now": failed,
@@ -423,5 +488,8 @@ def run_plus_eval(
         "stores_output_text": store_outputs,
         "experiment_fingerprint": fingerprint,
         "codex_version": codex_version,
+        "reserved_attempts_total": len(reservations) + completed_now + failed,
+        "total_call_cap": total_call_cap,
+        "authorized_attempts_remaining": max(0, total_call_cap - len(reservations) - completed_now - failed) if total_call_cap is not None else None,
         "billing_note": "Uses ChatGPT subscription login. API-dollar values are not measured in this mode.",
     }
