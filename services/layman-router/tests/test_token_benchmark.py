@@ -87,6 +87,8 @@ def test_persistent_attempt_cap_counts_both_arms_and_survives_restart(tmp_path, 
     first = run_benchmark(args)
     second = run_benchmark(args)
     assert first["reserved_attempts_total"] == 2
+    assert first["authorized_attempts_remaining"] == second["authorized_attempts_remaining"] == 0
+    assert first["remaining"] > first["authorized_attempts_remaining"]
     assert second["completed_now"] == 0
     assert len(launches) == 2
     assert any(call.get("max_model_attempts") == 1 for call in launches)

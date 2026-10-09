@@ -386,6 +386,7 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
         "experiment_digest": experiment_digest,
         "reserved_attempts_total": len(reservations) + completed_now + failed_now,
         "total_call_cap": total_call_cap,
+        "authorized_attempts_remaining": max(0, total_call_cap - len(reservations) - completed_now - failed_now),
     }
 
 
