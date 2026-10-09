@@ -147,6 +147,38 @@ def test_usage_implementation_change_invalidates_benchmark_fingerprint(monkeypat
     assert before["experiment_digest"] != after["experiment_digest"]
 
 
+def test_startup_diagnostics_keep_only_known_top_level_counters():
+    stdout = "\n".join([
+        "private non-json log",
+        json.dumps({"type": "thread.started", "thread_id": "private-thread"}),
+        json.dumps({"type": "turn.started"}),
+        json.dumps({"type": "item.completed", "result": {"type": "turn.completed", "text": "private-answer"}}),
+        json.dumps({"type": "turn.failed", "error": {"message": "private-error"}}),
+        json.dumps({"type": ["unexpected"]}),
+    ])
+    diagnostic = benchmark._startup_diagnostics(stdout, "private stderr", 1)
+    assert diagnostic == {
+        "exit_code": 1,
+        "stderr_present": True,
+        "lifecycle_counts": {"thread.started": 1, "turn.started": 1, "turn.completed": 0, "turn.failed": 1, "error": 0},
+    }
+    assert "private" not in json.dumps(diagnostic)
+
+
+def test_direct_failure_publishes_stage_and_missing_usage_not_raw_diagnostics(tmp_path, monkeypatch, router_config):
+    monkeypatch.setattr(benchmark, "load_config", lambda: router_config)
+    monkeypatch.setattr(benchmark.subprocess, "run", lambda command, **kwargs: subprocess.CompletedProcess(
+        command, 1, stdout="", stderr="Error loading config: private-file-path",
+    ))
+    result = benchmark._direct_run(CASES[0], tmp_path, "fake")
+    assert result["error_category"] == "cli_configuration"
+    assert result["usage_incomplete"] is True
+    assert result["startup_diagnostics"]["exit_code"] == 1
+    assert not any(result["startup_diagnostics"]["lifecycle_counts"].values())
+    record = _public_record(CASES[0], "direct", result, {"passed": False})
+    assert "private-file-path" not in json.dumps(record)
+
+
 def test_checkpoint_does_not_reuse_a_result_from_another_policy(tmp_path: Path):
     output = tmp_path / "results.jsonl"
     output.write_text(

@@ -178,6 +178,19 @@ def _execution_error(stdout: str, stderr: str, returncode: int) -> str:
     return f"codex_exit_{returncode}"
 
 
+def _startup_diagnostics(stdout: str, stderr: str, returncode: int) -> dict[str, Any]:
+    """Record lifecycle counters only, never event payloads or diagnostics text."""
+    counts = dict.fromkeys(("thread.started", "turn.started", "turn.completed", "turn.failed", "error"), 0)
+    for line in stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(event, dict) and isinstance(event.get("type"), str) and event["type"] in counts:
+            counts[event["type"]] += 1
+    return {"exit_code": returncode, "stderr_present": bool(stderr), "lifecycle_counts": counts}
+
+
 def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[str, Any]:
     config = load_config()
     spec = config.tiers["balanced"]
@@ -214,6 +227,7 @@ def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[s
             "fallback_used": False,
             "usage": _usage_from_events(result.stdout),
             "usage_incomplete": not _usage_available(result.stdout),
+            "startup_diagnostics": _startup_diagnostics(result.stdout, result.stderr, result.returncode),
             "latency_ms": round((time.perf_counter() - started) * 1_000),
             "answer": answer,
             **event_metrics(result.stdout),
