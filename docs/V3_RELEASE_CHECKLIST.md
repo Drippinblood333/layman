@@ -27,7 +27,7 @@ Remaining steps requiring owner action are explicit new authorization for furthe
 - [x] The current 233-test router suite and 41-test adaptive-reasoning harness pass locally and in hosted Windows/macOS/Linux CI at commit `46c8758` ([CI run 37890806052](https://github.com/Drippinblood333/layman/actions/runs/37890806052)), including the upgraded development tools, expanded lint policy and opt-in lossless-output encoding. The eight-case offline log check also passes; it does not prove task-token savings.
 - [x] 300-case deterministic routing matrix passes.
 - [x] 401, 429, 5xx, timeout, empty stream and interrupted stream paths are covered.
-- [ ] Fresh fingerprinted 18-case/36-call Plus calibration is complete for the current release candidate; the 2026-07-16 historical run completed without execution errors but cannot close this gate.
+- [x] Fresh fingerprinted 18-case/36-call Plus execution calibration completed at source `f1ae6db` under protocol v4 / Codex `0.162.0-alpha.2`; all usage records are complete and there are no execution failures. [Report](PLUS_CALIBRATION_2026-10-09.md): auto total tokens are 1.70% higher, not a savings claim. Human semantic-quality acceptance remains a separate unchecked gate; the historical run is not pooled.
 - [x] 30-task/60-call token benchmark completed; the savings gate failed and the negative result is published.
 - [x] GPT-6 model identifiers, reasoning efforts and 2026-10-09 short/long-context standard prices match current official documentation.
 - [x] The installed dependency tree passes `pip check`; the 2026-08-12 OSV audit reports no known vulnerabilities after upgrading pytest and Pillow.

@@ -75,6 +75,8 @@ Codex-reported token counts and latency are measured. Any dollar comparison deri
 
 The prior exploratory Plus calibration is retained in the [`legacy-v2` archive](../archive/legacy-v2/docs/PLUS_CALIBRATION_2026-07-16.md). A fresh 18-case/36-call run is required for each release candidate; each record is bound to the case corpus, resolved route plan, prompt protocol and verified Codex version by an experiment fingerprint. Outputs remain local until manually reviewed and deliberately published.
 
+The [2026-10-09 protocol-v4 calibration](PLUS_CALIBRATION_2026-10-09.md) completed all 36 approved executions with complete usage and no tool calls/failures. Auto total tokens were 1.70% higher than the always-deep baseline; human scores are absent. This is complete execution coverage, not quality acceptance or a public savings result. `--total-call-cap` now persists pre-launch reservations across batches/fingerprints, counts failures, refuses interrupted-reservation replay and uses an exclusive writer lock. Existing locks are not automatically stolen. The approved 36-execution journal is exhausted; further evaluation requires new explicit authorization. Per-batch `--max-calls` alone is not a cumulative approval ceiling.
+
 ## Direct execution versus Layman Auto
 
 ### Bounded six-category pilot
