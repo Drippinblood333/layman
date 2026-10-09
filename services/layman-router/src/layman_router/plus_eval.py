@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 import tempfile
@@ -15,7 +14,11 @@ from typing import Any
 
 from .classify import classify_task
 from .config import load_config
-from .execution_control import CODEX_USAGE_PROTOCOL_VERSION, usage_from_events
+from .execution_control import (
+    CODEX_USAGE_PROTOCOL_VERSION,
+    EventBudgetTracker,
+    usage_from_events,
+)
 from .models import RouteTier
 from .routing import decide_route
 
@@ -272,35 +275,14 @@ def _usage_from_events(stdout: str) -> dict[str, int]:
 
 
 def event_metrics(stdout: str) -> dict[str, Any]:
-    tool_calls = 0
-    compactions = 0
-    files: set[str] = set()
-    path_pattern = re.compile(r"(?i)(?:[A-Z]:)?[\\/\w. -]+\.(?:py|js|ts|tsx|jsx|md|json|ya?ml|toml|sql|sh|ps1)")
-
-    def visit(value: Any) -> None:
-        nonlocal tool_calls, compactions
-        if isinstance(value, dict):
-            item_type = str(value.get("type") or "").lower()
-            if item_type in {"command_execution", "mcp_tool_call", "file_read", "tool_call"}:
-                tool_calls += 1
-            if "compact" in item_type:
-                compactions += 1
-            for key, child in value.items():
-                if key in {"command", "cmd", "path", "file"} and isinstance(child, str):
-                    for match in path_pattern.findall(child):
-                        files.add(match.strip(" '\""))
-                else:
-                    visit(child)
-        elif isinstance(value, list):
-            for child in value:
-                visit(child)
-
+    tracker = EventBudgetTracker()
     for line in stdout.splitlines():
-        try:
-            visit(json.loads(line))
-        except json.JSONDecodeError:
-            continue
-    return {"tool_calls": tool_calls, "unique_files_read": len(files), "compactions": compactions}
+        tracker.consume(line)
+    return {
+        "tool_calls": tracker.tool_calls,
+        "unique_files_read": tracker.unique_files_read,
+        "compactions": tracker.compactions,
+    }
 
 
 def _safe_error(stderr: str, returncode: int) -> str:

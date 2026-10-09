@@ -72,22 +72,21 @@ def _text_output(value: str | bytes | None) -> str:
 
 def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_only: bool, workflow: str) -> str:
     action = (
-        "Analyze only; do not modify files."
+        "Read-only: analyze; do not modify files."
         if read_only
         else (
-            "The user has authorized implementation. When the request asks to fix, create, change, or implement, "
-            "you must edit the workspace and run the smallest relevant verification in this turn. Do not stop at "
-            "analysis, offer a patch as a suggestion, or ask whether to proceed. Implement only the requested change."
+            "If implementation is requested, you must edit the workspace and verify now; "
+            "no advice-only result or extra proceed question. Make only requested changes."
         )
     )
     return (
-        f"Layman route={tier.value}; workflow={workflow}. Preserve the request. {action} "
-        "Search named symbols and tests first; read only evidence needed for the done condition. "
-        f"The file limits are ceilings, not targets: {policy.initial_files} initially and {policy.expanded_files} "
-        f"only after a concrete evidence gap; do not exceed {policy.tool_calls} tool calls. "
-        "Reuse prior evidence; avoid broad scans, repeated contents, and full logs. "
-        f"Target about {policy.final_output_token_target} final-answer tokens: outcome, reported verification evidence, "
-        "residual risk, and next step. This is a concision target, not a truncation boundary."
+        f"Layman {tier.value}/{workflow}. Preserve request/scope. {action} "
+        "Search symbols/tests first; read only completion evidence. "
+        f"File ceilings, not targets: {policy.initial_files} initially; {policy.expanded_files} only for a concrete "
+        f"evidence gap; at most {policy.tool_calls} tool calls. "
+        "Reuse evidence; avoid broad scans, repeated reads and full logs. "
+        "Answer briefly: outcome, verification, risks/next step. "
+        f"Soft upper guide {policy.final_output_token_target} final-answer tokens; never pad or truncate needed detail."
     )
 
 

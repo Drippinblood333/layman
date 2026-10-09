@@ -8,12 +8,39 @@ import threading
 import time
 from pathlib import Path
 
+import pytest
 from layman_router.execution_control import (
     CancellationToken,
     EventBudgetTracker,
     run_streaming_process,
 )
-from layman_router.plus_run import plus_task_plan, run_plus_task
+from layman_router.models import RouteTier
+from layman_router.plus_run import (
+    POLICIES,
+    _execution_contract,
+    plus_task_plan,
+    run_plus_task,
+)
+
+
+@pytest.mark.parametrize("tier", list(RouteTier))
+@pytest.mark.parametrize("read_only", [True, False])
+def test_short_execution_contract_preserves_scope_safety_and_soft_budget(tier, read_only):
+    policy = POLICIES[tier]
+    contract = _execution_contract(tier, policy, read_only=read_only, workflow="fix")
+    assert "Preserve request/scope" in contract
+    assert f"{policy.initial_files} initially; {policy.expanded_files} only for a concrete evidence gap" in contract
+    assert f"at most {policy.tool_calls} tool calls" in contract
+    assert "Search symbols/tests first" in contract
+    assert f"Soft upper guide {policy.final_output_token_target}" in contract
+    assert "never pad or truncate needed detail" in contract
+    assert "outcome, verification, risks/next step" in contract
+    if read_only:
+        assert "do not modify files" in contract
+        assert "must edit" not in contract
+    else:
+        assert "If implementation is requested, you must edit the workspace and verify now" in contract
+        assert "Make only requested changes" in contract
 
 
 def test_plan_uses_deep_read_only_for_high_risk(router_config):
