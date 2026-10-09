@@ -121,3 +121,16 @@ The shorter contract preserves request/scope, conditional implementation authori
 The direct/buffered `event_metrics` collector now uses the same `EventBudgetTracker` as streamed execution. A regression confirms that started/completed events sharing one operation ID produce one call and one file, not two calls. This fixes reporting parity, not actual runtime work. Historical records cannot be retroactively corrected because raw events were intentionally not retained. The preserved pair's token values and negative result are unchanged; the old direct count remains explicitly non-comparable.
 
 All 312 local tests (271 router plus 41 adaptive), configured lint, secret scanning and whitespace validation pass. No additional execution reservation or model request occurred; **6/12 used, 6 remaining** in the original journal. Contract/collector source changes require a new experiment fingerprint, so subsequent measurements must not be pooled with the prior pair. Hosted verification remains pending. No API billing, installed configuration replacement, tag or public release occurred.
+
+## Delivery and installation verification of the shorter-contract candidate
+
+Remote `main` was read back at exact source commit `b23b067e21d984f59cb993124f645387f6c6674d` after the authorized push. [CI run 37929656288](https://github.com/Drippinblood333/layman/actions/runs/37929656288) reached terminal success: three OS test jobs, five standalone build/lifecycle jobs, Docker and release-asset assembly all passed. Publication was skipped. The earlier direct-path repair and preserved negative report are now delivered as ancestors of this commit. No CI retry was dispatched.
+
+A fresh local wheel/source build from this source passed the credential-isolated clean-install smoke, verifying 19 bundled files, CLI help and doctor for each package. Both reported missing API/admin credentials, loopback listen configuration, writable temporary database parent and offline service. The user's installed program/configuration was not replaced.
+
+| Local candidate artifact under `build/contract-parity-python-packages` | SHA-256 |
+| --- | --- |
+| `layman_codex-1.0.0-py3-none-any.whl` | `1524bc4464b254abca144a63ecb36307e05aa96b2baabfffb57590f05c8937cb` |
+| `layman_codex-1.0.0.tar.gz` | `17173ca1cf0fafb1d37a88969cfb1a6e22d80b77fd527f387141d734bb6f4d61` |
+
+The no-execution pilot planner confirms that this source has no completed arms under its new source digest, and the next planned arm is `bugfix-01:direct`. The original authorization journal still has six reservations; new fingerprints do not reset the remaining six-attempt cap. These packaging/CI results are not whole-task efficiency evidence. A new matched pair remains the next runtime calibration step; fresh holdout quality, human acceptance and owner-authorized prerelease/publication remain open.
