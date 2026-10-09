@@ -50,3 +50,18 @@ Source inspection found a launch difference: the streamed Layman runner creates 
 The local cached catalog lists `medium` among GPT-6.1 Sol's supported reasoning levels, so an unsupported effort is not supported by that local evidence. The catalog may differ from current account/server availability and is not a live access test. Argument parsing and offline prompt rendering already pass; runtime startup is still unverified.
 
 Local verification for the parity change passes 261 router plus 41 adaptive tests (302 total), configured lint and secret scanning. The exact-head hosted checkpoint remains `f7821ea`, not these subsequent local changes. GitHub direct access subsequently failed again, including a read-only remote check, so no remote delivery or CI result for this parity candidate is claimed. No global network configuration was changed and no speculative dependency downgrade, install replacement, tag or release occurred.
+
+## Delivery and clean-install credential isolation
+
+Connectivity recovered, and remote `main` was verified at `8981319cb65dae8bd36e69d45c2c7c7895a282e1`. [CI run 37916201617](https://github.com/Drippinblood333/layman/actions/runs/37916201617) passed all ten validation jobs including release assembly; publication was skipped. This supersedes the earlier pending-delivery status, but not the unresolved startup diagnosis or efficiency gates.
+
+Local wheel and source builds and their temporary-environment installation checks passed. The initial smoke inherited an unnecessary `OPENAI_API_KEY` environment setting (only its presence, never its value, was reported). The check did not start a service or perform a model call. The smoke runner now strips known model/account credentials, router overrides and Python import overrides, bootstraps pip with the sanitized child environment, and runs installation/inspection/CLI checks from the temporary directory instead of the repository. Parent environment and installed user application are unchanged. This is environment isolation, not an operating-system sandbox or a guarantee that dependencies cannot access other files.
+
+Both artifacts passed again after hardening, with `openai_api_key=missing`, `admin_token=missing`, service offline, loopback-only configuration and a writable temporary database directory. Nineteen bundled plugin files matched source hashes in each installation. Two regressions verify credential/config/import environment removal, preservation of the parent dictionary, and explicit temporary subprocess working directories. Full local suites pass 263 router plus 41 adaptive tests (304 total), lint and secret scanning. This smoke-script hardening still needs its own hosted check.
+
+The tested artifact SHA-256 values for code `8981319` are:
+
+- `layman_codex-1.0.0-py3-none-any.whl`: `be9992ecaa3fa6000a5748f37e946e28462a95868264842653139c02236fddc5`
+- `layman_codex-1.0.0.tar.gz`: `206baf41a1433e767034b6efdbf4b52494b8074b99a0b7578c7c680376b1d0d2`
+
+Artifacts remain under ignored `build/launch-parity-python-packages`; no release or installation replacement occurred. The authorized task budget remains 3/12 used and 9 remaining. No runtime task was retried in this follow-up, and no token-saving claim is supported.

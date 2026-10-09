@@ -12,6 +12,22 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = "1.0.0"
+SMOKE_BLOCKED_ENV_VARS = {
+    "OPENAI_API_KEY", "CODEX_API_KEY", "CODEX_ACCESS_TOKEN", "AZURE_OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "HF_TOKEN",
+    "GH_TOKEN", "GITHUB_TOKEN", "LAYMAN_ROUTER_ADMIN_TOKEN",
+    "PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV",
+}
+
+
+def smoke_environment(root: Path, inherited: dict[str, str]) -> dict[str, str]:
+    environment = {
+        key: value for key, value in inherited.items()
+        if key.upper() not in SMOKE_BLOCKED_ENV_VARS and not key.upper().startswith("LAYMAN_")
+    }
+    environment["LAYMAN_HOME"] = str(root / "layman-home")
+    environment["LAYMAN_ROUTER_DATABASE_PATH"] = str(root / "layman-home" / "usage.sqlite3")
+    return environment
 
 
 def digest(path: Path) -> str:
@@ -37,19 +53,18 @@ def environment_python(environment: Path) -> Path:
     return environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 
 
-def run(command: list[str], *, environment: dict[str, str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, env=environment, capture_output=True, text=True, check=True)
+def run(command: list[str], *, environment: dict[str, str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(command, env=environment, cwd=cwd, capture_output=True, text=True, check=True)
 
 
 def smoke(artifact: Path, expected: dict[str, str]) -> dict[str, object]:
     with tempfile.TemporaryDirectory(prefix="layman-python-package-") as temporary:
         root = Path(temporary)
         environment_path = root / "venv"
-        venv.EnvBuilder(with_pip=True).create(environment_path)
+        venv.EnvBuilder(with_pip=False).create(environment_path)
         python = environment_python(environment_path)
-        environment = os.environ.copy()
-        environment["LAYMAN_HOME"] = str(root / "layman-home")
-        environment["LAYMAN_ROUTER_DATABASE_PATH"] = str(root / "layman-home" / "usage.sqlite3")
+        environment = smoke_environment(root, os.environ.copy())
+        run([str(python), "-m", "ensurepip", "--upgrade"], environment=environment, cwd=root)
         run(
             [
                 str(python),
@@ -60,6 +75,7 @@ def smoke(artifact: Path, expected: dict[str, str]) -> dict[str, object]:
                 str(artifact.resolve()),
             ],
             environment=environment,
+            cwd=root,
         )
         inspection = run(
             [
@@ -76,6 +92,7 @@ def smoke(artifact: Path, expected: dict[str, str]) -> dict[str, object]:
                 ),
             ],
             environment=environment,
+            cwd=root,
         )
         actual = json.loads(inspection.stdout)
         if actual != expected:
@@ -86,11 +103,13 @@ def smoke(artifact: Path, expected: dict[str, str]) -> dict[str, object]:
                 f"bundled plugin mismatch for {artifact.name}: "
                 f"missing={missing}, unexpected={unexpected}, changed={changed}"
             )
-        run([str(python), "-m", "layman_router.cli", "--help"], environment=environment)
-        doctor = run([str(python), "-m", "layman_router.cli", "doctor"], environment=environment)
+        run([str(python), "-m", "layman_router.cli", "--help"], environment=environment, cwd=root)
+        doctor = run([str(python), "-m", "layman_router.cli", "doctor"], environment=environment, cwd=root)
         doctor_result = json.loads(doctor.stdout)
         if not doctor_result.get("listen_is_loopback") or not doctor_result.get("database_parent_writable"):
             raise RuntimeError(f"package doctor failed for {artifact.name}: {doctor_result}")
+        if doctor_result.get("openai_api_key") != "missing" or doctor_result.get("admin_token") != "missing":
+            raise RuntimeError(f"package smoke unexpectedly inherited account configuration for {artifact.name}")
         return {"artifact": artifact.name, "bundle_files": len(actual), "doctor": doctor_result}
 
 
