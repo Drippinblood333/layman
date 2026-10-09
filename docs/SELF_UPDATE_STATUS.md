@@ -12,6 +12,10 @@ Automatic routing now uses GPT-6 Luna / GPT-6.1 Sol / GPT-6 Astra with low / med
 
 ## Continuing updates
 
+### Startup infrastructure parity (local candidate)
+
+The direct token benchmark and streamed Layman execution now use the same shared platform launch options. This removes a verified Windows process-group/POSIX-session difference without changing the model, reasoning, permissions or Layman tool policies. Local platform and baseline-argument regressions pass; full suites contain 261 router and 41 adaptive tests (302 total). This is a compatibility candidate, not a confirmed repair of the startup failure or a token saving. No further execution was attempted, and the subscription budget remains 3/12 used, 9 remaining. The latest fully verified hosted code is still `f7821ea`; subsequent delivery is awaiting a successful GitHub connection. See the [diagnostic evidence](TOKEN_PILOT_2026-10-09.md#zero-call-launch-parity-follow-up).
+
 ### Authorized subscription pilot
 
 The owner-approved [bounded pilot](TOKEN_PILOT_2026-10-09.md) used two of at most twelve task executions. Layman passed the first hidden bug-fix validation with 277,114 total tokens (245,504 cached input included); the direct baseline exited after 54 ms without usable usage. The pilot stopped, leaving ten reserved-budget slots unspent and zero comparable pairs. No token savings or human quality equivalence is established. The benchmark now pins the balanced/medium baseline, prevents fallback beyond one launch per arm, persists attempt reservations across restarts, excludes incomplete usage, and classifies future errors without storing raw diagnostics. Local tests for the initial pilot code passed 239 router plus 41 adaptive tests; the follow-up adds one tested error-classification case. The hosted checkpoint above remains the last verified full CI, not proof for these new changes.

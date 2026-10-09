@@ -28,6 +28,7 @@ if str(SERVICE_SRC) not in sys.path:
 
 # ruff: disable[E402] Local benchmark imports require the path bootstrap above.
 from layman_router.config import load_config
+from layman_router.execution_control import process_launch_options
 from layman_router.plus_eval import (
     _safe_error,
     _usage_from_events,
@@ -212,6 +213,7 @@ def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[s
             result = subprocess.run(
                 command, input=_execution_prompt(case), capture_output=True, text=True, timeout=1_800,
                 encoding="utf-8", errors="replace", check=False, env=environment, cwd=workspace,
+                **process_launch_options(),
             )
         except subprocess.TimeoutExpired:
             return {"status": "failed", "error_category": "timeout", "latency_ms": 1_800_000, "answer": ""}

@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from layman_router.execution_control import process_launch_options
 from layman_router.plus_run import plus_task_plan
 
 from evals.token_optimization import benchmark
@@ -116,6 +117,8 @@ def test_direct_baseline_is_balanced_medium_not_deep(tmp_path, monkeypatch, rout
     monkeypatch.setattr(benchmark, "load_config", lambda: router_config)
 
     def runner(command, **kwargs):
+        for key, value in process_launch_options().items():
+            assert kwargs[key] == value
         seen.append(command)
         return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
 

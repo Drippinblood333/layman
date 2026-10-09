@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import json
+import subprocess
 
 import pytest
-from layman_router.execution_control import EventBudgetTracker, usage_from_events
+from layman_router.execution_control import (
+    EventBudgetTracker,
+    process_launch_options,
+    usage_from_events,
+)
 from layman_router.plus_eval import _usage_from_events
 from layman_router.plus_run import _usage_available
 
@@ -67,3 +72,9 @@ def test_zero_usage_and_invalid_json_have_distinct_availability():
     assert available
     assert all(value == 0 for value in usage.values())
     assert usage_from_events("invalid json\n") == (usage, False)
+
+
+@pytest.mark.parametrize("platform_name", ["nt", "posix"])
+def test_launch_options_match_streamed_and_direct_process_isolation(platform_name):
+    expected = {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)} if platform_name == "nt" else {"start_new_session": True}
+    assert process_launch_options(platform_name) == expected

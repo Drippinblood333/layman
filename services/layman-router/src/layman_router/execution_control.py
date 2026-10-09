@@ -16,6 +16,15 @@ from typing import IO, Any
 
 USAGE_KEYS = ("input_tokens", "cached_input_tokens", "output_tokens", "reasoning_tokens")
 CODEX_USAGE_PROTOCOL_VERSION = "completed-turn-usage-v1"
+
+
+def process_launch_options(platform_name: str | None = None) -> dict[str, Any]:
+    """Use the same process isolation for direct and streamed Codex launches."""
+    if (platform_name or os.name) == "nt":
+        return {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
+    return {"start_new_session": True}
+
+
 _USAGE_ALIASES = {
     "input_tokens": "input_tokens",
     "cached_input_tokens": "cached_input_tokens",
@@ -354,10 +363,7 @@ def run_streaming_process(
         "cwd": cwd,
         "env": env,
     }
-    if os.name == "nt":
-        popen_options["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-    else:
-        popen_options["start_new_session"] = True
+    popen_options.update(process_launch_options())
     process = subprocess.Popen(list(command), **popen_options)
     token.bind(process)
     try:
