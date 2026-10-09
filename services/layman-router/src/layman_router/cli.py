@@ -36,6 +36,7 @@ from .plus_eval import (
 from .plus_run import run_plus_task
 from .project_status import inspect_project
 from .task_plan import create_task_plan
+from .tool_output import MAX_CHARS, compact_output, restore_output
 
 
 def _configure_windows_stdio() -> None:
@@ -159,6 +160,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Explicitly authorize the exact destructive task supplied on stdin",
     )
     run.add_argument("--clipboard", action="store_true", help="Read Unicode task text directly from the clipboard")
+    compact = commands.add_parser("compact-output", help="Losslessly fold repeated stdin lines; no execution or model calls")
+    compact.add_argument("--restore", action="store_true", help="Restore exact line-run output instead of compacting it")
     project = commands.add_parser("project", help="Understand an existing project without reading file contents")
     project_commands = project.add_subparsers(dest="project_command", required=True)
     project_status = project_commands.add_parser("status", help="Estimate the current project stage from repository evidence")
@@ -216,6 +219,21 @@ def main(argv: list[str] | None = None) -> int:
     _configure_windows_stdio()
     args = build_parser().parse_args(argv)
     try:
+        if args.command == "compact-output":
+            binary_input = getattr(sys.stdin, "buffer", None)
+            text = (
+                binary_input.read(MAX_CHARS * 4 + 1).decode("utf-8")
+                if binary_input is not None else sys.stdin.read(MAX_CHARS + 1)
+            )
+            if len(text) > MAX_CHARS:
+                raise ValueError("Output exceeds the size limit")
+            rendered = restore_output(text) if args.restore else compact_output(text)
+            binary_output = getattr(sys.stdout, "buffer", None)
+            if binary_output is not None:
+                binary_output.write(rendered.encode("utf-8"))
+            else:
+                sys.stdout.write(rendered)
+            return 0
         if args.command == "setup":
             detected_mode, detection = detect_user_mode()
             mode = detected_mode if args.mode == "auto" else args.mode

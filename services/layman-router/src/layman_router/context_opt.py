@@ -15,10 +15,14 @@ class ContextOptimization:
     original_chars: int
     optimized_chars: int
     duplicate_blocks_removed: int
+    tool_output_mode: str = "off"
+    tool_outputs_compressed: int = 0
+    tool_output_original_bytes: int = 0
+    tool_output_packed_bytes: int = 0
 
     @property
     def changed(self) -> bool:
-        return self.duplicate_blocks_removed > 0
+        return self.duplicate_blocks_removed > 0 or self.tool_outputs_compressed > 0
 
 
 def _serialized_chars(value: Any) -> int:

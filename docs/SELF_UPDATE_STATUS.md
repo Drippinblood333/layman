@@ -46,6 +46,14 @@ The fix marks `*.lock` as LF in Git and canonicalizes CRLF to LF only in generat
 
 The read-only `release-assets` job now runs on ordinary CI and combines all five platforms, validates runtime inventories/SBOMs, smoke-installs Python packages, scans and stages flat checksummed assets. Publication is a separate job with write permission, dependent on successful assembly and restricted to the existing owner-approved version-tag series. Run 37828989982 passed the complete ten-job validation including combined assembly and saved the release-assets artifact; `publish` was skipped. No release tag or GitHub Release was created. This closes technical artifact assembly verification, not the separate live-quality, prerelease-installer, invited-tester or owner-approval gates.
 
+## Repeated-log efficiency follow-up (local verification)
+
+The opt-in lossless-line encoder and CLI filter reference RTK's public repeated-log-with-counts strategy, with original Python code and no vendored upstream source or binary. An attempted official RTK v0.51.0 Windows download was repeatedly truncated and failed SHA-256 verification; none of those files were extracted or executed. The independently implemented encoder preserves all lines/counts/ordering, call identifiers, raw safety classification and UTF-8/CRLF, and skips JSON/fenced code and non-beneficial inputs. Thirty new regression cases bring the local router suite to 233 tests; the 41 adaptive harness tests also pass (274 total), along with Ruff, Bandit, routing/plugin/release validators and secret scanning. Hosted validation of this follow-up remains pending.
+
+The [eight-case offline output measurement](BENCHMARKS.md#lossless-repeated-tool-output-offline-only) records 93.53–94.87% UTF-8 byte reduction on three synthetic repeated-log fixtures and unchanged output on the other five. Reconstruction is exact. Wheel/sdist builds and their clean-install smoke checks pass, as do local documentation-link checks. This is not a measured token reduction or a successful full-task efficiency benchmark. No paid or subscription-backed model call, local installation replacement or public release occurred.
+
+The [invited-user acceptance protocol](USER_ACCEPTANCE.md) is now prepared: exact candidate identity, installation/status tasks, counterbalanced direct-versus-Layman development tasks, predeclared acceptance criteria, intervention/time/token accounting, privacy-preserving human scoring and P0/P1 handling. This is preparation only. No participant was contacted, no real model call was made, and no release or existing installation was changed. Actual user outcomes and measured efficiency remain missing.
+
 ## Remaining public-release gates
 
 - Fresh release-candidate Plus calibration and human semantic-quality scoring.

@@ -6,6 +6,7 @@ import os
 import secrets
 import time
 import uuid
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +37,7 @@ from .routing import (
 )
 from .streaming import SSECapture
 from .telemetry import UsageStore, estimate_cost, extract_usage, price_for_model
+from .tool_output import optimize_tool_outputs
 from .validation import validate_response
 
 RETRYABLE_STATUS = {429, 500, 502, 503, 504}
@@ -71,6 +73,8 @@ def _layman_headers(
         "x-layman-fallback-used": str(fallback_used).lower(),
         "x-layman-context-mode": optimization.mode,
         "x-layman-context-duplicates-removed": str(optimization.duplicate_blocks_removed),
+        "x-layman-tool-output-mode": optimization.tool_output_mode,
+        "x-layman-tool-outputs-compressed": str(optimization.tool_outputs_compressed),
         "x-layman-prompt-cache-mode": cache_policy.mode,
         "x-layman-prompt-cache-breakpoints": str(cache_policy.breakpoints),
     }
@@ -151,6 +155,10 @@ def _usage_record(
             "context_original_chars": optimization.original_chars,
             "context_optimized_chars": optimization.optimized_chars,
             "context_duplicate_blocks_removed": optimization.duplicate_blocks_removed,
+            "tool_output_mode": optimization.tool_output_mode,
+            "tool_outputs_compressed": optimization.tool_outputs_compressed,
+            "tool_output_original_bytes": optimization.tool_output_original_bytes,
+            "tool_output_packed_bytes": optimization.tool_output_packed_bytes,
             "prompt_cache_mode": cache_policy.mode,
             "prompt_cache_breakpoints": cache_policy.breakpoints,
             "routing_decision": structured_decision(decision),
@@ -305,6 +313,15 @@ def create_app(
         )
         policy_finished_ns = time.perf_counter_ns()
         try:
+            # Decide the safety floor from the original tool text before encoding.
+            optimized_payload, tool_report = optimize_tool_outputs(optimized_payload)
+            optimization = replace(
+                optimization,
+                tool_output_mode=tool_report.mode,
+                tool_outputs_compressed=tool_report.compressed,
+                tool_output_original_bytes=tool_report.original_bytes,
+                tool_output_packed_bytes=tool_report.packed_bytes,
+            )
             upstream_payload, cache_policy = prepare_upstream_payload(
                 optimized_payload,
                 automatic=decision.automatic,

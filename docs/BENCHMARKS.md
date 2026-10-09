@@ -1,5 +1,21 @@
 # Cost, quality and routing benchmarks
 
+## Lossless repeated tool output (offline only)
+
+The [RTK strategy](https://github.com/rtk-ai/rtk) of folding repeated log lines with counts informed an original reversible Python encoder; no upstream source or executable is bundled. Run the zero-call regression measurement with:
+
+```powershell
+.\.venv\Scripts\python evals\token_optimization\check_tool_output.py
+```
+
+Eight synthetic fixtures verify exact reconstruction and non-growth, including Chinese CRLF, a failure after repeated warnings, unique test output, short repetition, structured JSON, fenced code and a traceback. Repeated progress/warning/Chinese fixtures shrink from 2,905/2,735/2,929 UTF-8 bytes to 149/177/175 bytes; the other five fixtures stay unchanged. These are synthetic byte measurements, not tokenizer counts, live usage, task-quality results or bill savings. They cannot close the public token-savings gate.
+
+API clients may explicitly set `metadata.layman_tool_output_mode="lossless_lines"` for automatic requests containing plain-text `function_call_output` logs. Routing safety classification happens before encoding. Current user instructions, tool arguments, call IDs and non-string outputs remain unchanged. Repetition counts and line order are preserved, and JSON/fenced code are not encoded. Every encoding includes reconstruction instructions; consumers requiring raw text should leave this off. The control metadata is stripped before upstream forwarding. Response headers expose mode/count, and local recent-usage reports expose byte counts without storing log text.
+
+`layman compact-output` reads UTF-8 stdin and writes the encoded or unchanged text; `--restore` reconstructs the original. It executes no command and makes no model call. Windows binary stdin/stdout preserve CRLF and Unicode. A shell pipeline may mask the producer's failure status: retain and check that status separately; a successful filter does not verify the command that produced the log.
+
+This feature does not automatically intercept Plus/Codex shell tools or shrink unrelated task history. Fresh paired end-to-end execution must measure whether tool-output reduction outweighs encoding overhead, re-reads and quality effects before publishing any total-token claim.
+
 ## Static routing suite
 
 `evals/router-v2/cases.jsonl` contains 300 varied cases across summary, rewrite, code explanation, debugging, architecture and extraction. Each category has 50 cases covering Chinese and English, long context, one versus multiple tools, previous-response state, budget/quality metadata, high-risk content and conflicting route overrides.

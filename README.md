@@ -21,6 +21,8 @@ Layman composes only the modules needed for the task: context selection, workflo
 
 ## Plus and API modes
 
+An opt-in, reversible repeated-log encoder is available for automatic API tool outputs and as `layman compact-output`. It follows RTK's repeated-lines-with-counts strategy without vendoring its code. [Offline measurements](docs/BENCHMARKS.md#lossless-repeated-tool-output-offline-only) establish exact reconstruction and smaller synthetic log bytes, not total task-token savings. It does not automatically intercept Plus shell tools.
+
 | Capability | ChatGPT login | OpenAI API key |
 |---|---:|---:|
 | Understand project progress | Yes | Yes |

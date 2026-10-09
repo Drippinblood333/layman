@@ -26,6 +26,7 @@ jobs:
       - run: python -m pytest evals/adaptive-reasoning-v1/test_benchmark.py
       - run: python evals/adaptive-reasoning-v1/benchmark.py validate-only
       - run: python evals/check_router_v2.py
+      - run: python evals/token_optimization/check_tool_output.py
       - run: python evals/check_release.py
       - run: python scripts/validate-public-plugin.py
       - run: python -m build services/layman-router --outdir build/python-packages

@@ -60,5 +60,5 @@ Updated: 2026-10-09
 - [x] The initial `main` branch is pushed and hosted CI completes successfully.
 - [x] Dependabot vulnerability alerts/security updates are enabled after the default branch exists.
 - [x] An active `main` ruleset blocks deletion/non-fast-forward updates, requires linear history and requires the nine verified hosted CI checks.
-- [ ] `v1.0.0-rc.1` is tested by 5–10 invited users with no unresolved P0/P1 issue.
+- [ ] `v1.0.0-rc.1` is tested by 5–10 invited users with no unresolved P0/P1 issue, following the [user acceptance protocol](USER_ACCEPTANCE.md); the protocol is prepared, but actual participant results are still missing.
 - [ ] Owner approves and publishes `v1.0.0`.

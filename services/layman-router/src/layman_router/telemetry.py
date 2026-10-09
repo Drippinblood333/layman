@@ -240,6 +240,12 @@ class UsageStore:
             item["attempts"] = metadata.get("attempts", [])
             item["routing_decision"] = metadata.get("routing_decision", {})
             item["router_overhead"] = metadata.get("router_overhead", {})
+            item["tool_output_optimization"] = {
+                "mode": metadata.get("tool_output_mode", "off"),
+                "compressed_outputs": int(metadata.get("tool_outputs_compressed", 0)),
+                "original_bytes": int(metadata.get("tool_output_original_bytes", 0)),
+                "packed_bytes": int(metadata.get("tool_output_packed_bytes", 0)),
+            }
             result.append(item)
         return result
 

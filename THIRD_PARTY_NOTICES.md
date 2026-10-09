@@ -5,7 +5,7 @@ Layman 1.0 does not copy or vendor source code from the comparison projects belo
 | Project | Upstream | License | Layman 1.0 use |
 |---|---|---|---|
 | Caveman | https://github.com/JuliusBrussee/caveman | MIT | Design comparison only |
-| RTK | https://github.com/rtk-ai/rtk | Apache-2.0 | Design comparison only; no Rust code included |
+| RTK | https://github.com/rtk-ai/rtk | Apache-2.0 | Repeated-log-with-counts strategy reference; original reversible Python implementation, no Rust source or RTK binary included |
 | Spec Kit | https://github.com/github/spec-kit | MIT | Workflow comparison only |
 | Superpowers | https://github.com/obra/superpowers | MIT | Skill-composition comparison only |
 | Claude Code Router | https://github.com/musistudio/claude-code-router | MIT | Routing-architecture comparison only |

@@ -64,6 +64,14 @@ layman run --clipboard
 
 当前 API 自动路由为：Fast 使用 GPT-6 Luna（低推理、低冗长度），Balanced 使用 GPT-6.1 Sol（中推理、低冗长度），Deep 使用 GPT-6 Astra（高推理、中冗长度）。该策略仍明确标记为“启发式、未校准”；只有在获得付费调用许可并完成人工复核后，30 个盲测留出任务才能用于下调模型或推理档位。
 
+### 重复工具日志压缩（实验性，显式开启）
+
+参考 [RTK](https://github.com/rtk-ai/rtk) 的重复日志计数策略，Layman 现在提供可完整还原的相邻重复行编码。API 请求设置 `metadata.layman_tool_output_mode="lossless_lines"` 后，只对 `model="auto"` 的字符串 `function_call_output.output` 尝试编码；风险判断仍使用原文。短输出、没有收益的输出、有效 JSON 和围栏代码原样保留，不删错误、不丢调用标识。
+
+本地也可把 UTF-8 日志通过标准输入交给 `layman compact-output`，用 `layman compact-output --restore` 还原。命令不执行输入、不调用模型，也不存储日志。不要把过滤器的退出码当作上游测试成功；管道必须另外保留原命令的退出状态。
+
+当前仅证明合成重复日志能变小且完全还原，尚未证明完整任务总 token 或费用下降。详见[输出压缩测量](docs/BENCHMARKS.md#lossless-repeated-tool-output-offline-only)。
+
 ### GPT-6 稳定前缀缓存（显式开启）
 
 GPT-6 的缓存写入本身会产生费用，因此 Layman 不猜测哪些内容稳定，也不会全局开启显式缓存。对于确实重复的 API 工作负载，把共享前缀放在前面，给其最后一个 `input_text`、`input_image` 或 `input_file` 内容块加标记，并提供一个不含敏感信息的键。Layman 会在转发前移除自己的控制元数据，写入 30 分钟的显式缓存策略，并在本地面板展示缓存读取和写入量。

@@ -182,6 +182,59 @@ async def test_safe_context_mode_deduplicates_before_upstream(router_config):
 
 
 @pytest.mark.asyncio
+async def test_lossless_tool_output_encoding_after_original_safety_classification(router_config, monkeypatch):
+    import layman_router.app as app_module
+    from layman_router.tool_output import restore_output
+
+    original_classify = app_module.classify_task
+    classified = []
+    seen = []
+    raw = "warning: synthetic log marker\n" * 100 + "FAILED: do not drop this error\n"
+
+    def classify(payload, config):
+        classified.append(payload["input"][0]["output"])
+        return original_classify(payload, config)
+
+    monkeypatch.setattr(app_module, "classify_task", classify)
+
+    async def upstream(request):
+        payload = json.loads(request.content)
+        seen.append(payload)
+        return httpx.Response(200, json=response_body(payload["model"]))
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post("/v1/responses", headers={"Authorization": "Bearer secret"}, json={
+            "model": "auto", "metadata": {"layman_tool_output_mode": "lossless_lines"},
+            "input": [{"type": "function_call_output", "call_id": "c1", "output": raw},
+                      {"role": "user", "content": "请总结工具运行结果"}],
+        })
+    assert result.status_code == 200
+    assert classified == [raw]
+    assert restore_output(seen[0]["input"][0]["output"]) == raw
+    assert seen[0]["input"][0]["call_id"] == "c1"
+    assert "metadata" not in seen[0]
+    assert result.headers["x-layman-tool-outputs-compressed"] == "1"
+    record = app.state.store.recent()[0]
+    metrics = record["tool_output_optimization"]
+    assert metrics["packed_bytes"] < metrics["original_bytes"]
+    assert "synthetic log marker" not in json.dumps(record)
+
+
+@pytest.mark.asyncio
+async def test_invalid_tool_output_mode_is_rejected_before_upstream(router_config):
+    async def upstream(request):
+        pytest.fail("Invalid compression metadata must not contact upstream")
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post("/v1/responses", headers={"Authorization": "Bearer secret"}, json={
+            "model": "auto", "metadata": {"layman_tool_output_mode": "truncate"}, "input": "hello",
+        })
+    assert result.status_code == 400
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("field", "value", "message"),
     [
