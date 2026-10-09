@@ -3,6 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -155,6 +158,88 @@ def test_explicit_selection_stops_after_execution_failure(tmp_path, monkeypatch)
     result = run_benchmark(args)
     assert len(launches) == result["failed_now"] == result["reserved_attempts_total"] == 1
     assert result["authorized_attempts_remaining"] == 11
+
+
+def test_trial_lock_releases_after_exception_and_preserves_foreign_lock(tmp_path):
+    output = tmp_path / "results.jsonl"
+    lock = output.with_name(output.name + ".lock")
+    with pytest.raises(ValueError, match="synthetic"), benchmark._exclusive_trial(output):
+        raise ValueError("synthetic")
+    assert not lock.exists()
+    with benchmark._exclusive_trial(output):
+        lock.write_text("replacement-owner", encoding="utf-8")
+    assert lock.read_text(encoding="utf-8") == "replacement-owner"
+    with pytest.raises(RuntimeError, match="writer lock exists"), benchmark._exclusive_trial(output):
+        pytest.fail("A stale/replacement lock must not be stolen")
+
+
+def test_existing_trial_lock_blocks_before_codex_resolution(tmp_path, monkeypatch):
+    output = tmp_path / "results.jsonl"
+    lock = output.with_name(output.name + ".lock")
+    lock.write_text("existing-owner", encoding="utf-8")
+    args = argparse.Namespace(output=output, seed=20261010, max_calls=2, run=True, allow_more_calls=False)
+    monkeypatch.setattr(benchmark, "find_codex", lambda _: pytest.fail("Locked trial must not reach Codex"))
+    with pytest.raises(RuntimeError, match="writer lock exists"):
+        run_benchmark(args)
+    assert lock.read_text(encoding="utf-8") == "existing-owner"
+    assert not output.exists()
+
+
+def test_trial_lock_excludes_an_independent_process(tmp_path):
+    output = tmp_path / "results.jsonl"
+    with benchmark._exclusive_trial(output):
+        child = subprocess.run([
+            sys.executable, "-c",
+            (
+                "import sys; from pathlib import Path; "
+                "from evals.token_optimization.benchmark import _exclusive_trial\n"
+                "try:\n"
+                " with _exclusive_trial(Path(sys.argv[1])): sys.exit(2)\n"
+                "except RuntimeError: print('blocked')\n"
+            ),
+            str(output),
+        ], cwd=benchmark.ROOT, capture_output=True, text=True, timeout=10, check=False)
+        assert child.returncode == 0
+        assert child.stdout.strip() == "blocked"
+
+
+def test_concurrent_trial_writers_cannot_double_reserve_last_attempt(tmp_path, monkeypatch):
+    args = argparse.Namespace(
+        output=tmp_path / "results.jsonl", work_root=tmp_path / "work", seed=20261010,
+        run=True, max_calls=2, allow_more_calls=False, codex_path="fake",
+        case_ids=["feature-01"], total_call_cap=1,
+    )
+    monkeypatch.setattr(benchmark, "find_codex", lambda _: "fake")
+    monkeypatch.setattr(benchmark, "codex_login_status", lambda _: {"available": True, "chatgpt_login": True})
+    monkeypatch.setattr(benchmark.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a[0], 0, stdout="test-version", stderr=""))
+    monkeypatch.setattr(benchmark, "prepare_workspace", lambda case, path: path.mkdir(parents=True))
+    monkeypatch.setattr(benchmark, "validate_workspace", lambda *a: {"passed": True})
+    launched = threading.Event()
+    release = threading.Event()
+    calls = []
+
+    def held_execution(*a, **k):
+        calls.append(1)
+        launched.set()
+        assert release.wait(10), "Test writer was not released"
+        return {"status": "completed", "usage": {"input_tokens": 10, "output_tokens": 2}, "answer": ""}
+
+    monkeypatch.setattr(benchmark, "_direct_run", held_execution)
+    monkeypatch.setattr(benchmark, "run_plus_task", held_execution)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        first = pool.submit(run_benchmark, args)
+        try:
+            assert launched.wait(10)
+            with pytest.raises(RuntimeError, match="writer lock exists"):
+                run_benchmark(args)
+        finally:
+            release.set()
+        assert first.result(timeout=10)["reserved_attempts_total"] == 1
+    assert run_benchmark(args)["completed_now"] == 0
+    assert len(calls) == 1
+    journal = args.output.with_name(args.output.name + ".attempts.jsonl")
+    assert len(journal.read_text(encoding="utf-8").splitlines()) == 1
+    assert not args.output.with_name(args.output.name + ".lock").exists()
 
 
 def test_analysis_excludes_incomplete_usage_not_as_free_savings(tmp_path):

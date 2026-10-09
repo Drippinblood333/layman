@@ -83,6 +83,8 @@ After explicit subscription-use approval, `--pilot --max-calls 12 --total-call-c
 
 Here a "call" means one entire Codex task execution, which may contain multiple internal model/tool exchanges; it is not a hard cap on provider-internal requests. API-key billing is disabled. Six pairs cannot close the 30-pair public claim gate, and this Plus experiment does not exercise the new API-only tool-output encoding.
 
+Executing the local task benchmark now requires an exclusive `<output>.lock` before login or reservation reads. A concurrent writer targeting the same resolved output fails before reaching Codex; budget reads, reservations and result writes occur under one writer's lock. Normal completion/exceptions remove only that writer's owned lock. A crashed process can leave a stale lock: verify the actual process and journal before requesting recovery, never delete a lock or replay reservations automatically. Preview remains lock-free. This protects this local runner's shared journal, not other output paths, independent API tools, provider-internal requests or distributed/network filesystems. It does not expand authorization.
+
 ```powershell
 .\.venv\Scripts\python -X utf8 evals\token_optimization\benchmark.py --pilot --max-calls 12 --total-call-cap 12 --seed 20261009 --output build/token-pilot-2026-10-09/results.jsonl --work-root build/token-pilot-2026-10-09/work
 ```

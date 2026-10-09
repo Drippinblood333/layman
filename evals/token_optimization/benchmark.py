@@ -14,6 +14,7 @@ import sys
 import tempfile
 import time
 import uuid
+from contextlib import contextmanager
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -300,6 +301,28 @@ def _ordered_arms(seed: int, selected: list[BenchmarkCase] | None = None) -> lis
     return pairs
 
 
+@contextmanager
+def _exclusive_trial(output: Path):
+    resolved_output = output.resolve()
+    lock = resolved_output.with_name(resolved_output.name + ".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    owner = uuid.uuid4().hex
+    try:
+        handle = lock.open("x", encoding="utf-8")
+    except FileExistsError as exc:
+        raise RuntimeError("Trial writer lock exists; inspect the active process or stale lock before retrying") from exc
+    try:
+        with handle:
+            handle.write(owner)
+            handle.flush()
+            os.fsync(handle.fileno())
+        yield
+    finally:
+        # Never remove a replacement lock or automatically steal a stale lock.
+        if lock.exists() and lock.read_text(encoding="utf-8") == owner:
+            lock.unlink()
+
+
 def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     if isinstance(args.max_calls, bool) or not isinstance(args.max_calls, int) or args.max_calls < 1:
         raise ValueError("max_calls must be a positive integer")
@@ -322,6 +345,12 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
         }
     if args.max_calls > 20 and not args.allow_more_calls:
         raise ValueError("More than 20 calls per batch requires --allow-more-calls")
+    with _exclusive_trial(args.output):
+        return _run_reserved_benchmark(args, experiment, plan)
+
+
+def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
+    total_call_cap = getattr(args, "total_call_cap", None)
     executable = find_codex(args.codex_path)
     login = codex_login_status(executable)
     if not login["available"] or not login["chatgpt_login"]:
