@@ -80,3 +80,19 @@ Two zero-model prompt-render probes from a clean synthetic fixture verified the 
 | resolved absolute path | 0 | yes | yes |
 
 The debug renderer itself does not reject the nonexistent directory. This reproduces incorrect path resolution, but is not a successful runtime task or retrospective proof that no other startup error occurred. The direct arm now resolves the workspace before setting both subprocess `cwd` and CLI `-C`. A regression exercises a relative work root and checks both absolute launch arguments and usage availability with a fake process, without model calls. Local suites pass 264 router plus 41 adaptive tests (305 total), lint and secret scanning. The path repair still needs hosted verification and a separately budgeted runtime retest. No fifth attempt was made in this batch, and no token-saving claim is supported.
+
+## Fifth attempt: corrected direct workspace passes runtime validation
+
+Remote GitHub verification was still failing, but the path repair had 305 passing local tests and a native zero-model path-render check. One local diagnostic under code `a9dc9ecca0fcac243c8ac234fdea1a4c7859a107` used the original output/journal, seed `20261010`, maximum one launch and unchanged total cap 12. This local runtime check does not replace the pending hosted verification or authorize publication.
+
+The corrected `bugfix-01:direct` completed and passed hidden function/scope validation, changing only `src/target.py`. It reported exactly one thread start, one turn start and one completed turn, with no failed-turn/error events. Usage is complete under the trusted completed-turn parser:
+
+| Model / effort | Input | Cached input (included in input) | Output | Reasoning (included in output) | Total | Time |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| GPT-6.1 Sol / medium | 279,649 | 256,768 | 1,673 | 136 | 281,322 | 120,449 ms |
+
+Fingerprint: `4e2f7655bed3d194ecaf9cadf7fbb01df49e077bf0451045b64e45acbfc138c5`. One unique file read and zero compactions were reported. The direct collector reported 10 tool item events; unlike the streamed collector, its legacy metric may count started/completed events twice, so this number is not an audited unique-tool-call comparison. It is not a public savings gate. Usage and validation are separate from that tool metric.
+
+This establishes that the directory-corrected direct arm can execute this task in the current setup. It does not establish success for all tasks, human semantic review or token savings. The substantial input count is now backed by a completed-turn usage event; its precise context-source breakdown has not been measured. Cached input must not be added twice or converted into a subscription invoice.
+
+The original journal now contains **5/12 reserved executions, 7 remaining**. No second execution was launched in this batch. No raw prompt, answer, generated code or stderr was retained. There is one usable direct baseline but no same-fingerprint Layman result yet; older experiments must not be pooled with it. The next useful runtime check is the matching Layman arm under this same code/protocol, after confirming safe delivery. No API-key billing, local installation replacement, tag or public release occurred.
