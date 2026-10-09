@@ -128,6 +128,22 @@ def test_model_unavailable_only_falls_upward(tmp_path: Path):
     assert result["usage_incomplete"] is True
 
 
+def test_attempt_limit_prevents_a_fallback_launch(tmp_path: Path):
+    models = []
+
+    def fake_runner(command, **kwargs):
+        if command[1:3] == ["login", "status"]:
+            return subprocess.CompletedProcess(command, 0, stdout="Logged in using ChatGPT", stderr="")
+        models.append(command[command.index("-m") + 1])
+        return subprocess.CompletedProcess(command, 1, stdout="", stderr="model not found")
+
+    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path=sys.executable, runner=fake_runner, max_model_attempts=1)
+    assert models == ["gpt-6-luna"]
+    assert len(result["attempts"]) == 1
+    assert result["status"] == "failed"
+    assert result["fallback_used"] is False
+
+
 def test_fallback_accumulates_usage_from_every_attempt(tmp_path: Path):
     calls = 0
 

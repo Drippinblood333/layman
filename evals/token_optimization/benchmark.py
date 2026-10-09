@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import inspect
 import json
+import os
 import random
 import shutil
 import stat
@@ -39,6 +40,7 @@ from layman_router.plus_run import (
     COMPACT_PROMPT,
     POLICIES,
     _execution_contract,
+    _usage_available,
     run_plus_task,
 )
 
@@ -52,7 +54,7 @@ from evals.token_optimization.fixture import (
 
 DEFAULT_OUTPUT = Path.home() / ".layman" / "token-benchmark.jsonl"
 DEFAULT_WORK = ROOT / "build" / "token-benchmark-work"
-BENCHMARK_SCHEMA_VERSION = 2
+BENCHMARK_SCHEMA_VERSION = 3
 
 
 def _execution_prompt(case: BenchmarkCase) -> str:
@@ -70,12 +72,14 @@ def _stable_digest(value: Any) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def _experiment_manifest(seed: int) -> dict[str, Any]:
+def _experiment_manifest(seed: int, selected: list[BenchmarkCase] | None = None) -> dict[str, Any]:
     config = load_config()
-    cases = [asdict(case) for case in CASES]
+    cases = [asdict(case) for case in (selected if selected is not None else CASES)]
     policies = {tier.value: asdict(policy) for tier, policy in POLICIES.items()}
     components = {
         "randomization_seed": seed,
+        "direct_baseline": "configured_balanced_medium",
+        "max_model_attempts_per_arm": 1,
         "cases_sha256": _stable_digest(cases),
         "routing_config_sha256": _stable_digest(config.model_dump(mode="json")),
         "execution_policies_sha256": _stable_digest(policies),
@@ -145,7 +149,7 @@ def _remove_workspace(workspace: Path, work_root: Path) -> None:
 
 def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[str, Any]:
     config = load_config()
-    spec = config.tiers["deep"]
+    spec = config.tiers["balanced"]
     with tempfile.TemporaryDirectory(prefix="layman-direct-") as directory:
         last_message = Path(directory) / "last-message.txt"
         command = [
@@ -163,7 +167,7 @@ def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[s
         try:
             result = subprocess.run(
                 command, input=_execution_prompt(case), capture_output=True, text=True, timeout=1_800,
-                check=False, env=environment, cwd=workspace,
+                encoding="utf-8", errors="replace", check=False, env=environment, cwd=workspace,
             )
         except subprocess.TimeoutExpired:
             return {"status": "failed", "error_category": "timeout", "latency_ms": 1_800_000, "answer": ""}
@@ -178,6 +182,7 @@ def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[s
             "sandbox": "read-only" if case.read_only else "workspace-write",
             "fallback_used": False,
             "usage": _usage_from_events(result.stdout),
+            "usage_incomplete": not _usage_available(result.stdout),
             "latency_ms": round((time.perf_counter() - started) * 1_000),
             "answer": answer,
             **event_metrics(result.stdout),
@@ -215,10 +220,22 @@ def _public_record(
     return record
 
 
-def _ordered_arms(seed: int) -> list[tuple[BenchmarkCase, str]]:
+def _selected_cases(pilot: bool) -> list[BenchmarkCase]:
+    if not pilot:
+        return CASES
+    seen: set[str] = set()
+    selected: list[BenchmarkCase] = []
+    for case in CASES:
+        if case.category not in seen:
+            selected.append(case)
+            seen.add(case.category)
+    return selected
+
+
+def _ordered_arms(seed: int, selected: list[BenchmarkCase] | None = None) -> list[tuple[BenchmarkCase, str]]:
     randomizer = random.Random(seed)
     pairs: list[tuple[BenchmarkCase, str]] = []
-    for case in CASES:
+    for case in (selected if selected is not None else CASES):
         arms = ["direct", "layman"]
         randomizer.shuffle(arms)
         pairs.extend((case, arm) for arm in arms)
@@ -226,14 +243,20 @@ def _ordered_arms(seed: int) -> list[tuple[BenchmarkCase, str]]:
 
 
 def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
-    experiment = _experiment_manifest(args.seed)
+    if isinstance(args.max_calls, bool) or not isinstance(args.max_calls, int) or args.max_calls < 1:
+        raise ValueError("max_calls must be a positive integer")
+    total_call_cap = getattr(args, "total_call_cap", None)
+    if total_call_cap is not None and (isinstance(total_call_cap, bool) or not isinstance(total_call_cap, int) or total_call_cap < 1):
+        raise ValueError("total_call_cap must be a positive integer")
+    selected = _selected_cases(getattr(args, "pilot", False))
+    experiment = _experiment_manifest(args.seed, selected)
     experiment_digest = experiment["experiment_digest"]
-    plan = _ordered_arms(args.seed)
+    plan = _ordered_arms(args.seed, selected)
     done = _completed_keys(args.output, experiment_digest)
     pending = [(case, arm) for case, arm in plan if f"{case.id}:{arm}" not in done]
     if not args.run:
         return {
-            "mode": "dry-run", "cases": len(CASES), "planned_calls": len(plan),
+            "mode": "dry-run", "cases": len(selected), "planned_calls": len(plan),
             "completed_calls": len(plan) - len(pending), "pending_calls": len(pending),
             "experiment_digest": experiment_digest,
             "next": [{"key": f"{case.id}:{arm}", "category": case.category} for case, arm in pending[: args.max_calls]],
@@ -262,23 +285,43 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     experiment_digest = experiment["experiment_digest"]
     done = _completed_keys(args.output, experiment_digest)
     pending = [(case, arm) for case, arm in plan if f"{case.id}:{arm}" not in done]
+    journal = args.output.with_name(args.output.name + ".attempts.jsonl")
+    reservations = [json.loads(line) for line in journal.read_text(encoding="utf-8").splitlines() if line.strip()] if journal.exists() else []
+    public_keys = {
+        record["key"] for line in args.output.read_text(encoding="utf-8").splitlines() if line.strip()
+        for record in [json.loads(line)] if record.get("experiment_digest") == experiment_digest
+    } if args.output.exists() else set()
+    relevant = [record for record in reservations if record.get("experiment_digest") == experiment_digest]
+    if any(record["key"] not in public_keys for record in relevant):
+        raise RuntimeError("An interrupted reserved attempt needs review; refusing automatic replay")
+    remaining_budget = max(0, total_call_cap - len(reservations)) if total_call_cap is not None else args.max_calls
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.work_root.mkdir(parents=True, exist_ok=True)
     baseline_total, baseline_failed = _failure_counts(args.output, experiment_digest)
     completed_now = 0
     failed_now = 0
     with args.output.open("a", encoding="utf-8") as stream:
-        for case, arm in pending[: args.max_calls]:
+        for case, arm in pending[: min(args.max_calls, remaining_budget)]:
             workspace = args.work_root / f"{case.id}-{arm}-{uuid.uuid4().hex[:8]}"
             prepare_workspace(case, workspace)
+            # Reserve one entire Codex execution before launch. A failed or
+            # interrupted execution still consumes the authorization ceiling.
+            with journal.open("a", encoding="utf-8") as budget_stream:
+                budget_stream.write(json.dumps({
+                    "key": f"{case.id}:{arm}", "experiment_digest": experiment_digest,
+                    "reserved_at": datetime.now(UTC).isoformat(),
+                }) + "\n")
+                budget_stream.flush()
+                os.fsync(budget_stream.fileno())
             if arm == "direct":
                 result = _direct_run(case, workspace, executable)
             else:
-                result = run_plus_task(_execution_prompt(case), cwd=workspace, codex_path=executable)
+                result = run_plus_task(_execution_prompt(case), cwd=workspace, codex_path=executable, max_model_attempts=1)
             validation = validate_workspace(case, workspace, result.get("answer", ""))
             record = _public_record(case, arm, result, validation, experiment=experiment)
             stream.write(json.dumps(record, ensure_ascii=False) + "\n")
             stream.flush()
+            os.fsync(stream.fileno())
             _remove_workspace(workspace, args.work_root)
             call_failed = record["execution_status"] != "completed" or not record["validation"]["passed"]
             if not call_failed:
@@ -288,7 +331,7 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             processed_now = completed_now + failed_now
             cumulative_total = baseline_total + processed_now
             cumulative_failed = baseline_failed + failed_now
-            if record.get("error_category") in {"subscription_limit", "authentication"} or (
+            if (getattr(args, "pilot", False) and record["execution_status"] != "completed") or record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"} or (
                 cumulative_total >= 10 and cumulative_failed / cumulative_total > 0.10
             ):
                 break
@@ -296,6 +339,8 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
         "mode": "run", "output": str(args.output.resolve()), "completed_now": completed_now,
         "failed_now": failed_now, "remaining": max(0, len(pending) - completed_now - failed_now),
         "experiment_digest": experiment_digest,
+        "reserved_attempts_total": len(reservations) + completed_now + failed_now,
+        "total_call_cap": total_call_cap,
     }
 
 
@@ -310,14 +355,19 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     for record in records:
         pairs.setdefault(record["case_id"], {})[record["arm"]] = record
     complete = [arms for arms in pairs.values() if {"direct", "layman"}.issubset(arms)]
+    eligible = [arms for arms in complete if all(
+        arm.get("execution_status") == "completed" and not arm.get("usage_incomplete", False)
+        and not arm.get("fallback_used", False) and arm.get("total_tokens", 0) > 0
+        for arm in arms.values()
+    )]
     reductions = [
         (arms["direct"]["total_tokens"] - arms["layman"]["total_tokens"]) / arms["direct"]["total_tokens"]
-        for arms in complete if arms["direct"]["total_tokens"] > 0
+        for arms in eligible
     ]
     output_reductions = [
         (arms["direct"]["usage"].get("output_tokens", 0) - arms["layman"]["usage"].get("output_tokens", 0))
         / arms["direct"]["usage"].get("output_tokens", 1)
-        for arms in complete if arms["direct"]["usage"].get("output_tokens", 0) > 0
+        for arms in eligible if arms["direct"]["usage"].get("output_tokens", 0) > 0
     ]
     bootstrap: list[float] = []
     if reductions:
@@ -339,6 +389,7 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     layman_files = statistics.median(arms["layman"].get("unique_files_read", 0) for arms in complete) if complete else None
     gates = {
         "all_30_pairs_complete": len(complete) == 30,
+        "all_30_pairs_usage_eligible": len(eligible) == 30,
         "median_total_token_reduction_at_least_15_percent": median_reduction is not None and median_reduction >= 0.15,
         "bootstrap_95_percent_lower_bound_above_zero": ci_low is not None and ci_low > 0,
         "quality_not_lower": layman_success >= direct_success,
@@ -350,6 +401,7 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     return {
         "experiment_digest": latest_digest,
         "pairs": len(complete), "median_total_token_reduction": median_reduction,
+        "usage_eligible_pairs": len(eligible),
         "bootstrap_95_percent_ci": [ci_low, bootstrap[int(len(bootstrap) * 0.975)] if bootstrap else None],
         "median_output_token_reduction": output_reduction,
         "direct_success": direct_success, "layman_success": layman_success,
@@ -365,6 +417,8 @@ def main() -> int:
     parser.add_argument("--codex-path")
     parser.add_argument("--max-calls", type=int, default=20)
     parser.add_argument("--allow-more-calls", action="store_true")
+    parser.add_argument("--pilot", action="store_true", help="Preselect the first task in each of the six categories")
+    parser.add_argument("--total-call-cap", type=int, help="Persistent execution-attempt cap, including failures and across restarts")
     parser.add_argument("--seed", type=int, default=20260716)
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--analyze", action="store_true")

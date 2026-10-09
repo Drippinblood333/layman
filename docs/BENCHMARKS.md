@@ -77,6 +77,18 @@ The prior exploratory Plus calibration is retained in the [`legacy-v2` archive](
 
 ## Direct execution versus Layman Auto
 
+### Bounded six-category pilot
+
+After explicit subscription-use approval, `--pilot --max-calls 12 --total-call-cap 12` selects the first task from each category before execution, with two randomized arms per task. The direct baseline uses the configured balanced model at medium effort, matching the documented Sol/medium comparison; it no longer incorrectly reads the deep tier. Each arm has at most one Codex launch, without automatic model fallback. A persisted, flushed reservation journal counts failures and interrupted launches against the total authorization cap across restarts; incomplete reservations require review instead of silent replay. The pilot stops on execution failure, and incomplete usage is excluded from token comparisons rather than treated as free savings.
+
+Here a "call" means one entire Codex task execution, which may contain multiple internal model/tool exchanges; it is not a hard cap on provider-internal requests. API-key billing is disabled. Six pairs cannot close the 30-pair public claim gate, and this Plus experiment does not exercise the new API-only tool-output encoding.
+
+```powershell
+.\.venv\Scripts\python -X utf8 evals\token_optimization\benchmark.py --pilot --max-calls 12 --total-call-cap 12 --seed 20261009 --output build/token-pilot-2026-10-09/results.jsonl --work-root build/token-pilot-2026-10-09/work
+```
+
+Preview is the default. Add `--run` only after approval. Use a fresh output file for a new authorization and experiment; never increase the cap or remove the reservation journal to bypass an existing approval ceiling. Machine-readable records contain fingerprints, counts and validation outcomes, not answer text or generated code.
+
 `evals/token_optimization` contains 30 synthetic repository tasks: six bug fixes, six features, five refactors, five testing tasks, four documentation/configuration tasks, and four high-risk read-only reviews. Each case runs from the same clean fixture in two randomized arms: direct Sol/medium and Layman context optimization plus automatic routing.
 
 ```powershell

@@ -172,9 +172,14 @@ def run_plus_task(
     timeout_seconds: int = 1_800,
     execute: bool = True,
     allow_destructive: bool = False,
+    max_model_attempts: int | None = None,
     runner: Callable[..., subprocess.CompletedProcess[str]] | None = None,
     cancel_token: CancellationToken | None = None,
 ) -> dict[str, Any]:
+    if max_model_attempts is not None and (
+        isinstance(max_model_attempts, bool) or not isinstance(max_model_attempts, int) or max_model_attempts < 1
+    ):
+        raise ValueError("max_model_attempts must be a positive integer")
     config = load_config()
     preview = plus_task_plan(task, config=config, allow_destructive=allow_destructive)
     workspace = cwd.expanduser().resolve()
@@ -227,7 +232,10 @@ def run_plus_task(
     error_category: str | None = None
     final_tier = selected
 
-    for tier in _candidate_tiers(selected):
+    candidates = _candidate_tiers(selected)
+    if max_model_attempts is not None:
+        candidates = candidates[:max_model_attempts]
+    for tier in candidates:
         spec = config.tiers[tier]
         policy = POLICIES[tier]
         read_only = preview["sandbox"] == "read-only"
