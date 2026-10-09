@@ -96,3 +96,18 @@ Fingerprint: `4e2f7655bed3d194ecaf9cadf7fbb01df49e077bf0451045b64e45acbfc138c5`.
 This establishes that the directory-corrected direct arm can execute this task in the current setup. It does not establish success for all tasks, human semantic review or token savings. The substantial input count is now backed by a completed-turn usage event; its precise context-source breakdown has not been measured. Cached input must not be added twice or converted into a subscription invoice.
 
 The original journal now contains **5/12 reserved executions, 7 remaining**. No second execution was launched in this batch. No raw prompt, answer, generated code or stderr was retained. There is one usable direct baseline but no same-fingerprint Layman result yet; older experiments must not be pooled with it. The next useful runtime check is the matching Layman arm under this same code/protocol, after confirming safe delivery. No API-key billing, local installation replacement, tag or public release occurred.
+
+## Sixth attempt: first usable pair is a negative efficiency result
+
+Before launch, the current source/CLI fingerprint was verified equal to the successful direct baseline, the next pending arm was `bugfix-01:layman`, ChatGPT login passed and the journal contained five reservations. One matching Layman execution was launched under the unchanged total cap. No source files or execution policy changed during either arm. It completed and passed the same hidden function/scope validation, changing only `src/target.py`.
+
+| Arm | Input | Cached input (subset) | Output | Reasoning (subset of output) | Total | Time |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Direct | 279,649 | 256,768 | 1,673 | 136 | 281,322 | 120,449 ms |
+| Layman | 299,021 | 281,088 | 1,962 | 233 | 300,983 | 129,529 ms |
+
+Both used GPT-6.1 Sol / medium, reported complete completed-turn usage, read one unique file and recorded zero compactions. The Layman tracker reported five unique tool operations; the direct legacy collector's ten item events are not a comparable unique-tool count. No raw transcripts or generated files were retained, and no human semantic review occurred.
+
+Fingerprint remains `4e2f7655bed3d194ecaf9cadf7fbb01df49e077bf0451045b64e45acbfc138c5`. Analysis has exactly one usage-eligible pair: Layman used **6.99% more total tokens** and **17.27% more output tokens** on this task. Both passed automated validation. The public savings gate is false. A bootstrap over a single pair has no meaningful generalization value, even though the current analyzer prints a degenerate interval. Cached/uncached differences are not a subscription invoice or an independent randomized cache study.
+
+The original journal now contains **6/12 reserved executions, 6 remaining**. No additional arm was launched after this negative result. Preserve it when designing context/prompt changes; do not pool older fingerprints, discard the direct failure history, or advertise general savings. The next useful step is zero-model context-overhead analysis before spending more attempts. GitHub read access briefly worked, but a subsequent push and verification failed; remote delivery remains unconfirmed for the path-corrected source and this report. No configuration replacement, API-key evaluation, release tag or public release occurred.
