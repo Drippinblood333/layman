@@ -419,7 +419,9 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
         for arms in eligible if arms["direct"]["usage"].get("output_tokens", 0) > 0
     ]
     bootstrap: list[float] = []
-    if reductions:
+    # One pair only reproduces its point estimate on every resample; it
+    # cannot supply a meaningful uncertainty interval or positive-CI gate.
+    if len(reductions) >= 2:
         randomizer = random.Random(seed)
         for _ in range(10_000):
             sample = [randomizer.choice(reductions) for _ in reductions]
@@ -457,6 +459,7 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
         "pairs": len(complete), "median_total_token_reduction": median_reduction,
         "usage_eligible_pairs": len(eligible),
         "bootstrap_95_percent_ci": [ci_low, bootstrap[int(len(bootstrap) * 0.975)] if bootstrap else None],
+        "bootstrap_status": "computed" if bootstrap else "insufficient_pairs",
         "median_output_token_reduction": output_reduction,
         "direct_success": direct_success, "layman_success": layman_success,
         "median_files_read": {"direct": direct_files, "layman": layman_files},

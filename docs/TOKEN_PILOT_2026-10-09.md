@@ -134,3 +134,18 @@ A fresh local wheel/source build from this source passed the credential-isolated
 | `layman_codex-1.0.0.tar.gz` | `17173ca1cf0fafb1d37a88969cfb1a6e22d80b77fd527f387141d734bb6f4d61` |
 
 The no-execution pilot planner confirms that this source has no completed arms under its new source digest, and the next planned arm is `bugfix-01:direct`. The original authorization journal still has six reservations; new fingerprints do not reset the remaining six-attempt cap. These packaging/CI results are not whole-task efficiency evidence. A new matched pair remains the next runtime calibration step; fresh holdout quality, human acceptance and owner-authorized prerelease/publication remain open.
+
+## Seventh and eighth attempts: shorter-contract pair
+
+After the source candidate passed hosted CI, a maximum-two-execution batch used the original journal/output, seed `20261010` and unchanged total cap 12. It completed exactly the new `bugfix-01:direct` and `bugfix-01:layman` arms, with no failures, fallback or extra retry. Runtime fingerprint (including native CLI version) is `b1453a184a5321d2c5e75c11ca7b807ac7ddec4c3e2cdec5233d5f2e53043ae4`; the offline planner's source-only digest is not this runtime fingerprint. No source changed while the batch ran. Both arms used GPT-6.1 Sol / medium, passed hidden function/scope checks and changed only `src/target.py`.
+
+| Arm | Input | Cached input (subset) | Output | Reasoning (output subset) | Total | Time |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Direct | 307,373 | 284,800 | 2,129 | 242 | 309,502 | 97,473 ms |
+| Layman | 306,082 | 286,848 | 2,498 | 353 | 308,580 | 101,194 ms |
+
+Both collectors now report six deduplicated tool operations, one unique file and zero compactions. Usage is complete. Layman total is **0.30% lower**, but its output is **17.33% higher**, with slightly greater elapsed time. These point observations do not pass the public savings gate. The same task was previously used for calibration, so this is not a fresh holdout or human semantic assessment. Do not pool older fingerprints, infer a causal improvement from comparing separate pairs, or convert cache counts to subscription billing. The earlier negative pair remains unchanged.
+
+The analyzer previously resampled a single pair into a degenerate interval and marked its positive-lower-bound gate true. Although the overall savings gate was false, that interval is misleading. It now returns `[null, null]`, `bootstrap_status="insufficient_pairs"` and a false interval gate for fewer than two usage-eligible pairs. A positive-single-pair regression checks this; a two-pair regression retains the descriptive bootstrap calculation without weakening the full 30-pair/quality gates. This analysis-only change was made after execution and does not alter recorded usage, but its source hash changes subsequent run fingerprints.
+
+All 314 local tests (273 router plus 41 adaptive), configured lint and secret scanning pass. The original journal now has **8/12 reservations, 4 remaining**. No ninth execution occurred; generated synthetic workspaces were cleaned by the runner, with no user data removed and no raw prompt, answer, code or stderr retained. No API billing, installed configuration replacement, tag or public release occurred. Hosted verification of the analyzer repair is still pending; general task-efficiency, fresh quality and participant acceptance gates remain open.

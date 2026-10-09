@@ -112,6 +112,38 @@ def test_analysis_excludes_incomplete_usage_not_as_free_savings(tmp_path):
     assert result["gates"]["trusted_usage_protocol"] is False
 
 
+def test_single_positive_pair_does_not_claim_a_bootstrap_interval(tmp_path):
+    output = tmp_path / "results.jsonl"
+    rows = [
+        {"case_id": "bugfix-01", "arm": arm, "experiment_digest": "d", "execution_status": "completed",
+         "validation": {"passed": True}, "usage": {"output_tokens": 10}, "total_tokens": count,
+         "schema_version": benchmark.BENCHMARK_SCHEMA_VERSION, "usage_protocol_sha256": "synthetic"}
+        for arm, count in [("direct", 100), ("layman", 80)]
+    ]
+    output.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+    result = benchmark.analyze(output)
+    assert result["median_total_token_reduction"] == 0.2
+    assert result["bootstrap_95_percent_ci"] == [None, None]
+    assert result["bootstrap_status"] == "insufficient_pairs"
+    assert result["gates"]["bootstrap_95_percent_lower_bound_above_zero"] is False
+    assert result["claim_token_savings"] is False
+
+
+def test_two_pairs_still_compute_a_descriptive_bootstrap_interval(tmp_path):
+    output = tmp_path / "results.jsonl"
+    rows = [
+        {"case_id": case, "arm": arm, "experiment_digest": "d", "execution_status": "completed",
+         "validation": {"passed": True}, "usage": {"output_tokens": 10}, "total_tokens": count}
+        for case in ("bugfix-01", "feature-01")
+        for arm, count in [("direct", 100), ("layman", 80)]
+    ]
+    output.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+    result = benchmark.analyze(output)
+    assert result["bootstrap_status"] == "computed"
+    assert result["bootstrap_95_percent_ci"] == [0.2, 0.2]
+    assert result["claim_token_savings"] is False
+
+
 def test_direct_baseline_is_balanced_medium_not_deep(tmp_path, monkeypatch, router_config):
     seen = []
     monkeypatch.setattr(benchmark, "load_config", lambda: router_config)
