@@ -37,6 +37,16 @@ else
 fi
 if [ "$actual" != "$expected" ]; then echo "SHA-256 verification failed for $asset" >&2; exit 1; fi
 unzip -q "$tmp/$asset" -d "$tmp/unpacked"
+for name in layman BUILD.json bundle-audit.json runtime-dependencies.json standalone-components.json THIRD_PARTY_NOTICES.md; do
+  if [ ! -f "$tmp/unpacked/$name" ]; then echo "Required package file not found: $name" >&2; exit 1; fi
+done
+if [ ! -d "$tmp/unpacked/THIRD_PARTY_LICENSES" ]; then echo 'Required package directory not found: THIRD_PARTY_LICENSES' >&2; exit 1; fi
+notice_root="${XDG_DATA_HOME:-$HOME/.local/share}/layman/installation"
+mkdir -p "$notice_root"
+for name in BUILD.json bundle-audit.json runtime-dependencies.json standalone-components.json THIRD_PARTY_NOTICES.md; do
+  cp "$tmp/unpacked/$name" "$notice_root/$name"
+done
+cp -R "$tmp/unpacked/THIRD_PARTY_LICENSES" "$notice_root/"
 mkdir -p "$HOME/.local/bin"
 install -m 755 "$tmp/unpacked/layman" "$HOME/.local/bin/layman"
 echo "Installed Layman to $HOME/.local/bin/layman"

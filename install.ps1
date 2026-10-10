@@ -31,6 +31,15 @@ try {
   $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToUpperInvariant()
   if ($actual -ne $expected) { throw "SHA-256 verification failed for $assetName" }
   Expand-Archive -LiteralPath $archive -DestinationPath $temporary -Force
+  $noticeFiles = @('BUILD.json','bundle-audit.json','runtime-dependencies.json','standalone-components.json','THIRD_PARTY_NOTICES.md')
+  foreach ($name in @('layman.exe') + $noticeFiles) {
+    if (-not (Test-Path -LiteralPath (Join-Path $temporary $name) -PathType Leaf)) { throw "Required package file not found: $name" }
+  }
+  if (-not (Test-Path -LiteralPath (Join-Path $temporary 'THIRD_PARTY_LICENSES') -PathType Container)) { throw 'Required package directory not found: THIRD_PARTY_LICENSES' }
+  foreach ($name in $noticeFiles) {
+    Copy-Item -LiteralPath (Join-Path $temporary $name) -Destination (Join-Path $installRoot $name) -Force
+  }
+  Copy-Item -LiteralPath (Join-Path $temporary 'THIRD_PARTY_LICENSES') -Destination $installRoot -Recurse -Force
   Copy-Item -LiteralPath (Join-Path $temporary 'layman.exe') -Destination (Join-Path $installRoot 'layman.exe') -Force
 } finally {
   Remove-Item -LiteralPath $temporary -Recurse -Force -ErrorAction SilentlyContinue

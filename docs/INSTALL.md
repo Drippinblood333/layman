@@ -20,6 +20,15 @@ curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install
 
 The installer downloads the matching release artifact and `SHA256SUMS.txt`, verifies the archive before extraction, adds the executable to the user path, installs the bundled local Codex plugin marketplace, and runs `layman setup --mode auto`. It never enables API routing without an API key. Code signing is not claimed for the first release candidate. Restart Codex and open a new task after installation so the plugin and updated path are loaded.
 
+Installers also retain `THIRD_PARTY_LICENSES/`, third-party notices and the build,
+runtime and component inventories. Missing required package files stop installation
+before replacing the executable. On Windows these records stay beside the executable
+in `%LOCALAPPDATA%\Layman\bin`; macOS/Linux use
+`${XDG_DATA_HOME:-$HOME/.local/share}/layman/installation`, keeping generic notice
+names out of the shared executable directory. They are installer-managed records,
+not `LAYMAN_HOME` user data; `layman uninstall --purge-data` does not delete them.
+Upgrades preserve older notice files rather than recursively clearing the directory.
+
 Release-candidate testers must target the exact prerelease tag because GitHub's `latest` endpoint excludes prereleases:
 
 ```powershell
