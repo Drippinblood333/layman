@@ -4,6 +4,28 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 command-outcome observability: Plus run attempt and aggregate results
+now include numeric command_failures. Only top-level item.completed events with
+command_execution items and nonzero integer exit_code count; bool/string/missing
+codes and answer/output text are ignored, identified duplicates count once.
+Streaming and captured-output paths share the tracker; command text/output and
+error bodies are not retained. Zero means no qualifying event observed, not
+successful validation; recovered command failures do not change completion
+status or trigger retries. This cannot reconstruct earlier EPERM or see failures
+hidden inside other tool types. Five initial regression failures reproduced the
+missing field. After implementation, 92 relevant offline cases and Ruff pass,
+including a real synthetic child process, streaming result propagation, duplicate
+events and invalid metadata. No model calls, saved permission changes, installs
+or releases; original allowance stays exhausted at 8/8.
+
+2026-10-11 configuration evidence correction: current invocation includes both
+legacy --sandbox and beta default_permissions. Official documentation says the
+former normally takes precedence (managed permission-profile requirements are
+an exception). Requested profile labels are not confirmed effective model-tool
+policy. Native REPL feature flags do not identify the missing historical tool
+requests. No cause established, runtime/configuration change or model call;
+allowance remains 8/8. See development diagnosis for the source and limits.
+
 2026-10-11 zero-model native command-path check: app-server command/exec launched
 absolute current Python successfully under workspaceWrite using ordinary pipes
 (exit 0, marker present). A corrected PTY request was explicitly rejected by the

@@ -132,6 +132,7 @@ class StreamedProcessResult:
     unique_files_read: int
     compactions: int
     stop_reason: str | None = None
+    command_failures: int = 0
 
 
 class EventBudgetTracker:
@@ -142,6 +143,8 @@ class EventBudgetTracker:
         self.usage_available = False
         self.tool_calls = 0
         self.compactions = 0
+        self.command_failures = 0
+        self._failed_command_ids: set[str] = set()
         self._files: set[str] = set()
         self._tool_ids: set[str] = set()
         self._compaction_ids: set[str] = set()
@@ -155,6 +158,20 @@ class EventBudgetTracker:
             event = json.loads(line)
         except json.JSONDecodeError:
             return
+        # Count structured command outcomes, never infer failures from answer text
+        # or inspect nested tool output as executable event metadata.
+        if isinstance(event, dict) and event.get("type") == "item.completed":
+            item = event.get("item")
+            if isinstance(item, dict) and item.get("type") == "command_execution":
+                code = item.get("exit_code")
+                if isinstance(code, int) and not isinstance(code, bool) and code != 0:
+                    identifier = item.get("id")
+                    if isinstance(identifier, str) and identifier:
+                        if identifier not in self._failed_command_ids:
+                            self._failed_command_ids.add(identifier)
+                            self.command_failures += 1
+                    else:
+                        self.command_failures += 1
         turn = completed_turn_usage(event)
         if turn is not None:
             self.usage_available = True
@@ -322,6 +339,7 @@ def _consume_bound_process(
         tool_calls=tracker.tool_calls,
         unique_files_read=tracker.unique_files_read,
         compactions=tracker.compactions,
+        command_failures=tracker.command_failures,
         stop_reason=stop_reason,
     )
 

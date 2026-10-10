@@ -2,6 +2,23 @@
 
 ## Newly authorized remaining-two diagnostic (2026-10-11, predeclared)
 
+Post-diagnostic configuration boundary (zero model calls): native features list
+shows js_repl and js_repl_tools_only removed/false, with both guardian Node REPL
+transcript flags false. These flags do not expose the historical tool requests;
+they neither establish a Node child-process cause nor rule out another tool host.
+Stop speculation without original command/error evidence.
+
+The [official permissions documentation](https://learn.chatgpt.com/docs/permissions)
+states that legacy sandbox settings and beta permission profiles do not compose:
+passing --sandbox selects legacy settings rather than default_permissions, except
+when managed allowed_permission_profiles requires profiles. The current Layman
+builder passes both --sandbox and default_permissions. Therefore earlier profile
+labels are requested configuration, not proof that beta profiles governed model
+tools. Both arms requested workspace-write restrictions; this finding is not
+proof of EPERM's cause or an authorization to broaden permissions. No runtime or
+saved configuration was changed. A migration requires separate compatibility
+and effective-policy evidence, not another speculative model retry.
+
 Post-diagnostic zero-model command-path probe (2026-10-11): following the
 [official app-server command interface](https://learn.chatgpt.com/docs/app-server),
 launched native `app-server --stdio` with subscription-safe environment and

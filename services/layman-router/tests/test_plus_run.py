@@ -25,6 +25,28 @@ from layman_router.plus_run import (
 )
 
 
+def test_command_failures_use_only_completed_envelope_and_deduplicate():
+    tracker = EventBudgetTracker()
+    item = {"id": "cmd-1", "type": "command_execution", "exit_code": 1,
+            "command": "secret command", "aggregated_output": "private output"}
+    tracker.consume(json.dumps({"type": "item.started", "item": item}))
+    assert tracker.command_failures == 0
+    for _ in range(2):
+        tracker.consume(json.dumps({"type": "item.completed", "item": item}))
+    assert tracker.command_failures == 1
+    tracker.consume(json.dumps({"type": "item.completed", "item": {
+        "type": "agent_message", "text": "spawn EPERM", "nested": item}}))
+    assert tracker.command_failures == 1
+
+
+@pytest.mark.parametrize("exit_code", [0, None, True, "1"])
+def test_command_failure_count_rejects_missing_success_or_invalid_exit(exit_code):
+    tracker = EventBudgetTracker()
+    tracker.consume(json.dumps({"type": "item.completed", "item": {
+        "id": "cmd", "type": "command_execution", "exit_code": exit_code}}))
+    assert tracker.command_failures == 0
+
+
 @pytest.mark.parametrize("tier", list(RouteTier))
 @pytest.mark.parametrize("read_only", [True, False])
 def test_short_execution_contract_preserves_scope_safety_and_soft_budget(tier, read_only):
@@ -139,12 +161,15 @@ def test_streamed_named_file_completion_uses_observed_tool_metadata(monkeypatch,
         return StreamedProcessResult(
             returncode=0, stderr="", usage={"input_tokens": 10, "cached_input_tokens": 0, "output_tokens": 3, "reasoning_tokens": 0},
             usage_available=True, tool_calls=tool_calls, unique_files_read=0, compactions=0,
+            command_failures=tool_calls,
         )
 
     monkeypatch.setattr("layman_router.plus_run.run_streaming_process", fake_stream)
     result = run_plus_task(task, cwd=tmp_path, codex_path=sys.executable)
     assert result["status"] == expected
     assert result["tool_calls"] == tool_calls
+    assert result["command_failures"] == tool_calls
+    assert result["attempts"][0]["command_failures"] == tool_calls
     assert len(executions) == 1
     assert result["usage"]["input_tokens"] == 10
 
@@ -411,6 +436,22 @@ def test_streaming_process_stops_when_file_budget_is_exceeded(tmp_path: Path):
     )
     assert result.stop_reason == "budget_exceeded"
     assert result.unique_files_read > 1
+
+
+def test_streaming_process_exports_only_numeric_command_failures(tmp_path: Path):
+    event = {"type": "item.completed", "item": {
+        "id": "cmd", "type": "command_execution", "exit_code": 1,
+        "command": "private-command", "aggregated_output": "private-output"}}
+    script = "import json; print(" + repr(json.dumps(event)) + ")"
+    result = run_streaming_process(
+        [sys.executable, "-c", script], input_text="", cwd=tmp_path,
+        env=os.environ.copy(), timeout_seconds=10, file_limit=1, tool_call_limit=1,
+    )
+    assert result.returncode == 0
+    assert result.command_failures == 1
+    assert result.stop_reason is None
+    assert "private-command" not in repr(result)
+    assert "private-output" not in repr(result)
 
 
 def test_streaming_process_stops_cancelled_process_tree(tmp_path: Path):

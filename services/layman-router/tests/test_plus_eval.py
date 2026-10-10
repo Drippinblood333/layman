@@ -23,7 +23,7 @@ from layman_router.plus_eval import (
 def test_buffered_event_metrics_deduplicate_started_and_completed_operations():
     item = {"id": "cmd-1", "type": "command_execution", "command": "Get-Content src/target.py"}
     events = "\n".join(json.dumps({"type": kind, "item": item}) for kind in ("item.started", "item.completed"))
-    assert event_metrics(events) == {"tool_calls": 1, "unique_files_read": 1, "compactions": 0}
+    assert event_metrics(events) == {"tool_calls": 1, "unique_files_read": 1, "compactions": 0, "command_failures": 0}
 
 
 def test_release_plan_is_eighteen_cases_and_thirty_six_calls(router_config):
