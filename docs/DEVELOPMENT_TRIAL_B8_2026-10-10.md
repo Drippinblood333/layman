@@ -1,5 +1,46 @@
 # Approved eight-execution development trial
 
+## Additional two-call event diagnosis (2026-10-11, predeclared)
+
+After an explicit proposal for at most two subscription diagnostic calls, the
+owner replied that subsequent actions are approved. Proceed within that proposed
+two-call scope, not unlimited assessments. Original journal remains exhausted
+8/8 and unchanged; new event-diagnostic-attempts.jsonl has cap two, fsync before
+execution and an exclusive lock. No replay after reservation or first failure.
+Use current source df46454 (runtime 3b180e2), the known feature-02 fixture,
+GPT-6.1 Sol / medium, Layman first, Direct only after completed/externally passing
+first arm with complete usage and no fallback. One attempt per arm, unchanged
+task/contract and workspace-write restrictions; no installation, paid API,
+permission changes, tag or release. This is fault diagnosis, not savings proof.
+
+Following [official JSON event guidance](https://learn.chatgpt.com/docs/non-interactive-mode),
+observe completed tool items via the existing event tracker. A private temporary
+observer projects only allowlisted item kinds/statuses, integer exit codes and
+EPERM/EACCES/ENOENT/ETIMEDOUT markers found in output/error fields. No raw command,
+arguments, output, tool/server names, paths, identifiers or answers are retained.
+Answer-reported markers are explicitly separate from tool-output markers.
+Markers alone are not proof of the cause; missing projected events are not proof
+that no other tool failed. Observer bounds records to 30; no production tracker
+change. Offline synthetic projection checks passed before launch. Results go to
+event-diagnostic-results.jsonl; workspaces are synthetic and removed after checks.
+
+Outcome: first Layman arm completed its native turn but failed external function
+validation, with zero changed files. One command_execution item was observed:
+status failed, exit_code 1, no allowlisted error marker. command_failures=1,
+tool_calls=1; answer contained no allowlisted marker either. This is structured
+evidence of command failure, not reproduction or diagnosis of spawn EPERM.
+The native-turn completed label is not delivered-task success; benchmark
+validation correctly failed. No runtime fix follows without a failure category.
+Input 124647, cached 110336, uncached 14311, output 723, total 125370;
+latency 30022 ms, complete usage, no fallback or compaction. Not a savings result.
+Native version 0.162.0-alpha.2; fingerprint
+984eb7f86a77379afd3b64995fe00505dd7d194cbed912bbfd531e359297e80a.
+First-failure rule stopped the process (exit 0 for orderly diagnostic completion),
+so Direct was not called: new allowance 1/2 used, original remains 8/8.
+No retry/reservation replay; synthetic workspace removed. Raw output was not
+retained, so this projection cannot identify the underlying failed command or
+distinguish configuration rejection from another nonzero command result.
+
 ## Newly authorized remaining-two diagnostic (2026-10-11, predeclared)
 
 Post-diagnostic configuration boundary (zero model calls): native features list

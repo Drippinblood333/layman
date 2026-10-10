@@ -4,6 +4,17 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 newly authorized bounded event diagnosis: following the owner's reply
+to the explicit two-call proposal, first Layman arm used 1/2 new calls; prior
+8/8 journal unchanged. Captured structured command_execution status failed,
+exit 1, no allowlisted errno marker; no files changed and hidden function checks
+failed despite native turn completion. This is genuine failed-tool evidence,
+not an EPERM root cause or a savings measurement. First-failure rule stopped
+without Direct or retry, one call unspent. Private projection excludes commands,
+outputs, paths and answer text; synthetic workspace removed. No sandbox change,
+installation replacement or publication. See development diagnosis for protocol,
+limits, exact fingerprint and usage; no runtime repair yet justified.
+
 2026-10-11 command-failure-count integration checkpoint: exact source
 3b180e2498189bd6289467cd4fb6bffbb4e8a7c3 passed
 [CI 38093266663](https://github.com/Drippinblood333/layman/actions/runs/38093266663).
