@@ -58,11 +58,11 @@ def test_vague_task_is_blocked_before_any_codex_call(tmp_path):
 
 
 @pytest.mark.parametrize("workflow", ["understand-implement-verify", "reproduce-fix-verify", "discover-test-gaps-verify"])
-def test_lean_rules_only_load_for_writable_development(workflow):
+def test_development_safety_is_scoped_without_unproven_reuse_advice(workflow):
     policy = POLICIES[RouteTier.BALANCED]
     writable = _execution_contract(RouteTier.BALANCED, policy, read_only=False, workflow=workflow)
-    assert "Reuse project code > stdlib/platform > installed deps" in writable
-    assert "no speculative abstractions" in writable
+    assert "Reuse project code > stdlib/platform > installed deps" not in writable
+    assert "no speculative abstractions" not in writable
     assert "Keep validation/errors/accessibility; check affected callers" in writable
     assert "Preserve request/scope" in writable
     assert "must edit the workspace and verify now" in writable
