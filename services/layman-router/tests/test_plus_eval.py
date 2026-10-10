@@ -111,6 +111,29 @@ def test_run_arm_passes_prompt_on_stdin_and_redacts_text(tmp_path: Path):
     assert record["answer_chars"] == len("secret model answer")
 
 
+def test_private_review_sink_keeps_answer_out_of_result(tmp_path: Path):
+    saved = []
+
+    def fake_runner(command, **kwargs):
+        Path(command[command.index("--output-last-message") + 1]).write_text("review-only answer", encoding="utf-8")
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    arm = PlusEvalArm("private-1", "summary", "auto", "model-a", "low", "fast", [], "synthetic task")
+    record = run_arm(arm, codex_path="codex", workspace=tmp_path, runner=fake_runner,
+                     review_sink=lambda selected, answer: saved.append((selected.key, answer)))
+    assert saved == [("private-1:auto", "review-only answer")]
+    assert "review-only answer" not in json.dumps(record)
+    assert "answer_text" not in record
+
+
+def test_private_review_rejects_result_answer_retention_before_execution(tmp_path: Path):
+    with pytest.raises(ValueError, match="cannot be combined"):
+        run_plus_eval(cases_path=None, output=tmp_path / "results.jsonl", workspace=tmp_path,
+                      codex_path="missing", execute=True, store_outputs=True,
+                      review_sink=lambda arm, answer: None)
+    assert not (tmp_path / "results.jsonl.lock").exists()
+
+
 def test_run_arm_removes_api_billing_environment(monkeypatch, tmp_path: Path):
     monkeypatch.setenv("OPENAI_API_KEY", "must-not-reach-codex")
     monkeypatch.setenv("CODEX_API_KEY", "must-not-reach-codex")

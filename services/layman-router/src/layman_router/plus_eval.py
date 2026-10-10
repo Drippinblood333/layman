@@ -308,8 +308,11 @@ def run_arm(
     workspace: Path,
     store_outputs: bool = False,
     experiment_fingerprint_value: str | None = None,
+    review_sink: Callable[[PlusEvalArm, str], None] | None = None,
     runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
 ) -> dict[str, Any]:
+    if store_outputs and review_sink is not None:
+        raise ValueError("Private review and answer retention in result logs cannot be combined")
     workspace.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="layman-plus-") as directory:
         last_message = Path(directory) / "last-message.txt"
@@ -351,6 +354,8 @@ def run_arm(
             record["error_category"] = _safe_error(result.stderr, result.returncode)
         if store_outputs and answer:
             record["answer_text"] = answer
+        if review_sink is not None and answer:
+            review_sink(arm, answer)
         return record
 
 
@@ -386,7 +391,10 @@ def run_plus_eval(
     allow_more_calls: bool = False,
     store_outputs: bool = False,
     total_call_cap: int | None = None,
+    review_sink: Callable[[PlusEvalArm, str], None] | None = None,
 ) -> dict[str, Any]:
+    if store_outputs and review_sink is not None:
+        raise ValueError("Private review and answer retention in result logs cannot be combined")
     if total_call_cap is not None and (
         isinstance(total_call_cap, bool) or not isinstance(total_call_cap, int) or total_call_cap < 1
     ):
@@ -395,6 +403,7 @@ def run_plus_eval(
         "cases_path": cases_path, "output": output, "workspace": workspace, "codex_path": codex_path,
         "execute": execute, "max_calls": max_calls, "allow_more_calls": allow_more_calls,
         "store_outputs": store_outputs, "total_call_cap": total_call_cap,
+        "review_sink": review_sink,
     }
     if execute:
         with _evaluation_writer(output):
@@ -413,6 +422,7 @@ def _run_plus_eval(
     allow_more_calls: bool = False,
     store_outputs: bool = False,
     total_call_cap: int | None = None,
+    review_sink: Callable[[PlusEvalArm, str], None] | None = None,
 ) -> dict[str, Any]:
     if max_calls < 1:
         raise ValueError("max_calls must be positive")
@@ -478,6 +488,7 @@ def _run_plus_eval(
                 workspace=workspace,
                 store_outputs=store_outputs,
                 experiment_fingerprint_value=fingerprint,
+                **({"review_sink": review_sink} if review_sink is not None else {}),
             )
             stream.write(json.dumps(record, ensure_ascii=False) + "\n")
             stream.flush()
