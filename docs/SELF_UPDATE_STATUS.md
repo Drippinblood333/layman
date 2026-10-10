@@ -1,8 +1,21 @@
 # Project update status
 
-Updated: 2026-10-10
+Updated: 2026-10-11
 
 ## Verified checkpoint
+
+2026-10-11 current-source subscription trial: the owner approved the remaining
+four executions with first-failure stopping. Twenty-nine offline harness tests
+and zero-call route previews passed. The first pagination pair used identical
+GPT-6.1 Sol / medium settings. Direct passed hidden function/scope validation
+(292585 total tokens); Layman used no tools and changed no files, failed function
+validation (153053 tokens), and correctly returned `needs_verification` rather
+than delivered success. Usage was complete with no fallback. The batch stopped
+without retries or testing-case calls: cumulative journal 6/8, two unused.
+This is not a token-saving result. Execution reliability is the next evidenced
+problem; exact cause is unknown. Full measurements and fingerprint are in
+[the development trial record](DEVELOPMENT_TRIAL_B8_2026-10-10.md).
+No paid API, user installation replacement or public release occurred.
 
 2026-10-10 installer-retention hosted checkpoint: exact source `dc6e76dd4911b0a6233710ab0b91fa619e371e7c` passed all ten validation jobs in [run 38061529626](https://github.com/Drippinblood333/layman/actions/runs/38061529626), including three native OS test suites with the hermetic installer regressions, five standalone builds, Docker and release assembly; publication was skipped. This closes the Unix-hosted verification item for notice preservation, reinstallation layout and incomplete-package refusal. Tests use synthetic executables/packages and mocked downloads, not a public-release installation or comprehensive legal/upgrade-atomicity audit. A polling TLS timeout recovered by observing the same job; no build/test retry, model call, actual installation replacement or publication occurred. This evidence-only record remains local until a justified implementation push. Full product goals, including representative token savings, remain incomplete.
 

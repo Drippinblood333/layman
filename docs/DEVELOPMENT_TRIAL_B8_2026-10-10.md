@@ -1,5 +1,50 @@
 # Approved eight-execution development trial
 
+## 2026-10-11 authorized final four executions (predeclared)
+
+The owner approved starting the previously proposed remaining four subscription
+executions. This batch uses current source at `ee39cd1` (runtime/source changes
+through `dc6e76d`), a fresh fingerprint and separate private `current-results.jsonl`.
+The original append-only attempts journal remains authoritative: 4/8 used before
+launch, maximum 8/8 including failed or interrupted attempts. No paid API,
+installation replacement, release/tag or automatic retry is included.
+
+Predeclared fixed order: `feature-02:direct`, `feature-02:layman`,
+`testing-02:layman`, `testing-02:direct`. Both arms use configured balanced model
+and medium reasoning, one attempt each. These are existing synthetic fixtures,
+not fresh holdouts. Pagination uses hidden function and file-scope checks;
+testing uses reference tests, three mutation checks and file scope. Each result
+must complete, pass validation, report complete usage and avoid fallback before
+the next arm starts. First failure stops the entire batch; no replacement call.
+The wrapper holds the original writer lock and fsyncs a reservation before launch.
+Results exclude answer bodies/generated code; temporary fixtures are removed
+after validation. A zero-call route preview and relevant offline harness tests
+precede execution. Small-sample paired results do not establish general savings.
+
+Status: stopped after the first pair; the Layman arm failed functional validation.
+No testing-02 arm was launched and no retry occurred. Original journal now has
+6/8 reservations, leaving two unused; this stopped batch is not automatically
+resumed. Native version was `codex-cli 0.162.0-alpha.2`; both arms used
+`gpt-6.1-sol` / medium. Current experiment fingerprint:
+`d17ef83c8024df5acb04c6b703eb510df4c4118143b9f5d0d247af60293d3322`.
+The 29 relevant offline harness tests and both zero-call route previews passed.
+
+| feature-02 arm | Input | Cached input | Uncached input | Output | Total | Latency | Tools | Validation |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Direct | 291026 | 267264 | 23762 | 1559 | 292585 | 41020 ms | 4 | Function/scope passed; only src/target.py changed |
+| Layman | 151952 | 136832 | 15120 | 1101 | 153053 | 36492 ms | 0 | Function failed; no files changed, scope passed |
+
+Usage was complete and neither arm used fallback. Native Layman execution
+reported a completed process, but the delivery guard correctly converted the
+public status to `needs_verification` / `workspace_execution_not_observed`.
+Thus current guard behavior is runtime-confirmed for this case; actual execution
+reliability remains unresolved. Lower usage on the failed arm is **not token
+savings**. This is one failed pair, not a quality-equivalent efficiency result.
+No answer body or generated code was retained in result records; temporary
+synthetic fixtures were removed after validation. The model's exact reason for
+omitting tools is not established by these records; do not attribute it to one
+contract sentence, sandbox defect or configuration without additional evidence.
+
 ## Zero-model sandbox startup check
 
 On 2026-10-10 the saved Windows sandbox selection was read as `unelevated`
