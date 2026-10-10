@@ -60,7 +60,9 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
             "The task requires an unrelated broad refactor or destructive operation.",
             "Verification contradicts the claimed outcome.",
         ],
-        "next_steps": project["next_steps"] if workflow == "release-gate" else [
+        "next_steps": [
+            "Answer the clarification questions, then resubmit the original request with those details; no execution has started.",
+        ] if guidance["needs_clarification"] else project["next_steps"] if workflow == "release-gate" else [
             "Inspect only the code and context needed for the requested task.",
             "Review the scoped plan before implementation." if plan_first else "Make the smallest complete change for the requested outcome.",
             "Run verification proportionate to this change and report any remaining risk.",

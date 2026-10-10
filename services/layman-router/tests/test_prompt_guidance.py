@@ -31,6 +31,16 @@ def test_vague_plan_stops_before_execution_without_retaining_task(tmp_path):
     assert result["prompt_guidance"]["needs_clarification"] is True
     assert "帮我优化整个项目" not in str(result)
     assert result["route"]["execution_allowed"] is False
+    assert len(result["next_steps"]) == 1
+    assert "resubmit the original request" in result["next_steps"][0]
+    assert "no execution has started" in result["next_steps"][0]
+
+
+def test_concrete_plan_keeps_normal_implementation_next_steps(tmp_path):
+    result = create_task_plan("修复src/a.py的空指针异常，不改接口", tmp_path)
+    assert result["prompt_guidance"]["needs_clarification"] is False
+    assert len(result["next_steps"]) == 3
+    assert "Make the smallest complete change" in result["next_steps"][1]
 
 
 def test_mcp_vague_run_exposes_questions_without_model_execution(monkeypatch, tmp_path):
