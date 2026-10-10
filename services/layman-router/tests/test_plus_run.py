@@ -66,6 +66,31 @@ def test_patch_only_execution_is_not_mislabelled_as_no_tool_action(tmp_path):
     assert result["error_category"] is None
 
 
+@pytest.mark.parametrize("recovered", [False, True])
+def test_only_failed_commands_are_not_delivered_but_recovery_is_not_blocked(tmp_path, recovered):
+    calls = []
+
+    def runner(command, **kwargs):
+        if command[1:3] == ["login", "status"]:
+            return subprocess.CompletedProcess(command, 0, stdout="Logged in using ChatGPT", stderr="")
+        calls.append(command)
+        Path(command[command.index("--output-last-message") + 1]).write_text("response", encoding="utf-8")
+        events = [{"type": "item.completed", "item": {
+            "id": "cmd", "type": "command_execution", "status": "failed", "exit_code": 1}}]
+        if recovered:
+            events.append({"type": "item.completed", "item": {
+                "id": "patch", "type": "file_change", "status": "completed"}})
+        events.append({"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}})
+        return subprocess.CompletedProcess(command, 0, stdout="\n".join(map(json.dumps, events)), stderr="")
+
+    result = run_plus_task("修复 src/target.py 的顺序", cwd=tmp_path, codex_path=sys.executable, runner=runner)
+    assert len(calls) == 1
+    assert result["command_failures"] == 1
+    assert result["status"] == ("completed" if recovered else "needs_verification")
+    assert result["error_category"] == (None if recovered else "workspace_command_success_not_observed")
+    assert result["attempts"][0]["status"] == "completed"
+
+
 @pytest.mark.parametrize("exit_code", [0, None, True, "1"])
 def test_command_failure_count_rejects_missing_success_or_invalid_exit(exit_code):
     tracker = EventBudgetTracker()
@@ -171,13 +196,18 @@ def test_named_file_execution_without_tools_is_not_reported_as_delivered(tmp_pat
         assert result["attempts"][0]["status"] == "completed"
 
 
-@pytest.mark.parametrize("tool_calls,expected", [(0, "needs_verification"), (1, "completed")])
+@pytest.mark.parametrize("tool_calls,command_failures,expected", [
+    (0, 0, "needs_verification"), (1, 0, "completed"),
+    (1, 1, "needs_verification"), (2, 1, "completed"),
+])
 @pytest.mark.parametrize("task", [
     "修复 src/target.py 的顺序",
     "修复 src/target.py 的顺序，不要修改接口。",
     "Fix src/target.py; do not modify other files.",
 ])
-def test_streamed_named_file_completion_uses_observed_tool_metadata(monkeypatch, tmp_path, tool_calls, expected, task):
+def test_streamed_named_file_completion_uses_observed_tool_metadata(
+    monkeypatch, tmp_path, tool_calls, command_failures, expected, task,
+):
     monkeypatch.setattr("layman_router.plus_run.codex_login_status", lambda *a, **k: {"available": True, "chatgpt_login": True})
     executions = []
 
@@ -188,15 +218,15 @@ def test_streamed_named_file_completion_uses_observed_tool_metadata(monkeypatch,
         return StreamedProcessResult(
             returncode=0, stderr="", usage={"input_tokens": 10, "cached_input_tokens": 0, "output_tokens": 3, "reasoning_tokens": 0},
             usage_available=True, tool_calls=tool_calls, unique_files_read=0, compactions=0,
-            command_failures=tool_calls,
+            command_failures=command_failures,
         )
 
     monkeypatch.setattr("layman_router.plus_run.run_streaming_process", fake_stream)
     result = run_plus_task(task, cwd=tmp_path, codex_path=sys.executable)
     assert result["status"] == expected
     assert result["tool_calls"] == tool_calls
-    assert result["command_failures"] == tool_calls
-    assert result["attempts"][0]["command_failures"] == tool_calls
+    assert result["command_failures"] == command_failures
+    assert result["attempts"][0]["command_failures"] == command_failures
     assert len(executions) == 1
     assert result["usage"]["input_tokens"] == 10
 

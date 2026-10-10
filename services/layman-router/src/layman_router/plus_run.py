@@ -393,19 +393,27 @@ def run_plus_task(
 
     final_spec = config.tiers[final_tier]
     final_policy = POLICIES[final_tier]
-    # A named-file development request cannot be delivered without a tool action.
-    # This detects absent execution, not correctness; tool use alone proves neither.
+    # No actions, or only failed command actions, cannot establish delivery.
+    # Other actions avoid this narrow guard but do not prove correctness.
+    only_failed_commands = (
+        aggregate_metrics["tool_calls"] > 0
+        and aggregate_metrics["command_failures"] == aggregate_metrics["tool_calls"]
+    )
     if (
         status == "completed"
         and preview["sandbox"] == "workspace-write"
         and preview["task_type"] in {TaskType.NORMAL_CODING.value, TaskType.TESTING.value, TaskType.DOCUMENTATION.value}
         and not _completion_read_only_intent(task)
         and re.search(r"(?:^|[\s`])(?:[\w.-]+/)+[\w.-]+\.(?:py|js|ts|tsx|go|rs|java|md|toml|yaml|yml)\b", task)
-        and aggregate_metrics["tool_calls"] == 0
+        and (aggregate_metrics["tool_calls"] == 0 or only_failed_commands)
     ):
         status = "needs_verification"
-        error_category = "workspace_execution_not_observed"
-        answer = "未观察到指定文件的工具操作，不能确认任务已完成；未自动重试。\n" + answer
+        if only_failed_commands:
+            error_category = "workspace_command_success_not_observed"
+            answer = "观察到的工具操作仅为失败命令，不能确认任务已完成；未自动重试。\n" + answer
+        else:
+            error_category = "workspace_execution_not_observed"
+            answer = "未观察到指定文件的工具操作，不能确认任务已完成；未自动重试。\n" + answer
     return {
         "mode": "run",
         "status": status,

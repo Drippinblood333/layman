@@ -4,6 +4,22 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 failed-only completion guard: latest event diagnosis established one
+failed command, no changed files and failed external validation while native
+turn status remained completed. Offline regression reproduced the public-status
+gap. For the existing bounded named-file/write-task guard, all observed actions
+being nonzero-exit command failures now yields needs_verification with
+workspace_command_success_not_observed. No automatic retry or extra model call.
+Mixed actions (including file changes) do not trigger this narrow rule; they
+still do not prove recovery, correctness or verified delivery. Read-only intent,
+scope exclusions and timeout/budget/cancellation behavior remain unchanged.
+Initial failed-only regression failed before the fix; prior streaming fixtures
+that deliberately set every command to failed were expanded to test correct
+new outcomes rather than disguise failures as successful commands. All 102
+related offline cases, Ruff and diff checks pass. Native attempts retain their
+process-completed status; public status describes missing delivery evidence.
+No EPERM root-cause fix, permissions change, model call, install or release.
+
 2026-10-11 file-change accounting integration checkpoint: exact source
 376dd8d13dc5a8a9ea040e9935740126afe75314 passed
 [CI 38094040418](https://github.com/Drippinblood333/layman/actions/runs/38094040418).
