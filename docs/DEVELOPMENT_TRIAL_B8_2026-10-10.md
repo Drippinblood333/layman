@@ -47,6 +47,27 @@ contract sentence, sandbox defect or configuration without additional evidence.
 
 ## Zero-model sandbox startup check
 
+2026-10-11 bounded tool-configuration follow-up: local native
+`codex features list` reports `shell_tool=true`, `unified_exec=true`,
+`unified_exec_tty=true`, `code_mode=false`, `code_mode_only=false` and
+`code_mode_host=true`. The offline bundled catalog (`debug models --bundled`,
+no refresh) identifies `gpt-6.1-sol` with `shell_type=unified_exec` and
+`apply_patch_tool_type=freeform`. Only these non-secret fields were selected;
+no model execution, network catalog refresh or saved setting change occurred.
+Source inspection of the actual Plus command builder shows no tool-disable
+override, and workspace permission/approval overrides match the direct arm.
+The official [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+documents shell-tool flags and additional developer instructions, and the
+[developer command reference](https://learn.chatgpt.com/docs/developer-commands)
+documents bundled model and prompt inspection. These observations do not show
+the failed request's effective tool schema, remote model metadata or model
+decision; a configured tool is not proof it was presented or invoked. Therefore
+no permission expansion, feature override or speculative contract edit is
+justified by this check. Exact root cause remains unresolved. Do not repeat
+prompt-input rendering, which already proved the prompt/contract were present
+but does not expose the complete execution-tool schema. Model budget stays 6/8;
+the first-failure stop remains in force.
+
 2026-10-11 transport follow-up: source inspection confirms both direct and
 streamed execution pass `-` for stdin, set workspace cwd, UTF-8 text mode and
 the workspace permission profile. The official

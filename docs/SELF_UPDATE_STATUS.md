@@ -4,6 +4,14 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 tool-configuration follow-up: local native feature inspection confirms
+shell/unified execution enabled; the offline bundled GPT-6.1 Sol catalog advertises
+unified execution and freeform patch support. Plus launch construction does not
+disable tools. This rules out a currently observed explicit tool-disable flag,
+not absent tools in the historical failed request. No additional model calls,
+runtime changes or broader permissions. Failure root cause remains unresolved;
+do not automatically resume the stopped trial or count failed-arm usage as savings.
+
 2026-10-11 zero-model transport follow-up: two real-child regressions validate
 that direct and streamed paths deliver matching expected UTF-8 prompt payloads
 through EOF and the correct Unicode/spaced cwd. All 47 Plus execution tests pass
