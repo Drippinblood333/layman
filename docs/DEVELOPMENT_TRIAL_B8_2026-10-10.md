@@ -1,5 +1,42 @@
 # Approved eight-execution development trial
 
+## Outcome: stopped at first validation failure
+
+Executed on 2026-10-10 using Codex `0.162.0-alpha.2`. Persistent reservations:
+**2/8 used, 6 unspent**. The process is terminal; no third execution was launched.
+The unspent allowance is not permission to bypass the agreed first-failure stop.
+Runtime fingerprint:
+`e9976a6e7cb2fc606e43fce51dc5b4ff39747542d641f9cb21f8d36b2641d04a`.
+
+| bugfix-02 metric | Direct | Layman |
+| --- | ---: | ---: |
+| Model / effort | gpt-6.1-sol / medium | gpt-6.1-sol / medium |
+| CLI execution | Completed | Completed |
+| Hidden function validation | Passed | **Failed** |
+| Changed files | src/target.py | None |
+| Tool calls / unique files read | 3 / 1 | 0 / 0 |
+| Input tokens | 270,045 | 124,494 |
+| Cached input (included above) | 248,960 | 110,336 |
+| Uncached input | 21,085 | 14,158 |
+| Output tokens | 1,062 | 580 |
+| Total input + output | 271,107 | 125,074 |
+| Latency milliseconds | 69,379 | 421,079 |
+
+Both arms reported complete usage and no fallback. Layman returned a final
+answer without performing the required edit, leaving the faulty implementation
+unchanged. Scope containment passed but task quality did not. **This is not a
+quality-equivalent token saving**; zero successful comparable pairs exist in this
+batch. Do not pool this with older fingerprints or the four no-tools review
+pairs. Exact reasons for the model's non-execution are not established by these
+metadata; raw answers/events were not retained and must not be reconstructed.
+
+The smallest next action is zero-model diagnosis of execution context and task
+completion reporting, not a speculative contract rewrite or another paid/model
+attempt. Resuming model trials after this stop requires an explicitly approved
+follow-up protocol. Original reservations/results remain intact and private.
+29 relevant offline harness tests and the zero-call route/order preview passed
+before launch; no installer replacement, API billing, tag or release occurred.
+
 ## Predeclared protocol
 
 The owner explicitly approved at most eight subscription model executions after
