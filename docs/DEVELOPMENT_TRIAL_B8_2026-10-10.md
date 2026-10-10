@@ -1,5 +1,33 @@
 # Approved eight-execution development trial
 
+## Zero-model sandbox startup check
+
+On 2026-10-10 the saved Windows sandbox selection was read as `unelevated`
+(only non-secret mode fields were inspected). Following the official
+[Windows sandbox guidance](https://learn.chatgpt.com/docs/windows/windows-sandbox),
+three bounded native `codex sandbox` probes used the explicit `:workspace`
+permission profile and managed configuration in temporary directories:
+
+| Probe | Result |
+| --- | --- |
+| Absolute current virtual-environment Python; print a synthetic marker | Exit 0, marker present |
+| PATH-resolved `python`; print a synthetic marker | Exit 0, marker present |
+| Resolved PowerShell, no profile/noninteractive; invoke absolute Python | Exit 0, marker present |
+
+Each subprocess used subscription-safe environment and a 25-second timeout.
+No model invocation, API billing, saved configuration change, elevated setup,
+new Windows account, firewall change or installation replacement occurred.
+Temporary probe directories were managed by the diagnostic helper and contain
+no user work. No sandbox-secrets directory was opened.
+
+The previously reported permission failure is **not reproduced** by these
+current startup probes. They do not reproduce the old model-generated command,
+its exact permissions metadata, runtime cwd, Python arguments or shell profile.
+Do not claim the old sandbox error is repaired or that user/model reporting was
+false. The original raw errors are absent; exact historical cause remains
+unknown. Keep current protections and avoid a speculative permission downgrade.
+The model-execution reservation journal stays at 4/8 consumed.
+
 ## Approved bounded diagnostic follow-up
 
 ### Result: both edits validate, negative efficiency evidence
