@@ -15,7 +15,11 @@ missing notice, missing license directory and setup failure. The failure fixture
 uses Windows where.exe with unsupported arguments and a temporary LOCALAPPDATA;
 it never touches the user's installation, PATH or Codex settings. PowerShell
 syntax, Python lint and whitespace checks pass. This validates installer failure
-signaling, not real Layman setup/login success. Hosted verification is pending.
+signaling, not real Layman setup/login success. Exact-source
+`3b7b0bcc52760045b5145a728f4d4586161c51bf` was pushed; hosted verification
+[38091401573](https://github.com/Drippinblood333/layman/actions/runs/38091401573)
+is queued, not passed. Push again reported nine expected branch checks bypassed;
+do not infer validation from push success. No public release occurred.
 
 2026-10-11 assembled-candidate measurement: exact-source `2d68503` release assets
 downloaded and verified against manifest, CRC and BUILD metadata. Windows ZIP
