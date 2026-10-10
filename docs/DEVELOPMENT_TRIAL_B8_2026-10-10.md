@@ -1,5 +1,47 @@
 # Approved eight-execution development trial
 
+## Explicit re-scope of final event-diagnostic call (2026-10-11)
+
+After the stopped first event-diagnostic arm, the owner explicitly said continue
+in response to a proposal to use the remaining one call for command-only fault
+diagnosis. This supersedes the unexecuted conditional Direct comparison, not the
+two-call ceiling. Reuse event-diagnostic-attempts.jsonl (expected one entry),
+exclusive lock, fsync reservation before invocation; never replay. Original
+eight-call journal stays intact. One native subscription GPT-6.1 Sol / medium
+invocation, workspace-write and approval never as before, no permission expansion.
+Ask the native command tool to execute one absolute Python command printing a
+fixed synthetic marker, once, with no other task operations or retry. Use an
+isolated temporary directory and 120-second timeout, tool-action limit one.
+This narrower prompt/native path is not an unchanged Layman feature comparison
+or representative development benchmark, and cannot prove general stability.
+
+Expanded transient projection keeps only allowlisted tool kind/status, exit code,
+known error categories (command-not-found, PowerShell parse error, access denied,
+elevation requirement, policy rejection, missing Python, unsupported Windows
+sandbox, process-spawn failure), numeric WinError codes and marker-presence flags.
+Command strings, file paths, arbitrary error/output text, identifiers and final
+answers remain excluded. Actual tool-output categories are separated from
+answer-reported categories. Offline secret-exclusion and classification checks
+passed before launch. Unknown errors may remain unclassified and must be reported
+as unresolved, not guessed. Result: private command-only-result.json, no automatic
+retry or additional model calls; no paid API, setup change, install or release.
+
+Outcome: native turn returned 0 with complete usage, no stop reason, zero tool
+calls and zero command failures. No completed tool items or actual Python marker
+were observed. Thus the requested command was not verified as executed; this is
+not an EPERM reproduction, Python-permission failure or successful diagnostic
+command. No known category appeared in the transient final answer/stderr either;
+their raw bodies were not retained, so model non-execution rationale remains
+unknown. No tool failure payload exists in this run to classify.
+Input 43189, cached 34816, uncached 8373, output 157 (total 43346), reasoning 0.
+Native 0.162.0-alpha.2, GPT-6.1 Sol / medium; fingerprint
+bc3166439793b2b5af5e61d0913afb0dd5f61115d9226eca3d200f353356047e.
+Targeted process exited 0; temporary workspace/answer file were removed normally.
+New diagnostic journal is now 2/2 used; original remains 8/8. No automatic retry,
+runtime/permission change or savings claim. The narrower native prompt also
+failed to demonstrate tool execution, so attributing all no-tool outcomes to the
+Layman contract or all failures to Windows Python restrictions is unsupported.
+
 ## Additional two-call event diagnosis (2026-10-11, predeclared)
 
 After an explicit proposal for at most two subscription diagnostic calls, the

@@ -4,6 +4,18 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 explicitly re-scoped final diagnostic completed: owner approved using
+the last remaining call for one benign native Python command rather than another
+feature comparison. Expanded allowlisted error projection passed offline privacy
+checks. Native turn ended 0 with complete usage but zero tools, no completed
+command item and no Python marker; execution is unverified, not a permission
+error reproduction. No classified error appeared; exact model non-execution
+rationale is unknown because raw answer/output are not retained. No runtime fix
+is justified by this result. New journal is 2/2 exhausted, original 8/8 intact.
+No retries, permission changes, API billing, installs or releases. See development
+diagnosis for the distinct prompt/path, fingerprint and limits. Do not infer
+general token savings from this failed-to-execute diagnostic's low usage.
+
 2026-10-11 failed-only guard integration checkpoint: exact source
 6a945e2a859163c0faa566a39b267a41a01e1e6c passed
 [CI 38094411442](https://github.com/Drippinblood333/layman/actions/runs/38094411442).
