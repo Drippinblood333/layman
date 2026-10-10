@@ -41,7 +41,14 @@ layman codex-plus status
 layman status
 ```
 
-Copy your actual task to the clipboard and preview the plan without launching a model:
+For a short task, you can instead enter `layman plan` or `layman run --dry-run`
+directly. When prompted, type one line and press Enter. This input is read by
+Layman rather than the shell, so it is not placed in shell command history;
+the prompt goes to stderr, leaving structured stdout unchanged. Use the clipboard
+or UTF-8 stdin for multiline requests. Planning and dry runs do not launch a model;
+`layman run` does execute the entered task and consumes subscription allowance.
+
+Or copy your actual task to the clipboard and preview the plan without launching a model:
 
 ```powershell
 layman run --dry-run --clipboard
