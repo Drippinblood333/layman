@@ -4,6 +4,19 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 Windows installer setup-status fix: a hermetic native-process
+reproduction demonstrated that a nonzero post-install setup exit still yielded
+installer exit 0 and misleading restart instructions. The installer now checks
+LASTEXITCODE, reports `Setup failed`, preserves installed files and supplies the
+installed executable's setup-only recovery command; restart instructions appear
+only after successful setup (or explicit NoSetup). No automatic retry or API
+fallback. Four native Windows installer scenarios pass locally: complete package,
+missing notice, missing license directory and setup failure. The failure fixture
+uses Windows where.exe with unsupported arguments and a temporary LOCALAPPDATA;
+it never touches the user's installation, PATH or Codex settings. PowerShell
+syntax, Python lint and whitespace checks pass. This validates installer failure
+signaling, not real Layman setup/login success. Hosted verification is pending.
+
 2026-10-11 assembled-candidate measurement: exact-source `2d68503` release assets
 downloaded and verified against manifest, CRC and BUILD metadata. Windows ZIP
 is 17,079,567 bytes (~16.29 MiB), expanded files 17,393,205 bytes (~16.59 MiB).

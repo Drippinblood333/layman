@@ -53,5 +53,10 @@ if (-not $NoPathUpdate) {
   $env:Path = "$installRoot;$env:Path"
 }
 Write-Host "Installed Layman to $installRoot"
-if (-not $NoSetup) { & (Join-Path $installRoot 'layman.exe') setup --mode $Mode }
+if (-not $NoSetup) {
+  & (Join-Path $installRoot 'layman.exe') setup --mode $Mode
+  if ($LASTEXITCODE -ne 0) {
+    throw "Setup failed (exit code $LASTEXITCODE). Installed files are preserved. Fix the reported error, then rerun: & '$(Join-Path $installRoot 'layman.exe')' setup --mode $Mode"
+  }
+}
 Write-Host 'Restart Codex and open a new task so the updated plugin and PATH are loaded.'

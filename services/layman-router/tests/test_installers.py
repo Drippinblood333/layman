@@ -14,9 +14,11 @@ ROOT = Path(__file__).resolve().parents[3]
 NOTICES = ("BUILD.json", "bundle-audit.json", "runtime-dependencies.json", "standalone-components.json", "THIRD_PARTY_NOTICES.md")
 
 
-@pytest.mark.parametrize("missing", [None, "THIRD_PARTY_NOTICES.md", "THIRD_PARTY_LICENSES"])
+@pytest.mark.parametrize("missing", [None, "THIRD_PARTY_NOTICES.md", "THIRD_PARTY_LICENSES", "setup_failure"])
 def test_installer_preserves_notices_and_refuses_incomplete_package(tmp_path, missing):
     windows = os.name == "nt"
+    if missing == "setup_failure" and not windows:
+        pytest.skip("PowerShell native exit-status regression")
     shell = (shutil.which("pwsh") or shutil.which("powershell")) if windows else shutil.which("sh")
     if not shell:
         pytest.skip("Native installer shell unavailable")
@@ -40,6 +42,10 @@ def test_installer_preserves_notices_and_refuses_incomplete_package(tmp_path, mi
     installed.write_bytes(b"old executable")
     archive = tmp_path / asset
     payload = b"not executable in Windows fixture" if windows else b"#!/bin/sh\nexit 0\n"
+    if missing == "setup_failure":
+        # A real harmless native Windows program: unsupported setup arguments
+        # return nonzero. No model, configuration change or synthetic shell mock.
+        payload = (Path(os.environ["SystemRoot"]) / "System32" / "where.exe").read_bytes()
     with zipfile.ZipFile(archive, "w") as package:
         package.writestr(executable, payload)
         for name in NOTICES:
@@ -51,7 +57,8 @@ def test_installer_preserves_notices_and_refuses_incomplete_package(tmp_path, mi
     checksums.write_text(f"{hashlib.sha256(archive.read_bytes()).hexdigest()}  {asset}\n", encoding="utf-8")
     env = {**os.environ, "TEMP": str(temporary), "TMP": str(temporary), "LAYMAN_TEST_ARCHIVE": str(archive), "LAYMAN_TEST_CHECKSUMS": str(checksums)}
     if windows:
-        env.update(LOCALAPPDATA=str(home), LAYMAN_TEST_INSTALLER=str(ROOT / "install.ps1"))
+        env.update(LOCALAPPDATA=str(home), LAYMAN_TEST_INSTALLER=str(ROOT / "install.ps1"),
+                   LAYMAN_TEST_SETUP_FAIL="1" if missing == "setup_failure" else "0")
         command = [shell, "-NoProfile", "-NonInteractive", "-Command", """
 function Invoke-RestMethod { param($Headers,$Uri)
   [pscustomobject]@{ assets=@(
@@ -62,7 +69,7 @@ function Invoke-WebRequest { param($Headers,$Uri,$OutFile)
   $source = if ($Uri -eq 'fixture-archive') { $env:LAYMAN_TEST_ARCHIVE } else { $env:LAYMAN_TEST_CHECKSUMS }
   Copy-Item -LiteralPath $source -Destination $OutFile
 }
-& $env:LAYMAN_TEST_INSTALLER -NoSetup -NoPathUpdate
+& $env:LAYMAN_TEST_INSTALLER -NoSetup:($env:LAYMAN_TEST_SETUP_FAIL -ne '1') -NoPathUpdate
 """]
     else:
         mocks = tmp_path / "mocks"
@@ -78,6 +85,12 @@ case "$url" in */SHA256SUMS.txt) cp "$LAYMAN_TEST_CHECKSUMS" "$destination";; *)
         env.update(HOME=str(home), XDG_DATA_HOME=str(home / "data"), LAYMAN_VERSION="fixture", LAYMAN_MODE="plus", PATH=str(mocks) + os.pathsep + env["PATH"])
         command = [shell, str(ROOT / "install.sh")]
     result = subprocess.run(command, env=env, capture_output=True, text=True, timeout=30, check=False)
+    if missing == "setup_failure":
+        assert result.returncode != 0
+        assert "Setup failed" in result.stdout + result.stderr
+        assert "Restart Codex" not in result.stdout + result.stderr
+        assert installed.read_bytes() == payload
+        return
     if missing:
         assert result.returncode != 0
         assert missing in result.stdout + result.stderr
