@@ -11,6 +11,19 @@ from layman_router.routing import (
 )
 
 
+@pytest.mark.parametrize("task", [
+    "项目安装简单，体积小，上手简单，优化prompt，避免过度测试，精简输入输出，节省token",
+    "避免过度测试", "不要不必要的测试", "减少过量测试", "avoid excessive testing",
+])
+def test_efficiency_constraints_do_not_request_testing(router_config, task):
+    assert classify_task({"model": "auto", "input": task}, router_config).task_type == TaskType.GENERAL
+
+
+@pytest.mark.parametrize("task", ["避免过度测试，但请增加必要测试", "请编写单元测试，避免过度测试"])
+def test_efficiency_constraints_preserve_positive_test_requests(router_config, task):
+    assert classify_task({"model": "auto", "input": task}, router_config).task_type == TaskType.TESTING
+
+
 def test_summary_routes_fast(router_config):
     payload = {"model": "auto", "input": "请总结这段发布说明"}
     features = classify_task(payload, router_config)

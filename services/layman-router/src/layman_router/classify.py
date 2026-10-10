@@ -317,8 +317,14 @@ def classify_task(payload: dict[str, Any], config: RouterConfig) -> TaskFeatures
     has_code = "```" in text or bool(re.search(r"\b(def|class|function|import|const|let|SELECT|FROM)\b", text))
 
     task_type = next((candidate for candidate, patterns in INTENT_PATTERNS if any(re.search(pattern, normalized) for pattern in patterns)), TaskType.GENERAL)
+    # Efficiency constraints are not requests to add tests; preserve other positive intents.
+    keyword_text = re.sub(
+        r"(?:避免|不要|减少)\s*(?:过度|过量|不必要的)\s*测试|"
+        r"\b(?:avoid|reduce)\s+(?:excessive|unnecessary|over[- ]?)\s*testing\b",
+        "", normalized,
+    )
     for candidate, terms in (KEYWORDS if task_type == TaskType.GENERAL else []):
-        if any(_contains_term(normalized, term.lower()) for term in terms):
+        if any(_contains_term(keyword_text, term.lower()) for term in terms):
             task_type = candidate
             break
 

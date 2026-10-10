@@ -23,3 +23,14 @@ def test_high_risk_plan_cannot_drop_safety_or_deep_route(tmp_path: Path):
     assert result["route"]["route_tier"] == "deep"
     assert result["execution"] == "plan-first"
     assert "safety" in result["selected_modules"]
+
+
+def test_non_release_task_does_not_inherit_release_checks(monkeypatch, tmp_path: Path):
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+        "stage": "release_candidate", "next_steps": ["Run the full release gate"],
+    })
+    result = create_task_plan("优化prompt，避免过度测试，精简输入输出", tmp_path)
+    assert result["task_type"] == "general"
+    assert "Run the full release gate" not in result["next_steps"]
+    assert any("proportionate" in step for step in result["next_steps"])
+    assert create_task_plan("发布版本", tmp_path)["next_steps"] == ["Run the full release gate"]

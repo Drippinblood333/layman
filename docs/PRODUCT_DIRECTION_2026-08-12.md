@@ -1,5 +1,7 @@
 # Product direction — 2026-08-12
 
+The owner's current four product goals and bounded self-update policy are defined in [PRODUCT_GOALS_2026-10-10.md](PRODUCT_GOALS_2026-10-10.md). Use that document for delivery priorities; the research below is historical context, not an instruction to broaden the default installation or run indefinite evaluations.
+
 ## Decision
 
 Position Layman as an **evidence-first efficiency governor for Codex**:
