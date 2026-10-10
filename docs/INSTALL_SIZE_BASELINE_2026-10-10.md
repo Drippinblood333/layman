@@ -1,10 +1,41 @@
 # Installation and size baseline — 2026-10-10
 
-This is a bounded read-only measurement of CI/local artifacts and current installer instructions, not a fresh local build, a public download test, or evidence of an installed user profile's size.
+These are bounded artifact and isolated-runtime measurements, not a fresh local build, a public download test, or evidence of an installed user profile's size.
 
 ## Measured artifacts
 
-### Latest verified five-platform checkpoint
+### Current Windows initialized-runtime snapshot
+
+Verified source `d510120386d400f26caab6f01ecd9075452c0bfc` passed all ten
+validation jobs in [run 38060294327](https://github.com/Drippinblood333/layman/actions/runs/38060294327).
+Downloaded its Windows x64 artifact once (ID `11672284115`, outer GitHub
+transport 17,398,902 bytes) to ignored `build/ci-d510120-footprint/windows-x64`.
+Executable SHA-256 `be493661175c539c6c1730a839fe48745115e2f4fb56176fe384f5289dc981ad`
+matches `BUILD.json` and its digest-verified bundle audit before launch.
+
+Launched only `mcp-server` in a newly created isolated fixture under that build
+directory, with child-only `TEMP`, `TMP` and `LAYMAN_HOME` locations. Removed
+model-provider/Layman overrides from the child's environment. Sent only the
+local `initialize` handshake, not a tool invocation; the reply confirmed Layman
+was initialized. No Codex login, setup, API request or model task was invoked.
+
+| Observed logical file sizes | Bytes | Files |
+| --- | ---: | ---: |
+| Candidate artifact directory | 17,392,894 | 32 |
+| Executable alone (included above) | 17,257,059 | 1 |
+| Live initialized `_MEI` temporary extraction | 28,206,516 | 181 |
+
+The artifact is 16.59 MiB and temporary extraction 26.90 MiB. Their combined
+logical file sizes are 43.49 MiB, not a minimum free-disk requirement or actual
+allocated-disk measurement. The temporary size was stable across two observations
+after the initialization reply; it is not peak extraction/RAM usage or a cold-start
+timing result. Normal stdin closure returned exit 0 and removed the temporary
+extraction. The isolated Layman data-home directory was never created. The
+candidate and empty fixture remain ignored; existing installations/configuration
+were not replaced. Installed-profile growth, startup peaks and other platforms'
+runtime extraction still need separate evidence.
+
+### Five-platform pre-strip checkpoint
 
 Source `b82380d6ca5f6d6f4589ac4d054c4dccbd8633d7` passed all ten validation
 jobs in [run 38056056295](https://github.com/Drippinblood333/layman/actions/runs/38056056295).
