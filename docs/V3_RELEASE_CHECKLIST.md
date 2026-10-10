@@ -4,7 +4,7 @@ Updated: 2026-10-09
 
 ## Current release audit and owner decisions
 
-The latest verified source is `f1ae6db427226fcd463849559ed720a49cc23c60`: 327 local tests and all ten [hosted checks](https://github.com/Drippinblood333/layman/actions/runs/37951429441) pass; publishing was skipped. Read-only GitHub release inventory returned no published releases on 2026-10-09 before the new calibration; no tag or publication was performed afterward. Source delivery and assembled CI artifacts are not a published or user-tested release.
+The latest verified source is `74ddca054da300b5bb4310450d70e48ec7468bae`: 332 local tests and all ten [hosted checks](https://github.com/Drippinblood333/layman/actions/runs/38031873455) pass; publishing was skipped. The 36-execution calibration remains tied to its original source `f1ae6db`; subsequent accounting guards did not rerun or alter its observations. Read-only GitHub release inventory returned no published releases on 2026-10-09 before the new calibration; no tag or publication was performed afterward. Source delivery and assembled CI artifacts are not a published or user-tested release.
 
 Both approvals are exhausted: the original 12-execution task trial and the separately approved 36-execution Plus calibration. The latter closes fresh Plus execution coverage only; its aggregate auto total is 1.70% higher, with no human scores. Neither closes the human-quality, paid API or 30-pair savings gates. Preserve all failures and negative evidence in [the task trial](TOKEN_PILOT_2026-10-09.md) and [Plus report](PLUS_CALIBRATION_2026-10-09.md); do not raise either cap, substitute an output journal or weaken an unchecked gate.
 
