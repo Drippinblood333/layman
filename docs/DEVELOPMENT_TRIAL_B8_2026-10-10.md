@@ -39,6 +39,31 @@ before launch; no installer replacement, API billing, tag or release occurred.
 
 ## Predeclared protocol
 
+### Subsequent zero-model instruction-loading check
+
+Source `2340722c32b742774959330ae924df759a483407` passed all ten validation
+jobs in [run 38050460774](https://github.com/Drippinblood333/layman/actions/runs/38050460774);
+publication was skipped. The completion-reporting guard is hosted-verified,
+not a runtime repair of model non-execution.
+
+Official [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+describes `developer_instructions` as additional session instructions rather than
+a replacement for built-in instructions. Native `codex debug prompt-input`
+on version `0.162.0-alpha.2` was then used to render the unchanged bugfix-02
+execution prompt with and without the current Layman contract, in a temporary
+empty directory with subscription-safe environment. No model execution, user
+configuration edit or raw-prompt retention occurred.
+
+Both renderings contained five input items (three developer, two user) and kept
+the explicit workspace-edit requirement. The Layman rendering contained the
+complete current contract. JSON serialization lengths were 18,928 vs 19,727
+characters (+799), not tokenizer counts or task savings. This rules out a missing
+contract in this bounded rendering, not a historical root cause. The empty
+directory and selected configuration overrides do not reconstruct the old
+execution workspace, full tool schema, effective runtime permissions or model
+behavior. Do not disable inherited safety rules or add stronger instructions
+based on this inconclusive check. The trial remains stopped at 2/8 used.
+
 Post-trial zero-model follow-up: mocked execution reproduced the success-label
 gap. A bounded named-file/no-tools guard now reports `needs_verification` rather
 than delivered success, with CLI/MCP failure signaling and no extra model call.
