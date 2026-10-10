@@ -4,6 +4,18 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 failed-only guard integration checkpoint: exact source
+6a945e2a859163c0faa566a39b267a41a01e1e6c passed
+[CI 38094411442](https://github.com/Drippinblood333/layman/actions/runs/38094411442).
+All ten validation jobs succeeded: three OS test suites, five standalone
+build/smoke jobs, Docker and candidate assembly. Publish skipped; no retry,
+local suite rerun, model call, installation replacement or release tag. Ordinary
+push reported expected-status-check bypass before CI; only subsequent exact-head
+results establish verification. This confirms compatibility of needs_verification
+for the bounded failed-only case, not a command-failure repair, successful real
+user onboarding or representative token gains. New diagnostic allowance remains
+stopped after first failure at 1/2; old exhausted journal stays 8/8.
+
 2026-10-11 failed-only completion guard: latest event diagnosis established one
 failed command, no changed files and failed external validation while native
 turn status remained completed. Offline regression reproduced the public-status
