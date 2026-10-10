@@ -72,6 +72,12 @@ def _text_output(value: str | bytes | None) -> str:
 
 
 def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_only: bool, workflow: str) -> str:
+    lean = (
+        "Reuse project code > stdlib/platform > installed deps; no speculative abstractions. "
+        "Keep validation/errors/accessibility; check affected callers. "
+        if not read_only and workflow in {"understand-implement-verify", "reproduce-fix-verify", "discover-test-gaps-verify"}
+        else ""
+    )
     action = (
         "Read-only: analyze; do not modify files."
         if read_only
@@ -82,7 +88,7 @@ def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_on
     )
     return (
         f"Layman {tier.value}/{workflow}. Preserve request/scope. {action} "
-        "Search symbols/tests first; read only completion evidence. "
+        f"Search symbols/tests first; read only completion evidence. {lean}"
         f"File ceilings, not targets: {policy.initial_files} initially; {policy.expanded_files} only for a concrete "
         f"evidence gap; at most {policy.tool_calls} tool calls. "
         "Reuse evidence; avoid broad scans, repeated reads and full logs. "

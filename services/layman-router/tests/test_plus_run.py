@@ -56,6 +56,27 @@ def test_vague_task_is_blocked_before_any_codex_call(tmp_path):
     assert "帮我优化整个项目" not in str(result)
 
 
+@pytest.mark.parametrize("workflow", ["understand-implement-verify", "reproduce-fix-verify", "discover-test-gaps-verify"])
+def test_lean_rules_only_load_for_writable_development(workflow):
+    policy = POLICIES[RouteTier.BALANCED]
+    writable = _execution_contract(RouteTier.BALANCED, policy, read_only=False, workflow=workflow)
+    assert "Reuse project code > stdlib/platform > installed deps" in writable
+    assert "no speculative abstractions" in writable
+    assert "Keep validation/errors/accessibility; check affected callers" in writable
+    assert "Preserve request/scope" in writable
+    assert "must edit the workspace and verify now" in writable
+    readonly = _execution_contract(RouteTier.BALANCED, policy, read_only=True, workflow=workflow)
+    assert "Reuse project code" not in readonly
+    assert "do not modify files" in readonly
+
+
+@pytest.mark.parametrize("workflow", ["scope-execute-verify", "inspect-update-check-links", "release-gate"])
+def test_non_development_contract_does_not_load_lean_rules(workflow):
+    assert "Reuse project code" not in _execution_contract(
+        RouteTier.FAST, POLICIES[RouteTier.FAST], read_only=False, workflow=workflow,
+    )
+
+
 def test_vague_dry_run_reports_block_without_model_execution(tmp_path):
     result = run_plus_task("fix it", cwd=tmp_path, execute=False, codex_path="missing")
     assert result["mode"] == "dry-run"

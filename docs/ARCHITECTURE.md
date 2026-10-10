@@ -44,6 +44,7 @@ Layman 1.0 implements its control layer locally rather than copying competitor r
 
 - Caveman-like output discipline is represented by a concise outcome target.
 - RTK-like tool discipline is represented by tool-output budgets; an external adapter can be added without embedding RTK internals.
+- Ponytail-informed reuse ordering and anti-speculation rules are now composed only into writable implementation, bugfix and test-development contracts. They preserve validation/error handling/accessibility and affected-caller checks. No upstream skill, hook or dependency is installed; this is uncalibrated guidance, not measured task-token savings.
 - Tool-call and process limits are enforced. File-path ceilings count paths observable in structured Codex events; batch reads can make that count a conservative lower bound, not a filesystem access-control boundary.
 - Spec Kit-like specification discipline is represented by smallest-outcome and acceptance-criteria workflows.
 - Superpowers-like composition is represented by progressive skill loading.
