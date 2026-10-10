@@ -79,6 +79,43 @@ builds, standalone smoke, inventory checks and measured package deltas are still
 required before claiming this strategy works or reduces size. The previously
 measured `b82380d` artifacts remain the pre-strip baseline.
 
+### Verified Linux slimming result
+
+Exact source `47af2d986dcfca9ded490319842111a7379293a4` passed all ten
+validation jobs in [run 38057482797](https://github.com/Drippinblood333/layman/actions/runs/38057482797),
+including both Linux standalone builds/smoke, three OS tests and release assembly;
+publication was skipped. Downloaded only the two existing Linux platform
+artifacts into ignored `build/ci-47af2d9-size`, without running them locally or
+replacing an installation. The baseline is the earlier `b82380d` measurement.
+
+| Platform | Previous executable bytes | New executable bytes | Previous expanded bytes | New expanded bytes | Expanded reduction |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Linux x64 | 34,454,672 | 16,785,424 | 34,590,450 | 16,921,202 | 51.08% |
+| Linux arm64 | 33,166,352 | 16,248,400 | 33,302,132 | 16,384,180 | 50.80% |
+
+Both retain 32 artifact files and the same 24 dependency names/versions as the
+baseline. Executable SHA-256 values match `BUILD.json` and its digest-verified
+bundle audit; runtime and standalone-component manifests match their build
+digests. The embedded Python library is now 5,969,456 bytes on x64 and 5,956,840
+on arm64; read-only ELF inspection confirms neither contains `.debug*`, `.symtab`
+or `.strtab` sections. Dynamic export tables are not classified as removable
+debug sections in this inspection. Executable hashes:
+
+```text
+linux-x64    7f8a11c9b7b51d920566a0e2d799288966becd556735b2ef3efc4ce215f268ea
+linux-arm64  4eef06636946bea8b89ee6843d7ec0294352bfedc16ac336a159ead443e7a035
+```
+
+GitHub's platform transport artifacts are 16,927,202 bytes for x64
+(ID `11671204056`) and 16,390,180 for arm64 (ID `11671943615`). These are not
+the assembled candidate release ZIP sizes; those new ZIP sizes remain unmeasured.
+These are separate hosted runs, not repeated controlled same-runner trials;
+the observed package deltas must not be advertised as universal percentages.
+No runtime feature/dependency was removed. Existing smoke and integrity coverage
+passed, but does not prove every possible runtime workflow or restore stripped
+native debugging detail. Windows/macOS size reductions, cold-start extraction
+space, installed-profile footprint and token savings are not established.
+
 ### Historical Windows checkpoint
 
 Source `eca27229ba70d0578c6f2fef317516e14163fad9` passed all ten validation
