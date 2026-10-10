@@ -30,3 +30,14 @@ def test_vague_plan_stops_before_execution_without_retaining_task(tmp_path):
     assert result["execution"] == "plan-first"
     assert result["prompt_guidance"]["needs_clarification"] is True
     assert "帮我优化整个项目" not in str(result)
+    assert result["route"]["execution_allowed"] is False
+
+
+def test_mcp_vague_run_exposes_questions_without_model_execution(monkeypatch, tmp_path):
+    from layman_router import mcp_server
+
+    monkeypatch.setattr("layman_router.plus_run.find_codex", lambda *a, **k: pytest.fail("No model preflight permitted"))
+    result = mcp_server._call_tool("run", {"task": "帮我优化整个项目", "workspace": str(tmp_path)})
+    assert result["isError"] is True
+    assert result["structuredContent"]["error_category"] == "prompt_clarification_required"
+    assert "具体结果" in result["content"][0]["text"]

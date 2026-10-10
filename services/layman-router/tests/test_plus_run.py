@@ -43,6 +43,26 @@ def test_short_execution_contract_preserves_scope_safety_and_soft_budget(tier, r
         assert "Make only requested changes" in contract
 
 
+def test_vague_task_is_blocked_before_any_codex_call(tmp_path):
+    def forbidden_runner(*args, **kwargs):
+        pytest.fail("Clarification must precede even CLI login/version checks")
+
+    result = run_plus_task("帮我优化整个项目", cwd=tmp_path, execute=True, runner=forbidden_runner)
+    assert result["status"] == "blocked"
+    assert result["error_category"] == "prompt_clarification_required"
+    assert result["attempts"] == []
+    assert not any(result["usage"].values())
+    assert result["tool_calls"] == 0
+    assert "帮我优化整个项目" not in str(result)
+
+
+def test_vague_dry_run_reports_block_without_model_execution(tmp_path):
+    result = run_plus_task("fix it", cwd=tmp_path, execute=False, codex_path="missing")
+    assert result["mode"] == "dry-run"
+    assert result["execution_allowed"] is False
+    assert result["prompt_guidance"]["needs_clarification"] is True
+
+
 def test_plan_uses_deep_read_only_for_high_risk(router_config):
     plan = plus_task_plan("请分析生产支付数据库迁移风险", config=router_config)
     assert plan["route_tier"] == "deep"

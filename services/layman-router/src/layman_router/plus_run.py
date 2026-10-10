@@ -27,6 +27,7 @@ from .plus_eval import (
     subscription_environment,
 )
 from .project_status import inspect_project
+from .prompt_guidance import prompt_guidance
 from .routing import decide_route, router_overhead, structured_decision
 from .workflow import select_workflow
 
@@ -117,6 +118,7 @@ def plus_task_plan(
     policy_finished_ns = time.perf_counter_ns()
     policy = POLICIES[decision.route_tier]
     destructive_blocked = features.destructive and not allow_destructive
+    guidance = prompt_guidance(task)
     read_only = features.risk == "high" and not (features.destructive and allow_destructive)
     preflight_finished_ns = time.perf_counter_ns()
     feature_extraction_ms = (feature_finished_ns - feature_started_ns) / 1_000_000
@@ -137,7 +139,8 @@ def plus_task_plan(
         "risk": features.risk,
         "destructive": features.destructive,
         "destructive_reason": features.destructive_reason,
-        "execution_allowed": not destructive_blocked,
+        "execution_allowed": not destructive_blocked and not guidance["needs_clarification"],
+        "prompt_guidance": guidance,
         "sandbox": "read-only" if read_only else "workspace-write",
         "initial_file_budget": policy.initial_files,
         "expanded_file_budget": policy.expanded_files,
@@ -184,6 +187,7 @@ def run_plus_task(
     if not execute:
         return {"mode": "dry-run", **preview}
     if not preview["execution_allowed"]:
+        clarification_required = bool(preview["prompt_guidance"]["needs_clarification"])
         return {
             "mode": "run",
             "status": "blocked",
@@ -196,8 +200,9 @@ def run_plus_task(
             "unique_files_read": 0,
             "compactions": 0,
             "fallback_used": False,
-            "error_category": "destructive_authorization_required",
+            "error_category": "prompt_clarification_required" if clarification_required else "destructive_authorization_required",
             "answer": (
+                "\n".join(preview["prompt_guidance"]["questions"]) if clarification_required else
                 "Layman blocked this destructive request before starting Codex. "
                 "A human must rerun the local CLI with --allow-destructive after reviewing the exact scope."
             ),

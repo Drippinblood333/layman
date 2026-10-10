@@ -7,7 +7,6 @@ from .classify import classify_task
 from .config import load_config
 from .plus_run import plus_task_plan
 from .project_status import inspect_project
-from .prompt_guidance import prompt_guidance
 from .workflow import select_workflow
 
 
@@ -21,7 +20,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     route = plus_task_plan(task, config=config)
 
     workflow = select_workflow(features.task_type, features.risk, project_stage=project["stage"], task=task)
-    guidance = prompt_guidance(task)
+    guidance = route["prompt_guidance"]
 
     modules = ["context", f"workflow:{workflow}", "routing", "output"]
     if features.risk != "low":
