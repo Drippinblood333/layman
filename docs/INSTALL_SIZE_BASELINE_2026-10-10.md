@@ -4,7 +4,55 @@ This is a bounded read-only measurement of CI/local artifacts and current instal
 
 ## Measured artifacts
 
-### Latest verified Windows checkpoint
+### Latest verified five-platform checkpoint
+
+Source `b82380d6ca5f6d6f4589ac4d054c4dccbd8633d7` passed all ten validation
+jobs in [run 38056056295](https://github.com/Drippinblood333/layman/actions/runs/38056056295).
+Downloaded its existing `release-assets` artifact (ID `11672041279`, outer
+GitHub transport archive 117,836,976 bytes) once, without running or installing
+any contained executable. The ignored local directory is
+`build/ci-b82380d-size/release-assets`.
+
+The following ZIPs are the assembled candidate release files inside that outer
+artifact, not GitHub's per-platform transport archives. They have not been
+published as public release downloads. Expanded bytes are the sum of file sizes
+inside each ZIP, not actual installed-profile or filesystem allocation sizes.
+
+| Platform | Candidate ZIP bytes | Expanded file bytes | Executable bytes |
+| --- | ---: | ---: | ---: |
+| Windows x64 | 17,074,588 | 17,389,307 | 17,253,472 |
+| macOS x64 | 17,091,382 | 17,331,442 | 17,195,664 |
+| macOS arm64 | 16,125,000 | 16,405,716 | 16,269,936 |
+| Linux x64 | 34,282,467 | 34,590,450 | 34,454,672 |
+| Linux arm64 | 32,997,149 | 33,302,132 | 33,166,352 |
+
+Each ZIP has 32 files and records 24 locked runtime dependencies (direct plus
+transitive). The executable accounts for more than 99% of expanded bytes on
+every platform. This locates the size budget in the bundled executable, not
+small documentation/skill files; it does not identify which embedded component
+can safely be removed or explain cross-platform differences. A lean build must
+preserve the required CLI/MCP/runtime behavior and license evidence.
+
+All five ZIP SHA-256 values match the assembled `SHA256SUMS.json`; ZIP CRC checks
+pass, and executable SHA-256 values match both `BUILD.json` and its digest-checked
+bundle audit. Archive digests, in table order:
+
+```text
+windows-x64  42b4fc79904434a4d40a020a6168dcfc8fc1124bc6901937aca98b5cf9b479e3
+macos-x64    a5bbd20466a6b23ca812280bbe3fc53a655dc222746fee5ca6747c1ed79b48f2
+macos-arm64  8207a3893c33a6776b0378cd7dfbcf33be61d551a58a3c5828108a27a6a3de96
+linux-x64    16ff8b8033ce555136f1e199265ffabf57c4758125852e63b910b17f9d329ea6
+linux-arm64  cc055a67be4f557339003345ca04c6654e3e04706664b34a70f9e14eb6caf19b
+```
+
+Windows candidate ZIP size is 16.28 MiB, expanded files 16.58 MiB. These measured
+values are baselines, not a demonstrated size reduction or token saving. No new
+build, model execution, installation replacement or publication was performed.
+Cold-start extraction space, installed profile size, user-data growth and public
+onboarding remain unmeasured. Hash agreement is integrity evidence within this
+CI artifact, not independent publisher identity or code signing.
+
+### Historical Windows checkpoint
 
 Source `eca27229ba70d0578c6f2fef317516e14163fad9` passed all ten validation
 jobs in [run 38044677991](https://github.com/Drippinblood333/layman/actions/runs/38044677991);
