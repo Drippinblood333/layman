@@ -4,6 +4,18 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 file-change accounting integration checkpoint: exact source
+376dd8d13dc5a8a9ea040e9935740126afe75314 passed
+[CI 38094040418](https://github.com/Drippinblood333/layman/actions/runs/38094040418).
+All ten validation jobs succeeded: three OS test suites, five standalone
+build/smoke jobs, Docker and candidate package assembly; publish skipped.
+No local suite rerun or model call during CI observation. Main push accepted
+expected-check bypass warnings before this exact-head result, so push alone was
+not verification. This establishes integration of file-change accounting only;
+latest failed-command diagnosis and earlier EPERM remain unresolved. New
+diagnostic journal remains 1/2 used and stopped on first failure, old journal 8/8.
+No installation replacement, release tag or public release.
+
 2026-10-11 file-change accounting fix: offline regression reproduced that a
 file_change item was omitted from tool_calls, so a patch-only named-file request
 could receive workspace_execution_not_observed despite a reported patch action.
