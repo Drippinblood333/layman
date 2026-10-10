@@ -4,6 +4,17 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 assembled-candidate measurement: exact-source `2d68503` release assets
+downloaded and verified against manifest, CRC and BUILD metadata. Windows ZIP
+is 17,079,567 bytes (~16.29 MiB), expanded files 17,393,205 bytes (~16.59 MiB).
+Linux x64/arm64 assembled ZIPs are 16,690,487/16,149,469 bytes, 51.31%/51.06%
+below the measured pre-strip `b82380d` candidate; Windows/macOS remain essentially
+unchanged. A temporary-profile actual Windows executable check confirms the new
+courtesy clarification stops before native model preflight (two questions, no
+attempts, exit 1). No user installation replacement or model execution occurred.
+See [size evidence](INSTALL_SIZE_BASELINE_2026-10-10.md) for hashes, scope and
+cross-run comparison limits. Byte savings are not token savings.
+
 2026-10-11 prompt-guidance courtesy fix: five offline reproductions showed that
 wholly unspecified requests such as `帮我优化整个项目吧`, `请修复一下，谢谢！`
 and `fix it, please` bypassed clarification. The existing full-request matcher

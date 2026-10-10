@@ -1,5 +1,51 @@
 # Installation and size baseline — 2026-10-10
 
+## 2026-10-11 current assembled candidates and zero-model Windows check
+
+Exact hosted source `2d68503c92e196c3ac843915fc99646d8f62fbb8` passed all ten
+validation jobs in [run 38090818098](https://github.com/Drippinblood333/layman/actions/runs/38090818098).
+Downloaded its assembled `release-assets` artifact, ID `11683123862`, transport
+size 83,397,719 bytes, into ignored `build/ci-2d68503-package/release-assets`.
+This is a CI candidate, not a published release or installed-program upgrade.
+
+| Platform | Candidate ZIP bytes | Expanded file bytes | Executable bytes | ZIP change vs pre-strip b82380d |
+| --- | ---: | ---: | ---: | ---: |
+| Windows x64 | 17,079,567 | 17,393,205 | 17,257,370 | +0.03% |
+| macOS x64 | 17,095,101 | 17,334,610 | 17,198,832 | +0.02% |
+| macOS arm64 | 16,125,850 | 16,406,900 | 16,271,120 | +0.01% |
+| Linux x64 | 16,690,487 | 16,920,314 | 16,784,536 | -51.31% |
+| Linux arm64 | 16,149,469 | 16,385,732 | 16,249,952 | -51.06% |
+
+All five archives have 32 files. ZIP SHA-256 matches assembled SHA256SUMS.json;
+CRC checks pass; BUILD.json references for bundle audit, runtime dependencies
+and standalone components match their digests, and executable digests match
+BUILD.json. The Linux observations close the previously unmeasured assembled
+ZIP comparison following symbol stripping; separate source/hosted runs and
+intervening fixes mean this is an observed candidate comparison, not a perfectly
+controlled single-change experiment. Windows/macOS size did not materially fall.
+These are logical archive/file bytes, not installed peak disk, RAM or token use.
+
+Candidate ZIP hashes (same platform order):
+
+```text
+windows-x64 8ffbfb88f045dee355cfcad4f0e432f6993f3be11419e325bee73611ad20c996
+macos-x64 74818f385fd35e219d719c34fc06385d4c52acba4ce53692480fc198bf769548
+macos-arm64 f16f56ba074e2e8255b149cdf2002e9958b726c76e12ef31bd7c2bbcff7d89c9
+linux-x64 ccb0e234eb6b39d788d57e81d2517375193ab5c8b74fc25dd742499e39c42491
+linux-arm64 7be698d2e25171839590157a0a64013d68d28e783fe4ace7bfa2f139b10aa112
+```
+
+A Windows-only candidate check extracted the verified package into a temporary
+directory and ran `run` with synthetic `帮我优化整个项目吧`, a Unicode/spaced
+workspace, isolated LAYMAN_HOME and TEMP/TMP, API keys removed from the child
+environment, and an intentionally nonexistent Codex executable path. It returned
+exit 1, `prompt_clarification_required`, exactly two questions, empty attempts
+and model_calls=0. Thus this packaged entrypoint stopped before native/login/model
+preflight; it was not merely a source-level test. Temporary package/profile
+directories were cleaned by the bounded helper. No setup, saved configuration,
+existing installation or public release was changed. This does not validate
+successful model execution, real-user onboarding or all-platform interactive UX.
+
 These are bounded artifact and isolated-runtime measurements, not a fresh local build, a public download test, or evidence of an installed user profile's size.
 
 ## Measured artifacts
