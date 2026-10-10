@@ -110,8 +110,8 @@ Layman 1.0 没有直接复制这些项目的代码，而是通过原创控制层
 ## 诚实的验证状态
 
 - 本地完整单元与集成测试以及 300 案例路由矩阵通过；发布日期证据见发布检查表。
-- 2026-07-16 的历史 Plus 校准 36 次调用均无执行错误并且未保存回答正文；当前候选版本仍需重新完成带指纹的校准。
-- 30 组 Token 对照测试中，Layman 隐藏验证为 30/30，Direct 为 29/30；但 Layman 总 Token 配对中位数增加 19.54%，读取文件也更多。
+- [2026-10-09 新版 Plus 校准](docs/PLUS_CALIBRATION_2026-10-09.md)已完成 36/36 次执行，用量完整，无失败或工具调用。自动路由总 Token 比固定深度模型基线多 1.70%，配对中位数没有节省。人工质量评分仍为空，因此这里只确认执行覆盖，不代表质量验收或发布就绪。
+- 历史 30 组报告记录了 Layman 隐藏验证 30/30、Direct 29/30，以及 Layman 总 Token 配对中位数增加 19.54%。它采用旧测量协议，不与新结果合并；[当前实现任务试跑](docs/TOKEN_PILOT_2026-10-09.md)也未达到公开节省门槛。
 - 因此 Token 优化仍为 Experimental，不宣传固定节省比例；API 路由在完成正式真实 API 基准前保持 Beta。
 
 更多信息：[产品方向](docs/PRODUCT_DIRECTION_2026-08-12.md) · [安全](docs/SECURITY.md) · [评测](docs/BENCHMARKS.md) · [Token 负面结果](docs/TOKEN_OPTIMIZATION_2026-07-16.md) · [恢复](docs/RECOVERY.md) · [发布门禁](docs/RELEASE.md)。

@@ -1,4 +1,6 @@
-# Subscription token pilot: stopped, no savings claim
+# Subscription token pilot: exhausted, no savings claim
+
+Current state, checked 2026-10-10: the original authorization has **12/12 executions used, zero remaining**. The chronological snapshots below preserve the initial stop and subsequent approved continuations; their historical remaining counts are not current authorization. See the final preselected-pairs and concurrency-safety sections for final results. The separately approved 36-execution Plus calibration is also exhausted, as recorded in [its report](PLUS_CALIBRATION_2026-10-09.md). Neither journal may be reset or replaced to bypass its ceiling.
 
 The owner approved at most 12 whole Codex task executions through ChatGPT login, without an API key. The six-category calibration pilot used seed `20261009`, code commit `a1ea2033ab7c2491d2b178a25e4fc4d515281f5e`, and experiment digest `089ae145009b7920d6a387b498516c004b7ba85d7be811133517642ba013e330`.
 

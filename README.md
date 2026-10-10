@@ -132,9 +132,9 @@ Layman does not vendor code from these projects in 1.0. It combines compatible c
 
 - The full local unit and integration suite passes; the release checklist records the dated evidence.
 - The deterministic routing matrix contains 300 cases, including the high-risk deep floor.
-- The historical 2026-07-16 Plus calibration completed 36/36 calls without execution errors or retained answer text; the current release candidate requires a fresh fingerprinted run.
-- The 30-pair token benchmark passed hidden validation 30/30 versus Direct's 29/30, but Layman used 19.54% more total tokens at the paired median and read more files.
+- The fresh [2026-10-09 Plus calibration](docs/PLUS_CALIBRATION_2026-10-09.md) completed 36/36 executions with complete usage and no failures or tool calls. Auto routing used 1.70% more aggregate total tokens than the always-deep baseline; median paired reduction was zero. Human quality scores remain absent, so this is execution coverage, not quality acceptance or release readiness.
+- The historical 30-pair report records hidden validation of 30/30 versus Direct's 29/30 and 19.54% more paired-median total tokens for Layman. It uses an older measurement protocol and is not pooled with current results. The [current implementation-task pilot](docs/TOKEN_PILOT_2026-10-09.md) also cannot close the public savings gate.
 - Token optimization therefore remains Experimental. Layman claims no fixed savings percentage.
 - API routing remains Beta until a release-grade live API benchmark exists.
 
-See the [Plus calibration](docs/PLUS_CALIBRATION_V1.0.0.md), [negative token result](docs/TOKEN_OPTIMIZATION_2026-07-16.md), [release gates](docs/RELEASE.md), [recovery guide](docs/RECOVERY.md), and [contributing guide](CONTRIBUTING.md). Licensed under [MIT](LICENSE).
+See the [latest Plus calibration](docs/PLUS_CALIBRATION_2026-10-09.md), [historical negative token report](docs/TOKEN_OPTIMIZATION_2026-07-16.md), [release gates](docs/RELEASE.md), [recovery guide](docs/RECOVERY.md), and [contributing guide](CONTRIBUTING.md). Licensed under [MIT](LICENSE).
