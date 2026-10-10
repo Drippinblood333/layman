@@ -72,7 +72,7 @@ def usage_from_events(stdout: str) -> tuple[dict[str, int], bool]:
     return usage, available
 
 
-_TOOL_TYPES = {"command_execution", "mcp_tool_call", "file_read", "tool_call"}
+_TOOL_TYPES = {"command_execution", "mcp_tool_call", "file_read", "file_change", "tool_call"}
 _PATH_EXTENSIONS = (
     r"(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|go|rs|java|kt|kts|scala|c|h|cc|cpp|cxx|hpp|"
     r"cs|fs|fsx|vb|php|rb|swift|dart|lua|r|jl|ex|exs|erl|hrl|hs|lhs|clj|cljs|"

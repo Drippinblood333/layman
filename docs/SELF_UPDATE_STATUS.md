@@ -4,6 +4,19 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 file-change accounting fix: offline regression reproduced that a
+file_change item was omitted from tool_calls, so a patch-only named-file request
+could receive workspace_execution_not_observed despite a reported patch action.
+Added file_change to the existing action-type set, preserving identifier-based
+lifecycle deduplication and budgets. Two regression cases failed before the fix;
+94 relevant offline cases, Ruff and diff checks pass afterward. No separate
+runtime architecture, model retry or full release gate was added. Observed patch
+events still do not prove correct implementation or successful verification.
+This is unrelated to the latest command_execution exit-1 failure (which had no
+changes), and does not repair EPERM. Existing trial fingerprints remain historical;
+any future authorized run must fingerprint the changed tracker. New diagnostic
+allowance remains stopped at 1/2 used, original journal 8/8 unchanged.
+
 2026-10-11 newly authorized bounded event diagnosis: following the owner's reply
 to the explicit two-call proposal, first Layman arm used 1/2 new calls; prior
 8/8 journal unchanged. Captured structured command_execution status failed,

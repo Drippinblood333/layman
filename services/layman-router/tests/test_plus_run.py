@@ -39,6 +39,33 @@ def test_command_failures_use_only_completed_envelope_and_deduplicate():
     assert tracker.command_failures == 1
 
 
+def test_file_change_action_counts_once_across_lifecycle():
+    tracker = EventBudgetTracker()
+    item = {"id": "patch-1", "type": "file_change", "status": "completed",
+            "changes": [{"path": "src/target.py", "kind": "update"}]}
+    for event_type in ("item.started", "item.completed", "item.completed"):
+        tracker.consume(json.dumps({"type": event_type, "item": item}))
+    assert tracker.tool_calls == 1
+    assert tracker.command_failures == 0
+
+
+def test_patch_only_execution_is_not_mislabelled_as_no_tool_action(tmp_path):
+    def runner(command, **kwargs):
+        if command[1:3] == ["login", "status"]:
+            return subprocess.CompletedProcess(command, 0, stdout="Logged in using ChatGPT", stderr="")
+        Path(command[command.index("--output-last-message") + 1]).write_text("modified", encoding="utf-8")
+        events = [
+            {"type": "item.completed", "item": {"id": "patch-1", "type": "file_change",
+             "status": "completed", "changes": [{"path": "src/target.py", "kind": "update"}]}},
+            {"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}},
+        ]
+        return subprocess.CompletedProcess(command, 0, stdout="\n".join(map(json.dumps, events)), stderr="")
+
+    result = run_plus_task("修复 src/target.py 的顺序", cwd=tmp_path, codex_path=sys.executable, runner=runner)
+    assert result["tool_calls"] == 1
+    assert result["error_category"] is None
+
+
 @pytest.mark.parametrize("exit_code", [0, None, True, "1"])
 def test_command_failure_count_rejects_missing_success_or_invalid_exit(exit_code):
     tracker = EventBudgetTracker()
