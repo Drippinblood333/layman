@@ -16,8 +16,15 @@ semantic prompt optimizer, universal ambiguity guard or measured token saving.
 No installation replacement, paid API or public release; model trial stays 6/8.
 Source `2d68503c92e196c3ac843915fc99646d8f62fbb8` is pushed; exact-head
 [hosted run 38090818098](https://github.com/Drippinblood333/layman/actions/runs/38090818098)
-is confirmed in progress, not passed. The push reported bypassed branch rules
-with nine expected checks; successful push is not proof of release gates.
+completed successfully: all ten validation jobs passed (three native OS test
+suites, five standalone builds/smokes, Docker and release assembly); publish
+was skipped. This also verifies the new real-child transport regressions on
+Windows, Linux and macOS. The push reported bypassed branch rules with nine
+expected checks; subsequent exact-head CI, not the push itself, is the evidence.
+No CI restart, additional model execution, installed-program replacement or
+public release occurred. Whole-product execution reliability and representative
+quality-equivalent token savings remain unproven. This evidence-only record stays
+local until a justified implementation push, avoiding a documentation-only CI rerun.
 
 2026-10-11 tool-configuration follow-up: local native feature inspection confirms
 shell/unified execution enabled; the offline bundled GPT-6.1 Sol catalog advertises
