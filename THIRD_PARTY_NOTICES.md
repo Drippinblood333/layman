@@ -4,12 +4,20 @@ Layman 1.0 does not copy or vendor source code from the comparison projects belo
 
 | Project | Upstream | License | Layman 1.0 use |
 |---|---|---|---|
-| Caveman | https://github.com/JuliusBrussee/caveman | MIT | Design comparison only |
+| Caveman | https://github.com/JuliusBrussee/caveman | Apache-2.0 (reviewed revision below) | Design comparison only; no upstream source/skill bundled |
 | RTK | https://github.com/rtk-ai/rtk | Apache-2.0 | Repeated-log-with-counts strategy reference; original reversible Python implementation, no Rust source or RTK binary included |
 | Ponytail | https://github.com/DietrichGebert/ponytail | MIT | Design reference for a withdrawn reuse-ordering experiment and retained development-quality safeguards; no upstream skill/hooks/source bundled |
 | Spec Kit | https://github.com/github/spec-kit | MIT | Workflow comparison only |
 | Superpowers | https://github.com/obra/superpowers | MIT | Skill-composition comparison only |
 | Claude Code Router | https://github.com/musistudio/claude-code-router | MIT | Routing-architecture comparison only |
+
+Caveman license review on 2026-10-10 checked upstream commit
+`2e08b9177c07bb7249a8a2d1a6758e5db281d002` and its
+[Apache-2.0 LICENSE](https://github.com/JuliusBrussee/caveman/blob/2e08b9177c07bb7249a8a2d1a6758e5db281d002/LICENSE).
+This corrects the earlier MIT label; it does not establish the license of older
+revisions or authorize copying unreviewed files. Layman uses this project only
+as a design comparison, with no Caveman dependency or installation hook.
+Any future vendoring must review the exact copied revision and files separately.
 
 Ponytail design review on 2026-10-10 used upstream commit
 `9b58c1ffb790c075ca32e70a89cf1d80588f4abf`, especially
