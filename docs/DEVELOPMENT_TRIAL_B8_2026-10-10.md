@@ -1,5 +1,66 @@
 # Approved eight-execution development trial
 
+## Approved bounded diagnostic follow-up
+
+### Result: both edits validate, negative efficiency evidence
+
+The two approved diagnostic calls completed; cumulative original allowance is
+now **4/8 used, 4 unspent**, and this two-call follow-up is finished. No fifth
+call was launched. Original two failed-trial records remain unchanged. Native
+version is `0.162.0-alpha.2`; diagnostic fingerprint:
+`f0f10901b12cd3bdddc37371c8ea1e6278ec846a4dd41d7040df9af4891b0e7c`.
+
+| Metric | Layman | Direct |
+| --- | ---: | ---: |
+| Model / effort | gpt-6.1-sol / medium | gpt-6.1-sol / medium |
+| Hidden function checks / file scope | Passed / passed | Passed / passed |
+| Input tokens | 264,783 | 204,102 |
+| Cached input (included above) | 234,880 | 183,808 |
+| Uncached input | 29,903 | 20,294 |
+| Output tokens | 1,304 | 894 |
+| Total input + output | 266,087 | 204,996 |
+| Latency milliseconds | 50,394 | 38,741 |
+| Tool calls / unique files read | 4 / 1 | 2 / 1 |
+
+Both changed only the allowed target file, reported complete usage and used no
+fallback. Layman total usage is **29.80% higher**, a negative same-task result.
+This fixed-order single pair is not causal evidence for a specific contract
+rule, a confidence interval or general release acceptance.
+
+The two private final answers report that Python verification attempts were
+blocked by Windows sandbox startup/configuration permissions (direct names
+`EPERM`). External hidden function checks subsequently passed in the harness.
+Keep those distinct: external validation proves the fixture behavior, not that
+the model's own sandbox verification succeeded. The raw tool errors were not
+retained, so the exact permission failure remains unverified. Neither answer
+claims its own tests passed. The retry's tool use also does not establish why
+the preceding Layman execution used no tools or prove that the new status guard
+caused behavioral improvement.
+
+Synthetic final answers are separately retained only in ignored local
+`diagnostic-layman-answer.txt` and `diagnostic-direct-answer.txt`; metadata has
+no answer bodies. No answers/code were added to Git. The next useful work is
+bounded zero-model verification-path diagnosis, not further prompt edits or
+disabling sandbox protections. No API billing, installer replacement, tag or
+public release occurred.
+
+The owner explicitly accepted the proposed follow-up with “我一直批准 不要再问我了”.
+Execute at most two new model calls from the original eight-call cumulative
+allowance; the two prior reservations remain consumed. Repeat only bugfix-02
+under current source and the same balanced/medium model settings. For diagnostic
+value, run Layman first, then direct only if Layman completes and passes hidden
+validation with complete usage and no fallback. First failed/incomplete arm stops
+this follow-up, without retry. This fixed diagnostic order is not randomized
+efficiency evidence and does not inherit the old fingerprint.
+
+Use the original writer lock and append-only attempts journal with total cap 8;
+this follow-up's own cap is 2. Write metadata separately to private
+`diagnostic-results.jsonl`, and write each synthetic final answer to a separate
+private local file for inspection, never result JSONL/product telemetry/Git.
+No paid API, changed user installation, publishing or additional total allowance
+is authorized. The owner's request to stop repeated permission questions applies
+within this explicitly approved scope; it does not remove the failure stop rule.
+
 ## Outcome: stopped at first validation failure
 
 Executed on 2026-10-10 using Codex `0.162.0-alpha.2`. Persistent reservations:
