@@ -1,8 +1,33 @@
 # Installation and size baseline — 2026-10-10
 
-This is a bounded read-only measurement of existing local artifacts and current installer instructions, not a fresh build, a public download test, or evidence of the latest source's installed size.
+This is a bounded read-only measurement of CI/local artifacts and current installer instructions, not a fresh local build, a public download test, or evidence of an installed user profile's size.
 
 ## Measured artifacts
+
+### Latest verified Windows checkpoint
+
+Source `eca27229ba70d0578c6f2fef317516e14163fad9` passed all ten validation
+jobs in [run 38044677991](https://github.com/Drippinblood333/layman/actions/runs/38044677991);
+publication was skipped. Downloaded only its Windows x64 CI artifact (ID
+`11666538086`, GitHub artifact archive size 17,397,196 bytes), without executing
+or installing it. This archive size is GitHub's transport size, not a public
+installer or release download size.
+
+- Executable: **17,256,040 bytes / 16.46 MiB**.
+- Extracted artifact directory: **17,391,188 bytes, 32 files**.
+- Executable SHA-256:
+  `85add6dfb672170ff3ec625e266144ff48ef77eb28015b3335adb77d449dff1b`,
+  matching its `BUILD.json` bundle-audit executable hash.
+- Difference from historical hosted `abe6c52`: +40,185 executable bytes,
+  approximately **+0.23%**, not a reduction or a controlled same-source build
+  comparison. These measurements do not attribute the difference to a feature.
+
+The candidate remains under ignored `build/ci-eca2722-size/windows-x64`.
+Other-platform extracted sizes, cold-start extraction footprint, installed
+profile size and user-data growth remain unmeasured. No full local regression or
+fresh lifecycle smoke was repeated for this read-only size measurement.
+
+### Historical measurements
 
 | Artifact | Exact bytes | Interpretation |
 | --- | ---: | --- |
@@ -11,7 +36,7 @@ This is a bounded read-only measurement of existing local artifacts and current 
 | Existing locally built upgraded-toolchain executable | 17,284,502 | Historical build, not a same-source controlled comparison |
 | Its complete artifact directory (32 files) | 17,418,714 | Historical artifact-directory measurement only |
 
-The hosted executable SHA-256 was rechecked: `5c0512a17dc486cd0845a9409d353759d153f1eb90aaa1db2697a410f42cff03`, matching the previously documented downloaded candidate. No artifact or user installation was modified. MiB means 1,048,576 bytes. Latest-head and other-platform sizes, downloaded archive sizes with exact provenance, cold-start extraction footprint and user-data growth remain unmeasured; do not infer them from these rows.
+The historical hosted executable SHA-256 was rechecked: `5c0512a17dc486cd0845a9409d353759d153f1eb90aaa1db2697a410f42cff03`, matching the previously documented downloaded candidate. No artifact or user installation was modified. MiB means 1,048,576 bytes. These historical rows alone establish neither current-source nor other-platform sizes; the newer Windows measurement is separately reported above. Cold-start extraction footprint and user-data growth remain unmeasured.
 
 ## Default installation and first use
 
