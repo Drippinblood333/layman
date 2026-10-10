@@ -18,8 +18,12 @@ syntax, Python lint and whitespace checks pass. This validates installer failure
 signaling, not real Layman setup/login success. Exact-source
 `3b7b0bcc52760045b5145a728f4d4586161c51bf` was pushed; hosted verification
 [38091401573](https://github.com/Drippinblood333/layman/actions/runs/38091401573)
-is queued, not passed. Push again reported nine expected branch checks bypassed;
-do not infer validation from push success. No public release occurred.
+completed successfully: all ten validation jobs passed, including native Windows
+installer regression, three OS test suites, five standalone builds, Docker and
+release assembly; publish was skipped. Push again reported nine expected branch
+checks bypassed; exact-head subsequent CI, not push success, proves these checks.
+No build/test restart, additional model call, actual installation replacement or
+public release occurred. Evidence-only updates stay local to avoid another CI run.
 
 2026-10-11 assembled-candidate measurement: exact-source `2d68503` release assets
 downloaded and verified against manifest, CRC and BUILD metadata. Windows ZIP
