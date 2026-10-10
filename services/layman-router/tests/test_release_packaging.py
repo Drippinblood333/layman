@@ -26,6 +26,36 @@ PLATFORMS = {
 FAKE_NOTICE_CONTENT = b"test license notice\n"
 
 
+@pytest.mark.parametrize("system,machine,expected", [
+    ("Linux", "x86_64", True),
+    ("Linux", "aarch64", True),
+    ("Windows", "AMD64", False),
+    ("Darwin", "arm64", False),
+])
+def test_native_symbol_stripping_is_linux_only(monkeypatch, tmp_path, system, machine, expected):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    spec = importlib.util.spec_from_file_location("layman_test_build", ROOT / "scripts" / "build-standalone.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module.platform, "system", lambda: system)
+    monkeypatch.setattr(module.platform, "machine", lambda: machine)
+    monkeypatch.setattr(sys, "argv", ["build-standalone", "--output", str(tmp_path / "out")])
+    commands = []
+
+    def capture(arguments):
+        commands.extend(arguments)
+        raise RuntimeError("build captured without execution")
+
+    monkeypatch.setattr(module.PyInstaller.__main__, "run", capture)
+    with pytest.raises(RuntimeError, match="build captured"):
+        module.main()
+    assert ("--strip" in commands) is expected
+    assert "--collect-all" in commands
+    assert "layman_router" in commands
+
+
 def runtime_inventory_module():
     spec = importlib.util.spec_from_file_location(
         "layman_test_runtime_inventory", ROOT / "scripts" / "runtime_inventory.py"

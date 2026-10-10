@@ -52,6 +52,33 @@ Cold-start extraction space, installed profile size, user-data growth and public
 onboarding remain unmeasured. Hash agreement is integrity evidence within this
 CI artifact, not independent publisher identity or code signing.
 
+### Linux native-symbol size investigation
+
+Read the existing Windows and Linux x64 executables' PyInstaller archives without
+executing them. Windows' largest entries are the Python module archive
+(5,723,712 stored bytes), Python DLL (2,719,317), Pydantic core (1,922,016),
+OpenSSL crypto library (1,854,357) and SQLite (843,195). The module archive has
+687 modules and no modules rooted in IPython, NumPy, pandas, matplotlib, Pillow,
+pytest, setuptools, rich or tkinter. SQLite is required by Layman's telemetry;
+these observations do not justify removing runtime dependencies.
+
+Linux x64's Python shared library is 32,222,648 uncompressed bytes and 13,553,500
+stored bytes. Read-only ELF section inspection found **26,252,412 bytes** of
+`.debug*`, `.symtab` and `.strtab` sections. This is uncompressed section size,
+not a prediction of ZIP reduction. PyInstaller's
+[documented `--strip` option](https://pyinstaller.org/en/stable/usage.html#cmdoption-strip)
+processes native symbol tables and is not recommended on Windows.
+
+The build now enables this option only on Linux; Windows and macOS are unchanged.
+No runtime module, feature or license file is excluded. Python-level error
+reporting remains required; stripped native symbols reduce native crash/debug
+detail, so debugging the native runtime may require the original unstripped
+upstream libraries. Thirty-seven relevant packaging tests, including both Linux
+architectures and non-Linux flag boundaries, and targeted lint pass. New Linux
+builds, standalone smoke, inventory checks and measured package deltas are still
+required before claiming this strategy works or reduces size. The previously
+measured `b82380d` artifacts remain the pre-strip baseline.
+
 ### Historical Windows checkpoint
 
 Source `eca27229ba70d0578c6f2fef317516e14163fad9` passed all ten validation

@@ -48,6 +48,10 @@ def main() -> int:
     PyInstaller.__main__.run([
         str(ROOT / "scripts" / "standalone_entry.py"),
         "--name", "layman", "--onefile", "--clean", "--noconfirm",
+        # Linux runtime libraries retain large native debug/symbol sections.
+        # Strip those without excluding runtime modules; leave Windows/macOS
+        # unchanged and verify both Linux architectures in standalone smoke.
+        *(["--strip"] if platform.system() == "Linux" else []),
         "--collect-all", "layman_router",
         "--exclude-module", "setuptools",
         "--exclude-module", "packaging",
