@@ -4,6 +4,18 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 command-failure-count integration checkpoint: exact source
+3b180e2498189bd6289467cd4fb6bffbb4e8a7c3 passed
+[CI 38093266663](https://github.com/Drippinblood333/layman/actions/runs/38093266663).
+All ten validation jobs succeeded: three OS test suites, five standalone
+build/smoke jobs, Docker health and candidate-release assembly. Publish was
+skipped. The existing watcher exited 0; no retry or model execution. Normal
+main push reported bypassed expected-status rules before CI; this subsequent
+exact-head result, not push acceptance, supplies validation evidence.
+This verifies integration/packaging of the numeric observation, not resolution
+of historical EPERM, stable model execution or representative token savings.
+No installation replacement, tag or public release occurred.
+
 2026-10-11 command-outcome observability: Plus run attempt and aggregate results
 now include numeric command_failures. Only top-level item.completed events with
 command_execution items and nonzero integer exit_code count; bool/string/missing
