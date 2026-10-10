@@ -60,6 +60,10 @@ If you are unsure how to describe the task, `layman plan --clipboard` offers an 
 
 Plus mode does not exercise the HTTP proxy, API fallback, or API billing.
 
+In CLI/MCP `plan` results, read clarification from the top-level `prompt_guidance`.
+It is not duplicated under `route`. Standalone `run --dry-run` previews still
+include their own `prompt_guidance`; their execution-blocking behavior is unchanged.
+
 Use `$layman-auto` in a new task to route the original request through the bundled local MCP tool. The tool verifies ChatGPT login, removes API-key environment variables, and starts an ephemeral Codex run. Terminal users can copy a task to the clipboard and pipe standard input without placing the task text in command history:
 
 ```powershell

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import copy
+import json
 from pathlib import Path
 
+import pytest
+from layman_router.plus_run import plus_task_plan
 from layman_router.task_plan import create_task_plan
 
 
@@ -34,3 +38,21 @@ def test_non_release_task_does_not_inherit_release_checks(monkeypatch, tmp_path:
     assert "Run the full release gate" not in result["next_steps"]
     assert any("proportionate" in step for step in result["next_steps"])
     assert create_task_plan("发布版本", tmp_path)["next_steps"] == ["Run the full release gate"]
+
+
+@pytest.mark.parametrize("task", [
+    "帮我优化整个项目",
+    "修复src/a.py的空指针异常，不改接口",
+    "请删除生产支付数据库并迁移权限",
+])
+def test_plan_emits_guidance_once_without_changing_standalone_preview(task, tmp_path, monkeypatch):
+    preview = plus_task_plan(task)
+    monkeypatch.setattr("layman_router.task_plan.plus_task_plan", lambda *a, **k: copy.deepcopy(preview))
+    result = create_task_plan(task, tmp_path)
+    assert result["prompt_guidance"] == preview["prompt_guidance"]
+    assert result["route"] == {key: value for key, value in preview.items() if key != "prompt_guidance"}
+    assert "prompt_guidance" in plus_task_plan(task)
+    text = json.dumps(result, ensure_ascii=False)
+    assert text.count('"prompt_guidance"') == 1
+    for question in result["prompt_guidance"]["questions"]:
+        assert text.count(question) == 1

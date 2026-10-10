@@ -20,7 +20,9 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     route = plus_task_plan(task, config=config)
 
     workflow = select_workflow(features.task_type, features.risk, project_stage=project["stage"], task=task)
-    guidance = route["prompt_guidance"]
+    # Plan owns clarification at the top level; do not emit the same questions
+    # again inside its route. Standalone Plus previews keep their own guidance.
+    guidance = route.pop("prompt_guidance")
 
     modules = ["context", f"workflow:{workflow}", "routing", "output"]
     if features.risk != "low":
