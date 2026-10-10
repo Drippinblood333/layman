@@ -2,6 +2,27 @@
 
 ## Newly authorized remaining-two diagnostic (2026-10-11, predeclared)
 
+Post-diagnostic zero-model command-path probe (2026-10-11): following the
+[official app-server command interface](https://learn.chatgpt.com/docs/app-server),
+launched native `app-server --stdio` with subscription-safe environment and
+`:workspace` defaults in a bounded temporary directory. Only initialize,
+initialized and command/exec were sent; no thread, turn, model or setup call.
+An absolute current virtual-environment Python command printed a synthetic marker
+and returned exit 0 under workspaceWrite policy using ordinary pipes; no EPERM.
+The first PTY request was schema-rejected because processId was missing. Only
+that request was corrected (ordinary-pipe success was not rerun); with processId
+the API returned -32600, `streaming command/exec is not supported with windows sandbox`.
+Both server processes exited 0 and temporary directories were removed.
+No saved sandbox mode, rules, permissions or runtime source was changed.
+
+This is a narrower command/exec-path observation, distinct from earlier native
+sandbox-helper probes. PTY API rejection is not reproduction of the model-reported
+spawn EPERM and does not establish that unified model tools use that API path.
+Ordinary pipe success is not proof all model-generated commands can start Python.
+Do not disable the sandbox/force non-PTY model behavior or replace execution
+architecture based on these results. Exact historical commands are still missing;
+root cause remains unresolved and model allowance stays exhausted at 8/8.
+
 The owner explicitly approved repurposing the remaining two executions for
 execution diagnosis. Original cumulative ceiling stays eight; six reservations
 already exist. Current source is `a512d3c` (runtime through `3b7b0bc`). Predeclare

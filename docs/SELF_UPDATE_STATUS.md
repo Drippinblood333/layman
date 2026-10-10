@@ -4,6 +4,15 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 zero-model native command-path check: app-server command/exec launched
+absolute current Python successfully under workspaceWrite using ordinary pipes
+(exit 0, marker present). A corrected PTY request was explicitly rejected by the
+Windows sandbox interface as unsupported, not EPERM. This neither reproduces
+the model-reported error nor proves the model tool uses that interface; no safe
+runtime repair follows from it. No threads/turns/models, permission changes or
+saved setup changes; allowance remains 8/8. See development diagnosis for the
+initial schema correction and exact limits. Do not rerun the passed probes.
+
 2026-10-11 newly approved two-execution diagnosis completed: current-source
 pagination task was executed Layman-first then Direct, same GPT-6.1 Sol / medium.
 Both changed only src/target.py and passed the same external function/scope checks;
