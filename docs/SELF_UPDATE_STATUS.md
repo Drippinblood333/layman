@@ -4,6 +4,18 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 prompt-guidance courtesy fix: five offline reproductions showed that
+wholly unspecified requests such as `帮我优化整个项目吧`, `请修复一下，谢谢！`
+and `fix it, please` bypassed clarification. The existing full-request matcher
+now accepts bounded courtesy endings without stripping or rewriting the prompt.
+Concrete goals and quoted text remain unblocked. A shared Plus entrypoint
+regression confirms refusal before native/login/model preflight; no extra model
+call is used. All 70 prompt-guidance/Plus execution tests pass locally, lint and
+whitespace checks pass. This is a limited wording-check improvement, not a
+semantic prompt optimizer, universal ambiguity guard or measured token saving.
+No installation replacement, paid API or public release; model trial stays 6/8.
+Hosted verification of this new source is pending.
+
 2026-10-11 tool-configuration follow-up: local native feature inspection confirms
 shell/unified execution enabled; the offline bundled GPT-6.1 Sol catalog advertises
 unified execution and freeform patch support. Plus launch construction does not
