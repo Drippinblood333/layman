@@ -4,6 +4,15 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 zero-model transport follow-up: two real-child regressions validate
+that direct and streamed paths deliver matching expected UTF-8 prompt payloads
+through EOF and the correct Unicode/spaced cwd. All 47 Plus execution tests pass
+locally. Windows text-mode line endings are platform-translated in both paths,
+not byte-identical to arbitrary original CRLF/LF text. This narrows the tested
+transport hypothesis but does not explain or repair the native no-tool failure.
+No runtime changes, model calls or permissions changes; trial remains stopped
+at 6/8. See the development trial record for limits and official CLI source.
+
 2026-10-11 current-source subscription trial: the owner approved the remaining
 four executions with first-failure stopping. Twenty-nine offline harness tests
 and zero-call route previews passed. The first pagination pair used identical

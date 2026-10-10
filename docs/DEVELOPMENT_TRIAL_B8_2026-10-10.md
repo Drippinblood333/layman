@@ -47,6 +47,22 @@ contract sentence, sandbox defect or configuration without additional evidence.
 
 ## Zero-model sandbox startup check
 
+2026-10-11 transport follow-up: source inspection confirms both direct and
+streamed execution pass `-` for stdin, set workspace cwd, UTF-8 text mode and
+the workspace permission profile. The official
+[CLI reference](https://learn.chatgpt.com/docs/cli/reference) documents stdin
+prompt and cwd/config overrides; it does not establish why the model omitted
+tools. Two new real-child regression cases (no model or login) confirm identical
+expected UTF-8 pipe payloads and cwd for direct vs streamed execution: a Chinese
+pagination request and multiline Unicode/quoted content in a Unicode/spaced
+workspace. The child consumes stdin through EOF and emits synthetic usage.
+All 47 tests in `test_plus_run.py` pass locally. Windows text-mode newline
+translation applies to both paths; these tests deliberately check the platform
+mapping and do not claim original line-ending bytes are preserved. They neither
+reproduce the failed native model execution nor rule out all transport races,
+effective tool availability, contract influence or model behavior. No runtime
+contract/configuration change or new model attempt was made; budget stays 6/8.
+
 On 2026-10-10 the saved Windows sandbox selection was read as `unelevated`
 (only non-secret mode fields were inspected). Following the official
 [Windows sandbox guidance](https://learn.chatgpt.com/docs/windows/windows-sandbox),

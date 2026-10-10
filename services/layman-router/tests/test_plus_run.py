@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -356,6 +357,39 @@ def test_stream_tracker_counts_common_non_python_source_files():
             "item": {"id": str(index), "type": "file_read", "path": path},
         }))
     assert tracker.unique_files_read == 4
+
+
+@pytest.mark.parametrize("task", [
+    "在 src/target.py 实现 paginate(values, page, size)，非法页码抛出 ValueError。",
+    "保留原意：中文🙂与引号\"、反斜线\\。\r\n第二行\n末行无换行",
+])
+def test_real_streamed_child_receives_same_utf8_task_and_cwd_as_direct(tmp_path: Path, task: str):
+    # No model/login: the child validates the real pipe payload after EOF.
+    workspace = tmp_path / "中文 workspace"
+    workspace.mkdir()
+    # Both existing text-mode transports apply the platform's newline mapping.
+    # Compare against that payload rather than claiming byte-identical line ends.
+    digest = hashlib.sha256(task.replace("\n", os.linesep).encode("utf-8")).hexdigest()
+    script = (
+        "import hashlib,json,os,sys\n"
+        "payload=sys.stdin.buffer.read()\n"
+        "assert hashlib.sha256(payload).hexdigest()==sys.argv[1]\n"
+        "assert os.path.samefile(os.getcwd(),sys.argv[2])\n"
+        "print(json.dumps({'type':'turn.completed','usage':"
+        "{'input_tokens':1,'output_tokens':1}}),flush=True)\n"
+    )
+    command = [sys.executable, "-c", script, digest, str(workspace)]
+    direct = subprocess.run(command, input=task, capture_output=True, text=True,
+                            encoding="utf-8", cwd=workspace, timeout=10, check=False)
+    streamed = run_streaming_process(
+        command, input_text=task, cwd=workspace, env=os.environ.copy(),
+        timeout_seconds=10, file_limit=1, tool_call_limit=1,
+    )
+    assert direct.returncode == streamed.returncode == 0
+    assert streamed.stop_reason is None
+    assert streamed.usage_available is True
+    assert streamed.usage["input_tokens"] == streamed.usage["output_tokens"] == 1
+    assert streamed.tool_calls == 0
 
 
 def test_streaming_process_stops_when_file_budget_is_exceeded(tmp_path: Path):
