@@ -4,6 +4,19 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 newly approved two-execution diagnosis completed: current-source
+pagination task was executed Layman-first then Direct, same GPT-6.1 Sol / medium.
+Both changed only src/target.py and passed the same external function/scope checks;
+usage complete, no fallback. Both synthetic answers reported `spawn EPERM` when
+attempting their own Python verification. This shared reported obstacle is not
+specific to Layman, but exact native command/error evidence is absent; root cause
+and stable execution remain unproven. Layman used 211290 total tokens vs Direct
+311080 (-32.08%) in this known-fixture pair only, not a representative savings
+claim; prior failures/negative pairs remain. Original journal is 8/8 exhausted,
+no additional call authorized. Results exclude answer text/code; no runtime,
+permissions, installation or publication changes. See
+[development diagnosis](DEVELOPMENT_TRIAL_B8_2026-10-10.md) for fingerprint/limits.
+
 2026-10-11 Windows installer setup-status fix: a hermetic native-process
 reproduction demonstrated that a nonzero post-install setup exit still yielded
 installer exit 0 and misleading restart instructions. The installer now checks

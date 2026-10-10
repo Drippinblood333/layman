@@ -1,5 +1,52 @@
 # Approved eight-execution development trial
 
+## Newly authorized remaining-two diagnostic (2026-10-11, predeclared)
+
+The owner explicitly approved repurposing the remaining two executions for
+execution diagnosis. Original cumulative ceiling stays eight; six reservations
+already exist. Current source is `a512d3c` (runtime through `3b7b0bc`). Predeclare
+`feature-02:layman` first, then `feature-02:direct` only if the first completes,
+passes the same function/scope checks, has complete usage and no fallback.
+Both use configured GPT-6.1 Sol / medium, one attempt, original stdin request
+and current runtime contract. First failure stops, no automatic retry.
+Inspect the synthetic task's final answer in the diagnostic tool result to
+understand reported non-execution; do not persist its body/generated code or
+full tool transcript in JSONL/telemetry. New private result file is
+`final-diagnostic-results.jsonl`; original journal and exclusive writer lock
+are reused with fsync before each invocation. No API billing, installation
+replacement, public release or broader sandbox permissions. This is diagnosis
+on a known fixture, not a new holdout or general savings experiment.
+Status: both authorized executions completed; original journal is now 8/8,
+no allowance remaining. Native version remains `codex-cli 0.162.0-alpha.2`;
+fingerprint `89fdf041df5c5c759b2c17bba08279be3b0bc4ca871e150a3137242ff8c39593`.
+Preflight confirmed subscription login and matched balanced/medium routes.
+
+| feature-02 arm | Input | Cached input | Uncached input | Output | Total | Latency | Tools | External validation |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Layman | 209841 | 193024 | 16817 | 1449 | 211290 | 43957 ms | 3 | Function/scope passed; src/target.py only |
+| Direct | 309387 | 285696 | 23691 | 1693 | 311080 | 44437 ms | 4 | Function/scope passed; src/target.py only |
+
+Both report complete usage, no fallback and no compaction. Layman total tokens
+are 32.08% lower in this single pair; tool counts/order/cache differ. It is not
+representative or causal evidence, independent human review, or proof of stable
+delivery. Earlier failed pairs and the 29.80%-higher diagnostic pair remain intact;
+do not pool different fingerprints or discard negative outcomes.
+
+The synthetic final answers were inspected transiently, not stored in result
+records. Both reported editing the requested file and attempting Python runtime
+verification blocked by `spawn EPERM`; Direct additionally reported static
+checks. The external hidden-function validator ran successfully outside the
+native model tool environment. Thus external correctness is confirmed for this
+pair, not successful verification inside Codex. The shared reported permission
+obstacle is not specific to the Layman arm; without original command/error events
+its exact source remains unknown. This successful Layman attempt with the same
+execution-contract digest as the earlier failed pagination arm demonstrates the
+no-tool outcome is not reproduced on every attempt; it does not prove repair or
+exclude contract influence. No runtime/sandbox/config change was made for this
+diagnostic. Temporary synthetic workspaces were removed after validation.
+Next action must not spend beyond eight or infer permission expansion from EPERM;
+retain the failure guard and budget limits while pursuing specific error evidence.
+
 ## 2026-10-11 authorized final four executions (predeclared)
 
 The owner approved starting the previously proposed remaining four subscription
