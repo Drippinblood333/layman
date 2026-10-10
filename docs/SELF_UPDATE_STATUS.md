@@ -95,10 +95,13 @@ The [invited-user acceptance protocol](USER_ACCEPTANCE.md) is now prepared: exac
 
 ## Remaining public-release gates
 
-- Fresh release-candidate Plus calibration and human semantic-quality scoring.
-- Explicit approval before paid API calibration. The approved subscription pilot stopped without a usable pair; paid API calibration was not run.
-- Complete six-arm adaptive comparison: local Codex CLI 0.160.0 passes zero-call preflight for five arms but does not expose Luna `none`. A five-arm subset cannot close the six-arm gate.
+- Human semantic-quality scoring and fresh holdout acceptance remain open. The 18-case Plus calibration completed all 36 executions, closing execution coverage only; the implementation-task pilot produced usable pairs but did not establish general savings. Both approved execution budgets are exhausted.
+- Existing calibration records retain usage metadata, not answer text, and contain no human scores. Counts and hashes cannot supply retrospective semantic review. Any new model execution or private retention of review answers needs a separately scoped owner decision; do not rerun under either exhausted approval.
+- Explicit approval before paid API calibration; no paid API calibration was run, and Plus results do not establish API invoice savings.
+- Complete six-arm adaptive comparison remains unverified. The earlier CLI 0.160.0 preflight covered five arms but not Luna `none`; the newer 0.162.0-alpha.2 calibration does not validate all six arms. A five-arm subset cannot close the six-arm gate.
 - Published prerelease installer checks and 5–10 invited testers, with no unresolved P0/P1 issue.
 - Owner approval before a release tag or final public release.
+
+2026-10-10 heartbeat documentation audit: reconciled this remaining-gates summary with the completed calibration and implementation-task evidence above. No model call, answer retention, dependency change, tag or release occurred. This documentation correction does not change the verified code checkpoint or close any quality/publication gate.
 
 The full adaptive protocol reserves a counterfactual API-cost ceiling of USD 286.35 including retries and judges. This is not actual expenditure, a subscription bill, or measured savings. See the benchmark protocol for its approval and budget controls.
