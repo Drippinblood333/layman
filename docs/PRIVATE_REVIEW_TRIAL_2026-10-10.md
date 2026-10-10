@@ -1,5 +1,39 @@
 # Owner-approved local review trial — 2026-10-10
 
+## User-confirmed assistant review (not independent blind scoring)
+
+On 2026-10-10 the assistant reviewed all eight answers and proposed 2/2 for
+correctness, instruction following and clarity for each. The owner explicitly
+accepted that recommendation. The local review page records those scores and
+their provenance: **assistant-assisted, user-confirmed scoring**, not independent
+human reviews. Code snippets were not executed in this content review. Original
+result JSONL records, including null `human_score` fields, remain unchanged;
+the eight local answer hashes match them. Raw answers remain private.
+
+Offline aggregation of the existing four pairs:
+
+| Metric | Auto | Always-deep |
+| --- | ---: | ---: |
+| Input tokens (including cached input) | 63,448 | 66,765 |
+| Cached input tokens | 58,240 | 66,048 |
+| Uncached input tokens | 5,208 | 717 |
+| Output tokens | 360 | 352 |
+| Total input + output tokens | 63,808 | 67,117 |
+
+Auto total tokens are 4.93% lower in this specific sample, while output tokens
+are higher and uncached input differs substantially. Per-pair total changes
+(auto relative to deep) are summary +9.55%, rewrite -11.60%, debugging -11.75%
+and extraction -4.01%. This is not an API cost measurement, a representative
+development-task benchmark or a causal estimate of prompt-compression savings.
+Fixed execution order, tiny sample, differing models/cache behavior and
+assistant-assisted scoring prevent a general quality-equivalent savings claim.
+The newer lean execution contract has a different fingerprint and cannot
+inherit this result. Approval stays exhausted at 8/8; no execution was launched.
+Broader claims require separately approved, predeclared evaluation and
+independent quality evidence.
+
+## Original execution record (historical)
+
 The owner explicitly approved the preceding proposal: at most eight new ChatGPT-subscription executions, synthetic tasks only, answers retained separately and locally for owner scoring. No upload of answers, paid API evaluation, tag or release is authorized.
 
 This approval has its own cumulative reservation journal under ignored `build/private-plus-review-2026-10-10/`; the exhausted 12- and 36-execution journals remain unchanged. The existing exclusive writer, pre-execution fsynced reservations, first-failure stop and interrupted-reservation replay refusal apply. Failures consume budget; no automatic replacement experiment is authorized.
