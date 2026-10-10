@@ -87,6 +87,12 @@ def test_vague_dry_run_reports_block_without_model_execution(tmp_path):
 
 @pytest.mark.parametrize("task,expected", [
     ("修复 src/target.py 中 unique 的顺序", "needs_verification"),
+    ("修复 src/target.py 中 unique 的顺序，不要修改接口。", "needs_verification"),
+    ("修复 src/target.py 中 unique 的顺序，不要修改其他文件。", "needs_verification"),
+    ("Fix src/target.py; do not change the API.", "needs_verification"),
+    ("Fix src/target.py; do not modify other files.", "needs_verification"),
+    ("Fix src/target.py; do not change the API; review only.", "completed"),
+    ("修复 src/target.py 的方案，不要修改接口，不要修改文件。", "completed"),
     ("为 src/target.py 添加 tests/test_target.py", "needs_verification"),
     ("解释 src/target.py 的代码，不要修改文件", "completed"),
     ("只分析 src/target.py 的修复方案，不要修改文件", "completed"),
@@ -98,6 +104,7 @@ def test_named_file_execution_without_tools_is_not_reported_as_delivered(tmp_pat
     def fake_runner(command, **kwargs):
         if command[1:3] == ["login", "status"]:
             return subprocess.CompletedProcess(command, 0, stdout="Logged in using ChatGPT", stderr="")
+        assert kwargs["input"] == task
         executions.append(command)
         Path(command[command.index("--output-last-message") + 1]).write_text("advice only", encoding="utf-8")
         event = json.dumps({"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}})
@@ -115,11 +122,17 @@ def test_named_file_execution_without_tools_is_not_reported_as_delivered(tmp_pat
 
 
 @pytest.mark.parametrize("tool_calls,expected", [(0, "needs_verification"), (1, "completed")])
-def test_streamed_named_file_completion_uses_observed_tool_metadata(monkeypatch, tmp_path, tool_calls, expected):
+@pytest.mark.parametrize("task", [
+    "修复 src/target.py 的顺序",
+    "修复 src/target.py 的顺序，不要修改接口。",
+    "Fix src/target.py; do not modify other files.",
+])
+def test_streamed_named_file_completion_uses_observed_tool_metadata(monkeypatch, tmp_path, tool_calls, expected, task):
     monkeypatch.setattr("layman_router.plus_run.codex_login_status", lambda *a, **k: {"available": True, "chatgpt_login": True})
     executions = []
 
     def fake_stream(command, **kwargs):
+        assert kwargs["input_text"] == task
         executions.append(command)
         Path(command[command.index("--output-last-message") + 1]).write_text("response", encoding="utf-8")
         return StreamedProcessResult(
@@ -128,7 +141,7 @@ def test_streamed_named_file_completion_uses_observed_tool_metadata(monkeypatch,
         )
 
     monkeypatch.setattr("layman_router.plus_run.run_streaming_process", fake_stream)
-    result = run_plus_task("修复 src/target.py 的顺序", cwd=tmp_path, codex_path=sys.executable)
+    result = run_plus_task(task, cwd=tmp_path, codex_path=sys.executable)
     assert result["status"] == expected
     assert result["tool_calls"] == tool_calls
     assert len(executions) == 1

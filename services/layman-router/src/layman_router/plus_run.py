@@ -72,6 +72,21 @@ def _text_output(value: str | bytes | None) -> str:
     return value or ""
 
 
+def _completion_read_only_intent(task: str) -> bool:
+    # Scope exclusions do not prohibit work on the requested file. Ignore only
+    # these complete clauses when checking completion, never when authorizing
+    # execution or passing the original request to Codex.
+    remaining = re.sub(
+        r"(?:不要|不得)\s*(?:修改|改动)\s*(?:接口|其他文件)(?=\s*(?:$|[,，。;；.!]))|"
+        r"\bdo\s+not\s+(?:modify|change)\s+(?:the\s+)?(?:api|interface|other\s+files)"
+        r"(?=\s*(?:$|[,;.!]))",
+        "",
+        task,
+        flags=re.IGNORECASE,
+    )
+    return _is_inheritance_read_only_intent(remaining)
+
+
 def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_only: bool, workflow: str) -> str:
     development_safety = (
         "Keep validation/errors/accessibility; check affected callers. "
@@ -383,7 +398,7 @@ def run_plus_task(
         status == "completed"
         and preview["sandbox"] == "workspace-write"
         and preview["task_type"] in {TaskType.NORMAL_CODING.value, TaskType.TESTING.value, TaskType.DOCUMENTATION.value}
-        and not _is_inheritance_read_only_intent(task)
+        and not _completion_read_only_intent(task)
         and re.search(r"(?:^|[\s`])(?:[\w.-]+/)+[\w.-]+\.(?:py|js|ts|tsx|go|rs|java|md|toml|yaml|yml)\b", task)
         and aggregate_metrics["tool_calls"] == 0
     ):
