@@ -32,20 +32,24 @@ curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install
 
 ## ChatGPT Plus mode
 
-Check the Codex login and preview the fixed 18-case, 36-call calibration without making a model call:
+You do not need an API key, a running router service, a dashboard, or a benchmark to start. After installation, restart Codex and open a new task.
+
+Check the Codex login and project status; neither command launches a model task:
 
 ```powershell
 layman codex-plus status
-layman codex-plus eval
+layman status
 ```
 
-Run the resumable calibration in batches of at most 12 calls:
+Copy your actual task to the clipboard and preview the plan without launching a model:
 
 ```powershell
-layman codex-plus eval --run
+layman run --dry-run --clipboard
 ```
 
-Plus mode does not exercise the HTTP proxy, API fallback, or API billing. Use `$layman` for idea-to-result work and `$layman-status` to understand project progress.
+When the preview matches your intent, run `layman run --clipboard`. This step executes a task through your ChatGPT subscription and consumes its usage allowance. Alternatively, ask `$layman` in Codex to help with your task; `$layman-status` explains project progress. You do not need to select model tiers or write a formal specification for a simple task.
+
+Plus mode does not exercise the HTTP proxy, API fallback, or API billing.
 
 Use `$layman-auto` in a new task to route the original request through the bundled local MCP tool. The tool verifies ChatGPT login, removes API-key environment variables, and starts an ephemeral Codex run. Terminal users can copy a task to the clipboard and pipe standard input without placing the task text in command history:
 
@@ -66,6 +70,10 @@ layman run --clipboard
 `--clipboard` reads Unicode text directly and avoids both shell history and Windows PowerShell 5 pipeline encoding loss. Standard input remains available for scripts that already emit UTF-8.
 
 High-risk tasks are routed to deep and run read-only. Model-unavailable fallback only moves upward; subscription or authentication errors never fall back to API billing.
+
+### Developer calibration — not a first-use requirement
+
+`layman codex-plus eval` previews the fixed 18-case, 36-call comparison without launching a model. Running it is an evaluation workload, not setup or an ordinary user task. Only execute after a separate approval that names the cumulative call budget and output journal. A per-batch limit alone is not a cumulative allowance; failures also consume budget. See the [benchmark controls](BENCHMARKS.md) and [current release evidence](SELF_UPDATE_STATUS.md). Existing exhausted approvals do not authorize a new run.
 
 ## OpenAI API mode
 
