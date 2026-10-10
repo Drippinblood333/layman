@@ -299,16 +299,25 @@ def main(argv: list[str] | None = None) -> int:
             return serve()
         if args.command == "status":
             status = process_status()
-            try:
-                status["service"] = _fetch("/healthz")
-            except (OSError, RuntimeError, TimeoutError):
-                status["service"] = {"status": "offline"}
+            mode = read_state().get("mode") if not args.service_only else None
+            mode = mode if isinstance(mode, str) and mode in {"plus", "api"} else None
+            if mode == "plus":
+                status["service"] = {"status": "not_checked", "required": False}
+            else:
+                try:
+                    status["service"] = _fetch("/healthz")
+                except (OSError, RuntimeError, TimeoutError):
+                    status["service"] = {"status": "offline"}
             if not args.service_only:
                 status = {
                     "product": "Layman",
+                    "configured_mode": mode if mode in {"plus", "api"} else "unknown",
                     "project": inspect_project(args.cwd),
                     "router": status,
-                    "meaning": "Project stage is evidence-based; release readiness still requires real verification.",
+                    "meaning": (
+                        "Plus mode does not require an API router. ChatGPT login is not checked here; use layman codex-plus status. "
+                        if mode == "plus" else ""
+                    ) + "Project stage is evidence-based; release readiness still requires real verification.",
                 }
             print(json.dumps(status, indent=2, ensure_ascii=False))
             return 0

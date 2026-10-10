@@ -41,6 +41,12 @@ layman codex-plus status
 layman status
 ```
 
+When the saved setup mode is Plus, project `status` skips the optional API-router
+health request and labels it `not_checked` / `required: false`, rather than
+presenting an offline API service as part of Plus setup. This does not check
+ChatGPT login; use `layman codex-plus status` for that. `layman status --service-only`
+still explicitly checks the API service, as do API-mode or unknown-mode status requests.
+
 For a short task, you can instead enter `layman plan` or `layman run --dry-run`
 directly. When prompted, type one line and press Enter. This input is read by
 Layman rather than the shell, so it is not placed in shell command history;

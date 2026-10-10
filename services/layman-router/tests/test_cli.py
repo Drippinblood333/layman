@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from io import StringIO
 
 import pytest
@@ -48,8 +49,6 @@ def test_piped_multiline_input_stays_unchanged_and_silent(monkeypatch, capsys):
 
 
 def test_interactive_dry_run_never_starts_codex(monkeypatch, tmp_path, capsys):
-    import json
-
     stream = StringIO("修复src/a.py的空指针异常，不改接口\n")
     monkeypatch.setattr(stream, "isatty", lambda: True)
     monkeypatch.setattr(cli.sys, "stdin", stream)
@@ -57,3 +56,38 @@ def test_interactive_dry_run_never_starts_codex(monkeypatch, tmp_path, capsys):
     assert cli.main(["run", "--dry-run", "--cwd", str(tmp_path)]) == 0
     result = json.loads(capsys.readouterr().out)
     assert result["mode"] == "dry-run"
+
+
+def test_plus_status_skips_optional_router_without_claiming_login(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(cli, "read_state", lambda: {"mode": "plus"})
+    monkeypatch.setattr(cli, "process_status", lambda: {"running": False, "pid": None})
+    monkeypatch.setattr(cli, "_fetch", lambda *a, **k: pytest.fail("Plus project status must not probe the API router"))
+    monkeypatch.setattr(cli, "find_codex", lambda *a, **k: pytest.fail("Status must not infer ChatGPT login"))
+    assert cli.main(["status", "--cwd", str(tmp_path)]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["configured_mode"] == "plus"
+    assert result["router"]["service"] == {"status": "not_checked", "required": False}
+    assert "login is not checked" in result["meaning"]
+
+
+@pytest.mark.parametrize("mode,service_only", [
+    ("api", False), (None, False), ([], False), ({"unexpected": "plus"}, False), ("plus", True),
+])
+def test_status_keeps_explicit_or_non_plus_service_probe(monkeypatch, tmp_path, capsys, mode, service_only):
+    monkeypatch.setattr(cli, "read_state", lambda: {"mode": mode})
+    monkeypatch.setattr(cli, "process_status", lambda: {"running": False, "pid": None})
+    requests = []
+
+    def offline(path):
+        requests.append(path)
+        raise OSError("synthetic service offline")
+
+    monkeypatch.setattr(cli, "_fetch", offline)
+    args = ["status", "--cwd", str(tmp_path)] + (["--service-only"] if service_only else [])
+    assert cli.main(args) == 0
+    result = json.loads(capsys.readouterr().out)
+    router = result if service_only else result["router"]
+    assert router["service"] == {"status": "offline"}
+    assert requests == ["/healthz"]
+    if not service_only:
+        assert result["configured_mode"] == ("api" if mode == "api" else "unknown")
