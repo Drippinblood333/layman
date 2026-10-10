@@ -49,6 +49,8 @@ layman run --dry-run --clipboard
 
 When the preview matches your intent, run `layman run --clipboard`. This step executes a task through your ChatGPT subscription and consumes its usage allowance. Alternatively, ask `$layman` in Codex to help with your task; `$layman-status` explains project progress. You do not need to select model tiers or write a formal specification for a simple task.
 
+If you are unsure how to describe the task, `layman plan --clipboard` offers an offline plan. For a few obvious vague phrases such as "improve the whole project", it asks at most two questions about the intended result and acceptance criteria and marks the plan as `plan-first`. It does not rewrite, execute or retain your task. This limited wording check is not a complete prompt-quality or safety assessment; an empty question list is not proof that a request is unambiguous. It is guidance, not an execution gate: `layman run` does not enforce these clarification questions, so resolve them before running.
+
 Plus mode does not exercise the HTTP proxy, API fallback, or API billing.
 
 Use `$layman-auto` in a new task to route the original request through the bundled local MCP tool. The tool verifies ChatGPT login, removes API-key environment variables, and starts an ephemeral Codex run. Terminal users can copy a task to the clipboard and pipe standard input without placing the task text in command history:

@@ -7,6 +7,7 @@ from .classify import classify_task
 from .config import load_config
 from .plus_run import plus_task_plan
 from .project_status import inspect_project
+from .prompt_guidance import prompt_guidance
 from .workflow import select_workflow
 
 
@@ -20,6 +21,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     route = plus_task_plan(task, config=config)
 
     workflow = select_workflow(features.task_type, features.risk, project_stage=project["stage"], task=task)
+    guidance = prompt_guidance(task)
 
     modules = ["context", f"workflow:{workflow}", "routing", "output"]
     if features.risk != "low":
@@ -33,7 +35,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     }:
         modules.append("verification")
 
-    plan_first = features.risk == "high" or workflow in {"idea-to-smallest-usable-version", "read-only-risk-review"}
+    plan_first = guidance["needs_clarification"] or features.risk == "high" or workflow in {"idea-to-smallest-usable-version", "read-only-risk-review"}
     acceptance = [
         "The requested user-visible outcome is present.",
         "The smallest relevant automated or manual verification succeeds.",
@@ -53,6 +55,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
         "execution": "plan-first" if plan_first else "execute-and-verify",
         "route": route,
         "acceptance_criteria": acceptance,
+        "prompt_guidance": guidance,
         "stop_conditions": [
             "Required context exceeds the selected file budget.",
             "The task requires an unrelated broad refactor or destructive operation.",
