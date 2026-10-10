@@ -133,7 +133,7 @@ def _call_tool(
         text = "Layman stopped the run because its execution budget was exceeded."
     else:
         text = answer
-    is_error = result.get("status") in {"failed", "blocked", "cancelled", "budget_exceeded"}
+    is_error = result.get("status") in {"failed", "blocked", "cancelled", "budget_exceeded", "needs_verification"}
     return {"content": [{"type": "text", "text": text}], "structuredContent": result, "isError": is_error}
 
 

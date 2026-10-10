@@ -12,6 +12,7 @@ import pytest
 from layman_router.execution_control import (
     CancellationToken,
     EventBudgetTracker,
+    StreamedProcessResult,
     run_streaming_process,
 )
 from layman_router.models import RouteTier
@@ -82,6 +83,56 @@ def test_vague_dry_run_reports_block_without_model_execution(tmp_path):
     assert result["mode"] == "dry-run"
     assert result["execution_allowed"] is False
     assert result["prompt_guidance"]["needs_clarification"] is True
+
+
+@pytest.mark.parametrize("task,expected", [
+    ("修复 src/target.py 中 unique 的顺序", "needs_verification"),
+    ("为 src/target.py 添加 tests/test_target.py", "needs_verification"),
+    ("解释 src/target.py 的代码，不要修改文件", "completed"),
+    ("只分析 src/target.py 的修复方案，不要修改文件", "completed"),
+    ("请总结内容", "completed"),
+])
+def test_named_file_execution_without_tools_is_not_reported_as_delivered(tmp_path, task, expected):
+    executions = []
+
+    def fake_runner(command, **kwargs):
+        if command[1:3] == ["login", "status"]:
+            return subprocess.CompletedProcess(command, 0, stdout="Logged in using ChatGPT", stderr="")
+        executions.append(command)
+        Path(command[command.index("--output-last-message") + 1]).write_text("advice only", encoding="utf-8")
+        event = json.dumps({"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}})
+        return subprocess.CompletedProcess(command, 0, stdout=event, stderr="")
+
+    result = run_plus_task(task, cwd=tmp_path, codex_path=sys.executable, runner=fake_runner)
+    assert result["status"] == expected
+    assert len(executions) == 1
+    assert result["tool_calls"] == 0
+    assert result["usage_incomplete"] is False
+    if expected == "needs_verification":
+        assert result["error_category"] == "workspace_execution_not_observed"
+        assert "不能确认任务已完成" in result["answer"]
+        assert result["attempts"][0]["status"] == "completed"
+
+
+@pytest.mark.parametrize("tool_calls,expected", [(0, "needs_verification"), (1, "completed")])
+def test_streamed_named_file_completion_uses_observed_tool_metadata(monkeypatch, tmp_path, tool_calls, expected):
+    monkeypatch.setattr("layman_router.plus_run.codex_login_status", lambda *a, **k: {"available": True, "chatgpt_login": True})
+    executions = []
+
+    def fake_stream(command, **kwargs):
+        executions.append(command)
+        Path(command[command.index("--output-last-message") + 1]).write_text("response", encoding="utf-8")
+        return StreamedProcessResult(
+            returncode=0, stderr="", usage={"input_tokens": 10, "cached_input_tokens": 0, "output_tokens": 3, "reasoning_tokens": 0},
+            usage_available=True, tool_calls=tool_calls, unique_files_read=0, compactions=0,
+        )
+
+    monkeypatch.setattr("layman_router.plus_run.run_streaming_process", fake_stream)
+    result = run_plus_task("修复 src/target.py 的顺序", cwd=tmp_path, codex_path=sys.executable)
+    assert result["status"] == expected
+    assert result["tool_calls"] == tool_calls
+    assert len(executions) == 1
+    assert result["usage"]["input_tokens"] == 10
 
 
 def test_plan_uses_deep_read_only_for_high_risk(router_config):

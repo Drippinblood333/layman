@@ -39,6 +39,13 @@ before launch; no installer replacement, API billing, tag or release occurred.
 
 ## Predeclared protocol
 
+Post-trial zero-model follow-up: mocked execution reproduced the success-label
+gap. A bounded named-file/no-tools guard now reports `needs_verification` rather
+than delivered success, with CLI/MCP failure signaling and no extra model call.
+Seventy relevant offline tests pass. It does not explain why the trial model
+declined tool use or prove that the model will now perform edits. Source changes
+invalidate the old fingerprint; no runtime retest or trial resumption occurred.
+
 The owner explicitly approved at most eight subscription model executions after
 being told this means four paired development tasks, failures consume allowance,
 and the first execution failure stops the batch. No paid API, installation

@@ -9,6 +9,18 @@ from layman_router import mcp_server
 from layman_router.mcp_server import serve
 
 
+def test_mcp_missing_workspace_execution_is_not_success(monkeypatch, tmp_path):
+    monkeypatch.setattr(mcp_server, "run_plus_task", lambda *a, **k: {
+        "mode": "run", "status": "needs_verification",
+        "error_category": "workspace_execution_not_observed",
+        "answer": "未观察到指定文件的工具操作，不能确认任务已完成；未自动重试。",
+    })
+    result = mcp_server._call_tool("run", {"task": "修复 src/a.py", "workspace": str(tmp_path)})
+    assert result["isError"] is True
+    assert result["structuredContent"]["status"] == "needs_verification"
+    assert "不能确认任务已完成" in result["content"][0]["text"]
+
+
 def test_mcp_lists_layman_run_tool():
     incoming = io.StringIO(
         json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18"}})
