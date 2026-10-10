@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import time
 import uuid
+from collections import Counter
 from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -451,6 +452,11 @@ def _run_plus_eval(
     journal = output.with_name(output.name + ".attempts.jsonl")
     reservations = [json.loads(line) for line in journal.read_text(encoding="utf-8").splitlines() if line.strip()] if journal.exists() else []
     records = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines() if line.strip()] if output.exists() else []
+    if total_call_cap is not None:
+        reserved_counts = Counter((record.get("experiment_fingerprint"), record.get("key")) for record in reservations)
+        result_counts = Counter((record.get("experiment_fingerprint"), record.get("key")) for record in records)
+        if any(count > reserved_counts[key] for key, count in result_counts.items()):
+            raise RuntimeError("Unreserved historical evaluation results need budget review; refusing an understated cumulative cap")
     recorded = {(record.get("experiment_fingerprint"), record.get("key")) for record in records}
     if any((record.get("experiment_fingerprint"), record.get("key")) not in recorded for record in reservations):
         raise RuntimeError("Interrupted reserved evaluation needs review; refusing automatic replay")

@@ -77,6 +77,8 @@ The prior exploratory Plus calibration is retained in the [`legacy-v2` archive](
 
 The [2026-10-09 protocol-v4 calibration](PLUS_CALIBRATION_2026-10-09.md) completed all 36 approved executions with complete usage and no tool calls/failures. Auto total tokens were 1.70% higher than the always-deep baseline; human scores are absent. This is complete execution coverage, not quality acceptance or a public savings result. `--total-call-cap` now persists pre-launch reservations across batches/fingerprints, counts failures, refuses interrupted-reservation replay and uses an exclusive writer lock. Existing locks are not automatically stolen. The approved 36-execution journal is exhausted; further evaluation requires new explicit authorization. Per-batch `--max-calls` alone is not a cumulative approval ceiling.
 
+Capped execution also refuses historical result rows without matching reservations, including partial journals and duplicate rows. It checks multiplicity across all fingerprints, not just completed keys in the current plan. A legacy result file cannot silently become a zero-used authorization journal; review its actual history before an explicitly authorized migration. The runner does not synthesize reservations, reset results or consume another model call to repair ambiguous accounting.
+
 ## Direct execution versus Layman Auto
 
 ### Bounded six-category pilot

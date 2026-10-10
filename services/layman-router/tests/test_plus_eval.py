@@ -196,3 +196,31 @@ def test_concurrent_calibration_is_blocked_before_codex(fake_calibration, monkey
     with pytest.raises(RuntimeError, match="writer lock exists"):
         run_plus_eval(**fake_calibration)
     assert lock.read_text() == "existing-owner"
+
+
+@pytest.mark.parametrize("status", ["completed", "failed"])
+@pytest.mark.parametrize("partial_journal", [False, True])
+def test_unreserved_historical_results_refuse_capped_execution(fake_calibration, monkeypatch, status, partial_journal):
+    output = fake_calibration["output"]
+    rows = [{"key": "old:auto", "status": status, "experiment_fingerprint": "old-protocol"}]
+    if partial_journal:
+        rows.insert(0, {"key": "recorded:auto", "status": "completed", "experiment_fingerprint": "old-protocol"})
+        output.with_name("results.jsonl.attempts.jsonl").write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
+    original = "\n".join(json.dumps(row) for row in rows) + "\n"
+    output.write_text(original, encoding="utf-8")
+    monkeypatch.setattr(plus_eval, "run_arm", lambda *a, **k: pytest.fail("Ambiguous budget must not launch"))
+    with pytest.raises(RuntimeError, match="Unreserved historical"):
+        run_plus_eval(**fake_calibration)
+    assert output.read_text(encoding="utf-8") == original
+    journal = output.with_name("results.jsonl.attempts.jsonl")
+    assert (len(journal.read_text().splitlines()) if journal.exists() else 0) == int(partial_journal)
+
+
+def test_duplicate_result_rows_are_not_hidden_by_set_matching(fake_calibration, monkeypatch):
+    output = fake_calibration["output"]
+    row = {"key": "old:auto", "status": "completed", "experiment_fingerprint": "old-protocol"}
+    output.write_text((json.dumps(row) + "\n") * 2, encoding="utf-8")
+    output.with_name("results.jsonl.attempts.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+    monkeypatch.setattr(plus_eval, "run_arm", lambda *a, **k: pytest.fail("Ambiguous duplicate rows must not launch"))
+    with pytest.raises(RuntimeError, match="Unreserved historical"):
+        run_plus_eval(**fake_calibration)
