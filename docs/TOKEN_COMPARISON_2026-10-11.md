@@ -227,3 +227,41 @@ Its zero counters mean unavailable usage, not zero consumption. Four observed
 actions do not turn the failed process into successful equivalent delivery.
 No fallback or retry. Exact source 8cda13894500091d017565cc5b4429851e2b5e89
 subsequently passed all ten CI validation jobs; publish skipped.
+
+## Bounded local App-scope screen: negative efficiency evidence
+
+After installer CI completed, a separate four-call ceiling preselected bugfix-03
+and strengthened refactor-02 with counterbalanced orders: off/on, then on/off.
+Both arms explicitly pin features.apps in the child invocation, with identical
+stable CLI 0.162.1, configured balanced model/medium effort, original task,
+permissions and quality/scope criteria. Global Apps/MCP settings remain intact.
+This compares tool scope inside Layman, not Direct versus Layman.
+
+Comparison fingerprint:
+345c9a20c588e5947a9f5bccb6580f0f3edaa142b8321ec4750e5db45bacfac4.
+Private helper SHA256 after the comparison, before adding fault-review mode:
+f5cc867034eb5001c47f50e6fceb5c90a17d965bf8ec0e190f05b3637bf2f0af.
+
+| Task/arm | Input | Cached input | Uncached input | Output | Total | Quality/scope | Actions |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| bugfix-03/off | 259546 | 239744 | 19802 | 1662 | 261208 | pass | 4 |
+| bugfix-03/on | 205130 | 189312 | 15818 | 1473 | 206603 | pass | 4 |
+| refactor-02/on | 70069 | 43520 | 26549 | 387 | 70456 | fail/no changes | 0 |
+
+All three have complete usage/no fallback. The only complete quality-eligible
+pair used 26.43% MORE total tokens with Apps off; output and uncached input also
+increased. One synthetic pair does not establish general causality or relative
+cost, but provides no evidence for making Apps-off the product default.
+The screen stopped after 3/4 calls on refactor nonexecution; its off arm was not
+run, and the cheap failed on arm cannot be used in a savings estimate.
+
+The remaining call was re-scoped to private nonexecution observation, with the
+same refactor task and explicit Apps-on settings, not a replacement comparison.
+Fingerprint bd875986a05700484c8ade258a407c665465a02d5f88670035f6d701295a55c0.
+It executed five actions and passed strengthened function/reuse/scope checks,
+using 240992 total tokens, complete usage/no fallback. Success after a zero-tool
+failure with unchanged runtime settings does not establish a repair. Diagnosis
+plus the failed refactor arm totals 311448 tokens, not a successful paired
+efficiency result. The cumulative ceiling is now 4/4: three screen calls plus
+one observation; negative records remain. Raw answers/code are not retained in
+aggregate results. No production tool-scope default or installation change.

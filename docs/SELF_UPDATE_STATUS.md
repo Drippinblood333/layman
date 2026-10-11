@@ -4,6 +4,23 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 local App-scope screen completed its four-call ceiling: three
+counterbalanced screen calls then one separately reviewed fault observation.
+The only passing pair used 26.43% more total tokens with child Apps disabled;
+refactor Apps-on then failed with zero actions, and observation with unchanged
+runtime settings passed. No generalized causal repair or savings claim follows.
+Do not merge Apps-off into the default route. Negative records and diagnosis
+costs remain; no global connection, permission or installation change. See
+TOKEN_COMPARISON_2026-10-11.md for cached/uncached metrics and fingerprints.
+
+2026-10-11 Windows installer exact source
+0e970c9c6036088269f80011ad7cd40efec6a4b2 passed
+[CI 38115846680](https://github.com/Drippinblood333/layman/actions/runs/38115846680).
+All ten validation jobs passed; publish skipped. This includes native Windows
+installer tests and cross-platform integration/build checks; it does not give
+macOS/Linux the Windows directory-switch protection or replace a real-user
+first-use acceptance check. Current installation/global settings unchanged.
+
 2026-10-11 Windows installer mixed-version correction: a real fixture file lock
 reproduced the previous behavior of retaining the old executable while replacing
 its records/licenses before failing. Windows now stages the complete tree beside
