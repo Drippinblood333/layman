@@ -218,3 +218,12 @@ not elimination of duplicate logic. Generated model artifacts were cleaned up
 and cannot be revalidated; retain those outcomes as historical evidence rather
 than promoting them to stronger quality or token-savings claims. The changed
 case fingerprint requires future experiments to remain separate.
+
+A separate one-call strengthened-criterion check (fingerprint
+4f2bee53a38b58d3d90d2f3007eb963b70cc17fed5878db47bec83391979296c)
+produced an artifact passing helper-reuse/function/scope checks, but native
+execution failed with authentication status and missing completed-turn usage.
+Its zero counters mean unavailable usage, not zero consumption. Four observed
+actions do not turn the failed process into successful equivalent delivery.
+No fallback or retry. Exact source 8cda13894500091d017565cc5b4429851e2b5e89
+subsequently passed all ten CI validation jobs; publish skipped.

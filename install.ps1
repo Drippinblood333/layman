@@ -18,6 +18,12 @@ if (-not $asset) { throw "Release asset not found: $assetName" }
 $checksumsAsset = $release.assets | Where-Object { $_.name -eq 'SHA256SUMS.txt' } | Select-Object -First 1
 if (-not $checksumsAsset) { throw 'Release checksum manifest not found: SHA256SUMS.txt' }
 $installRoot = Join-Path $env:LOCALAPPDATA 'Layman\bin'
+$installParent = Split-Path -Parent $installRoot
+$transactionId = [guid]::NewGuid().ToString()
+$stagedRoot = Join-Path $installParent (".bin-stage-" + $transactionId)
+$backupRoot = Join-Path $installParent (".bin-backup-" + $transactionId)
+$previousMoved = $false
+$committed = $false
 $temporary = Join-Path ([IO.Path]::GetTempPath()) ("layman-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Force -Path $temporary,$installRoot | Out-Null
 try {
@@ -36,12 +42,37 @@ try {
     if (-not (Test-Path -LiteralPath (Join-Path $temporary $name) -PathType Leaf)) { throw "Required package file not found: $name" }
   }
   if (-not (Test-Path -LiteralPath (Join-Path $temporary 'THIRD_PARTY_LICENSES') -PathType Container)) { throw 'Required package directory not found: THIRD_PARTY_LICENSES' }
+  # Prepare the complete update beside the installation before touching it.
+  # Preserve any existing extra files; an interrupted copy cannot mix versions.
+  Copy-Item -LiteralPath $installRoot -Destination $stagedRoot -Recurse -Force
   foreach ($name in $noticeFiles) {
-    Copy-Item -LiteralPath (Join-Path $temporary $name) -Destination (Join-Path $installRoot $name) -Force
+    Copy-Item -LiteralPath (Join-Path $temporary $name) -Destination (Join-Path $stagedRoot $name) -Force
   }
-  Copy-Item -LiteralPath (Join-Path $temporary 'THIRD_PARTY_LICENSES') -Destination $installRoot -Recurse -Force
-  Copy-Item -LiteralPath (Join-Path $temporary 'layman.exe') -Destination (Join-Path $installRoot 'layman.exe') -Force
+  Copy-Item -LiteralPath (Join-Path $temporary 'THIRD_PARTY_LICENSES') -Destination $stagedRoot -Recurse -Force
+  Copy-Item -LiteralPath (Join-Path $temporary 'layman.exe') -Destination (Join-Path $stagedRoot 'layman.exe') -Force
+  [IO.Directory]::Move($installRoot, $backupRoot)
+  $previousMoved = $true
+  [IO.Directory]::Move($stagedRoot, $installRoot)
+  $committed = $true
+} catch {
+  $installError = $_
+  if ($previousMoved -and -not $committed) {
+    try {
+      [IO.Directory]::Move($backupRoot, $installRoot)
+      $previousMoved = $false
+    } catch {
+      throw "Installation failed and automatic rollback failed. Previous files are preserved at '$backupRoot'. Original error: $installError. Rollback error: $_"
+    }
+  }
+  throw $installError
 } finally {
+  Remove-Item -LiteralPath $stagedRoot -Recurse -Force -ErrorAction SilentlyContinue
+  if ($committed) {
+    Remove-Item -LiteralPath $backupRoot -Recurse -Force -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $backupRoot) {
+      Write-Warning "Update committed; previous files could not be fully cleaned up at '$backupRoot'."
+    }
+  }
   Remove-Item -LiteralPath $temporary -Recurse -Force -ErrorAction SilentlyContinue
 }
 if (-not $NoPathUpdate) {

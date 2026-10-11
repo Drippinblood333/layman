@@ -4,6 +4,34 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 Windows installer mixed-version correction: a real fixture file lock
+reproduced the previous behavior of retaining the old executable while replacing
+its records/licenses before failing. Windows now stages the complete tree beside
+the installation, uses Directory.Move for directory switches, and restores the
+preserved old tree if the second switch fails. Extra user files remain. All nine
+installer cases pass, including clean-install/reinstall, native lock, injected
+switch failure and two Windows PowerShell 5.1 compatibility checks; changed-file Ruff, release
+secret scan and diff checks pass. An injected second
+switch failure verifies actual rollback and cleanup, while the file-lock check
+uses a real native lock rather than an error mock. No dependency/global install
+change; live user installation is untouched. Protection is limited to caught
+file-operation failures on Windows, not setup rollback, concurrent installers,
+power loss or macOS/Linux. See INSTALL.md for recovery behavior and limits.
+
+The [Microsoft Directory.Move documentation](https://learn.microsoft.com/en-us/dotnet/api/system.io.directory.move)
+specifies file-in-use/destination-exists/cross-volume failures. Staging and backup
+are unique siblings on the installation volume; actual lock/rollback checks,
+not documentation alone, establish the verified failure behavior above.
+
+2026-10-11 exact source 8cda13894500091d017565cc5b4429851e2b5e89 passed
+[CI 38105898350](https://github.com/Drippinblood333/layman/actions/runs/38105898350):
+all ten validation jobs succeeded; publish skipped. A separate one-call check
+with the strengthened reuse criterion produced an externally passing artifact
+but the CLI ended with authentication status and no completed-turn usage.
+This remains an execution failure with incomplete usage, not successful delivery
+or zero-token consumption. No retry. Account limits subsequently reported a
+refreshed window; no reset credit was redeemed by this task.
+
 2026-10-11 refactor evaluation correction: an unused normalize_name helper
 previously passed refactor-02 despite unchanged duplication in both callers.
 An offline regression reproduced the false positive; hidden checks now verify

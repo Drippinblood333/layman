@@ -147,6 +147,17 @@ python -m pip check
 
 Install the new release over the old executable, then run `layman doctor`. Legacy v2 data is copied from `~/.layman-router` to `~/.layman` only when the new destination does not exist; the source is retained.
 
+On Windows, the installer prepares the executable and its records in a sibling
+staging directory before switching the installation. Existing extra files are
+preserved. A file-copy or caught directory-switch failure leaves or restores
+the previous tree; close any running Layman process before retrying a file-in-use
+error. If automatic restoration fails, the error reports the preserved backup
+directory. Successful updates remove the staging/backup directories, or warn
+when an old backup cannot be fully removed. This needs temporary staging space.
+It is not crash/power-loss recovery, concurrent-installer coordination, or rollback
+of `setup` changes; a failed setup still reports failure with installed files
+preserved. macOS/Linux do not yet have this directory-switch protection.
+
 Run `layman uninstall` to stop the service, remove the Layman plugin and local marketplace, and restore managed Codex settings. Data and backups remain in `~/.layman`. Add `--purge-data` only when permanent deletion is intended. Purging succeeds only when plugin/marketplace references are resolved, the home has a valid Layman ownership marker, Layman originally created the directory, and every remaining entry appears in its managed-path manifest. A pre-existing custom `LAYMAN_HOME`, an unknown file, a malformed marker or an unavailable Codex CLI when references may remain causes a refusal and preserves the data. A fresh installation created with `setup --skip-plugin` records that no plugin was managed and can purge its isolated Layman-created home without calling Codex. Re-running that option never downgrades an existing or legacy installation's conservative cleanup state.
 
 Destructive tasks are blocked before a child Codex process starts. After reviewing the exact stdin task and scope, a local terminal user can make a one-run authorization with `layman run --allow-destructive --clipboard`. The Codex MCP tool intentionally has no equivalent switch.
