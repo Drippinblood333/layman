@@ -4,6 +4,34 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 zero-model EPERM path reproduction and scoped mitigation: native
+doctor reports optional node_repl missing forwarded CODEX_WINDOWS_REGISTERED_CORE;
+configuration/install/connectivity were otherwise readable, no failing doctor
+check. This warning is not established as causal: the configured standalone
+node_repl MCP server initialized/listed four tools normally without the variable.
+Read-only inspection of the log database found only this desktop thread in the
+diagnostic time range, not CLI trial processes; historical command errors remain
+unrecoverable from it. No credentials or raw session bodies were exported.
+
+Using the same absolute Python executable and benign print command, current
+desktop node_repl spawnSync returned status 0 and marker; separately launched
+configured standalone node_repl returned status null, errorCode EPERM and no
+marker. Server exited normally. This reproduces a specific standalone REPL
+child-process failure without a model; it does not prove which tool produced
+earlier trial errors or explain no-tool model turns. Native shell/helper Python
+success already has prior evidence; do not rerun those unchanged probes.
+
+Windows development contracts now specify native shell for process/test commands,
+not REPL child_process, and never bypass denials. Only the three development
+workflows load the extra rule; non-Windows and unrelated answer workflows do not.
+No MCP disabled, permission/configuration changes, install replacement or model
+retry. This prompt-level mitigation is not deterministic tool routing or verified
+end-to-end repair. After correcting a missing-import regression fixture setup,
+the Windows assertion failed before implementation; 104 relevant offline cases,
+Ruff and diff checks pass after it. New diagnostic budget remains 2/2 exhausted,
+old journal 8/8. Actual model compliance/stable delivery and representative token
+benefit are still unverified; no savings claim follows from this additional rule.
+
 2026-10-11 explicitly re-scoped final diagnostic completed: owner approved using
 the last remaining call for one benign native Python command rather than another
 feature comparison. Expanded allowlisted error projection passed offline privacy

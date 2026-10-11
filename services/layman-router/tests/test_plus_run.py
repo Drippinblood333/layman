@@ -25,6 +25,21 @@ from layman_router.plus_run import (
 )
 
 
+@pytest.mark.parametrize("platform_name", ["nt", "posix"])
+def test_windows_contract_uses_native_shell_for_process_checks(monkeypatch, platform_name):
+    monkeypatch.setattr("layman_router.plus_run.os.name", platform_name)
+    contract = _execution_contract(RouteTier.BALANCED, POLICIES[RouteTier.BALANCED],
+                                   read_only=False, workflow="reproduce-fix-verify")
+    assert ("process/test commands with native shell" in contract) == (platform_name == "nt")
+    if platform_name == "nt":
+        assert "not REPL child_process" in contract
+        assert "never bypass denials" in contract
+    assert "Preserve request/scope" in contract
+    answer_contract = _execution_contract(RouteTier.BALANCED, POLICIES[RouteTier.BALANCED],
+                                         read_only=True, workflow="scope-execute-verify")
+    assert "REPL child_process" not in answer_contract
+
+
 def test_command_failures_use_only_completed_envelope_and_deduplicate():
     tracker = EventBudgetTracker()
     item = {"id": "cmd-1", "type": "command_execution", "exit_code": 1,

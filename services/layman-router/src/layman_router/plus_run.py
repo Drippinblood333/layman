@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import tempfile
@@ -88,6 +89,13 @@ def _completion_read_only_intent(task: str) -> bool:
 
 
 def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_only: bool, workflow: str) -> str:
+    process_checks = (
+        "Windows: run process/test commands with native shell, not REPL child_process; never bypass denials. "
+        if os.name == "nt" and workflow in {
+            "understand-implement-verify", "reproduce-fix-verify", "discover-test-gaps-verify",
+        }
+        else ""
+    )
     development_safety = (
         "Keep validation/errors/accessibility; check affected callers. "
         if not read_only and workflow in {"understand-implement-verify", "reproduce-fix-verify", "discover-test-gaps-verify"}
@@ -103,7 +111,7 @@ def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_on
     )
     return (
         f"Layman {tier.value}/{workflow}. Preserve request/scope. {action} "
-        f"Search symbols/tests first; read only completion evidence. {development_safety}"
+        f"Search symbols/tests first; read only completion evidence. {development_safety}{process_checks}"
         f"File ceilings, not targets: {policy.initial_files} initially; {policy.expanded_files} only for a concrete "
         f"evidence gap; at most {policy.tool_calls} tool calls. "
         "Reuse evidence; avoid broad scans, repeated reads and full logs. "
