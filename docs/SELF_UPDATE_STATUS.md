@@ -4,6 +4,14 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 distinguishing-test rule integration checkpoint: exact source
+07020d138a4a37989b2dfe4ea34d73e47e1c5cfa passed
+[CI 38102104932](https://github.com/Drippinblood333/layman/actions/runs/38102104932).
+All ten validation jobs succeeded: three OS suites, five standalone build/smoke
+jobs, Docker and candidate assembly. Publish skipped. This verifies compatibility
+of the scoped rule, not elimination of intermittent execution failures or token
+savings. No further model call or local full-suite rerun accompanied this check.
+
 2026-10-11 new owner-authorized four-call diagnosis completed. First feature
 delivery passed; second test-writing delivery failed independent mutation checks
 despite writing the permitted test file. Offline example-only vs distinguishing
