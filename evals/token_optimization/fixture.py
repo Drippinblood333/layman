@@ -3,8 +3,11 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 from .cases import BenchmarkCase
 
@@ -113,6 +116,32 @@ def _validate_content(case: BenchmarkCase, workspace: Path) -> tuple[bool, str]:
     if not target.exists():
         return False, "missing_content_file"
     text = target.read_text(encoding="utf-8")
+    if case.id in {"docs-03", "docs-04"}:
+        try:
+            if case.id == "docs-03":
+                config = tomllib.loads(text)
+                original = tomllib.loads(case.extra_files[case.allowed_files[0]])["project"]
+                project = config.get("project")
+                passed = (
+                    isinstance(project, dict)
+                    and all(project.get(key) == value for key, value in original.items())
+                    and project.get("requires-python") == ">=3.11"
+                    and isinstance(project.get("license"), dict)
+                    and project["license"].get("text") == "MIT"
+                )
+            else:
+                config = yaml.safe_load(text)
+                original = yaml.safe_load(case.extra_files[case.allowed_files[0]])
+                passed = (
+                    isinstance(config, dict)
+                    and all(config.get(key) == value for key, value in original.items())
+                    and type(config.get("retention_days")) is int
+                    and config["retention_days"] == 30
+                    and config.get("telemetry") == "local_only"
+                )
+        except (tomllib.TOMLDecodeError, yaml.YAMLError):
+            passed = False
+        return passed, "configuration_checks_passed" if passed else "configuration_checks_failed"
     passed = all(term.lower() in text.lower() for term in case.required)
     return passed, "required_content_present" if passed else "required_content_missing"
 

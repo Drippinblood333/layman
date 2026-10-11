@@ -4,6 +4,22 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 configuration delivery criteria fixed: eight before-fix regressions
+showed docs-03/docs-04 accepting deleted/changed original fields, comment-only
+settings and malformed YAML, while rejecting equivalent valid formatting.
+The benchmark now parses TOML/YAML and verifies requested values plus preserved
+original fields. All 61 benchmark tests passed; existing parsers are reused,
+with no new runtime dependency or model call. The fixture hash already forms
+part of the experiment digest, so previous weaker observations are not pooled
+with this quality contract. This improves measurement fidelity, not proven
+token savings or comprehensive semantic prompt optimization.
+
+2026-10-11 POSIX installer source
+a953af74d060c47ba59806d302c2f2ee7509d581 passed
+[CI 38137412981](https://github.com/Drippinblood333/layman/actions/runs/38137412981):
+all ten validation jobs passed, including native Linux/macOS/Windows tests;
+publish skipped. The controlled failure tests run without models or downloads.
+
 2026-10-11 POSIX installer caught-error recovery: a controlled install failure
 reproduced the old program/new records mismatch before the fix. The installer
 now stages both components, preserves extra record files and restores records

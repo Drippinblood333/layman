@@ -28,6 +28,26 @@ def test_benchmark_has_exact_category_distribution():
     assert counts == {"bugfix": 6, "feature": 6, "refactor": 5, "testing": 5, "docs_config": 4, "high_risk": 4}
 
 
+@pytest.mark.parametrize("case_id,text,expected", [
+    ("docs-03", '[project]\nrequires-python = ">=3.11"\nlicense = { text = "MIT" }\n', False),
+    ("docs-03", '[project]\nname = "changed"\nversion = "0.1.0"\nrequires-python = ">=3.11"\nlicense = { text = "MIT" }\n', False),
+    ("docs-03", '# requires-python = ">=3.11"\n# license = { text = "MIT" }\n[project]\nname = "demo"\nversion = "0.1.0"\n', False),
+    ("docs-03", '[project]\nname = "demo"\nversion = "0.1.0"\nrequires-python=">=3.11"\nlicense={text="MIT"}\n', True),
+    ("docs-04", 'service: changed\n# service: demo\nretention_days: 30\ntelemetry: local_only\n', False),
+    ("docs-04", 'service: demo\n# retention_days: 30\n# telemetry: local_only\n', False),
+    ("docs-04", 'service: demo\nretention_days: 30\ntelemetry: local_only\ninvalid: [\n', False),
+    ("docs-04", 'service: "demo"\nretention_days: 30\ntelemetry: local_only\n', True),
+])
+def test_configuration_quality_validates_structure_and_preserves_fields(tmp_path, case_id, text, expected):
+    case = next(case for case in CASES if case.id == case_id)
+    workspace = tmp_path / "fixture"
+    prepare_workspace(case, workspace)
+    (workspace / case.allowed_files[0]).write_text(text, encoding="utf-8")
+    result = validate_workspace(case, workspace, "")
+    assert result["quality_ok"] is expected
+    assert result["scope_ok"] is True
+
+
 @pytest.mark.parametrize("reject_negative", [False, True])
 def test_chunk_quality_covers_requested_negative_size(tmp_path, reject_negative):
     case = _selected_cases(False, ["bugfix-04"])[0]
