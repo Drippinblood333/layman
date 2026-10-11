@@ -136,7 +136,8 @@ def test_persistent_attempt_cap_counts_both_arms_and_survives_restart(tmp_path, 
     assert any(call.get("max_model_attempts") == 1 for call in launches)
 
 
-def test_explicit_selection_stops_after_execution_failure(tmp_path, monkeypatch):
+@pytest.mark.parametrize("execution_status", ["failed", "completed"])
+def test_explicit_selection_stops_after_execution_or_quality_failure(tmp_path, monkeypatch, execution_status):
     args = argparse.Namespace(
         output=tmp_path / "results.jsonl", work_root=tmp_path / "work", seed=20261010,
         run=True, max_calls=4, allow_more_calls=False, codex_path="fake",
@@ -151,7 +152,8 @@ def test_explicit_selection_stops_after_execution_failure(tmp_path, monkeypatch)
 
     def failed_execution(*args, **kwargs):
         launches.append(1)
-        return {"status": "failed", "error_category": "codex_exit_1", "usage": {}, "answer": ""}
+        return {"status": execution_status, "error_category": "codex_exit_1" if execution_status == "failed" else None,
+                "usage": {}, "answer": ""}
 
     monkeypatch.setattr(benchmark, "_direct_run", failed_execution)
     monkeypatch.setattr(benchmark, "run_plus_task", failed_execution)
@@ -240,6 +242,25 @@ def test_concurrent_trial_writers_cannot_double_reserve_last_attempt(tmp_path, m
     journal = args.output.with_name(args.output.name + ".attempts.jsonl")
     assert len(journal.read_text(encoding="utf-8").splitlines()) == 1
     assert not args.output.with_name(args.output.name + ".lock").exists()
+
+
+@pytest.mark.parametrize("failed_arm", ["direct", "layman"])
+def test_analysis_excludes_quality_failures_from_token_savings(tmp_path, failed_arm):
+    output = tmp_path / "results.jsonl"
+    records = [
+        {"case_id": "feature-02", "arm": arm, "execution_status": "completed",
+         "validation": {"passed": arm != failed_arm}, "usage": {"output_tokens": 10},
+         "total_tokens": count, "usage_incomplete": False, "fallback_used": False}
+        for arm, count in (("direct", 1000), ("layman", 100))
+    ]
+    output.write_text("\n".join(json.dumps(record) for record in records), encoding="utf-8")
+    result = benchmark.analyze(output)
+    assert result["pairs"] == 1
+    assert result["usage_eligible_pairs"] == 1
+    assert result["quality_eligible_pairs"] == 0
+    assert result["median_total_token_reduction"] is None
+    assert result["direct_success"] == (failed_arm != "direct")
+    assert result["layman_success"] == (failed_arm != "layman")
 
 
 def test_analysis_excludes_incomplete_usage_not_as_free_savings(tmp_path):

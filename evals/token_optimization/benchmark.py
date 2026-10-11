@@ -419,7 +419,7 @@ def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
             cumulative_total = baseline_total + processed_now
             cumulative_failed = baseline_failed + failed_now
             bounded_selection = getattr(args, "pilot", False) or getattr(args, "case_ids", None) is not None
-            if (bounded_selection and record["execution_status"] != "completed") or record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"} or (
+            if (bounded_selection and call_failed) or record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"} or (
                 cumulative_total >= 10 and cumulative_failed / cumulative_total > 0.10
             ):
                 break
@@ -444,10 +444,15 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     for record in records:
         pairs.setdefault(record["case_id"], {})[record["arm"]] = record
     complete = [arms for arms in pairs.values() if {"direct", "layman"}.issubset(arms)]
-    eligible = [arms for arms in complete if all(
+    usage_eligible = [arms for arms in complete if all(
         arm.get("execution_status") == "completed" and not arm.get("usage_incomplete", False)
         and not arm.get("fallback_used", False) and arm.get("total_tokens", 0) > 0
         for arm in arms.values()
+    )]
+    # Failed artifacts are not a cheaper equivalent delivery. Retain them in
+    # success/failure counts, but exclude them from token-reduction estimates.
+    eligible = [arms for arms in usage_eligible if all(
+        arm.get("validation", {}).get("passed") is True for arm in arms.values()
     )]
     reductions = [
         (arms["direct"]["total_tokens"] - arms["layman"]["total_tokens"]) / arms["direct"]["total_tokens"]
@@ -480,7 +485,7 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     layman_files = statistics.median(arms["layman"].get("unique_files_read", 0) for arms in complete) if complete else None
     gates = {
         "all_30_pairs_complete": len(complete) == 30,
-        "all_30_pairs_usage_eligible": len(eligible) == 30,
+        "all_30_pairs_usage_eligible": len(usage_eligible) == 30,
         "trusted_usage_protocol": bool(complete) and all(
             record.get("schema_version") == BENCHMARK_SCHEMA_VERSION
             and bool(record.get("usage_protocol_sha256"))
@@ -497,7 +502,8 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     return {
         "experiment_digest": latest_digest,
         "pairs": len(complete), "median_total_token_reduction": median_reduction,
-        "usage_eligible_pairs": len(eligible),
+        "usage_eligible_pairs": len(usage_eligible),
+        "quality_eligible_pairs": len(eligible),
         "bootstrap_95_percent_ci": [ci_low, bootstrap[int(len(bootstrap) * 0.975)] if bootstrap else None],
         "bootstrap_status": "computed" if bootstrap else "insufficient_pairs",
         "median_output_token_reduction": output_reduction,

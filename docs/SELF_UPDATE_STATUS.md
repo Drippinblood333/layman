@@ -4,6 +4,26 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 equivalent-delivery token evaluation guard: bounded selections now
+stop on external quality/scope failure even if the native process completed.
+Token/output reduction estimates require both arms to pass validation; failed
+arms remain in pair and success/failure counts. Usage eligibility is reported
+separately from new quality_eligible_pairs, so complete usage alone cannot imply
+equivalent delivery. Three regression cases failed before the fix; all 32 token
+benchmark tests, changed-file Ruff and diff checks pass afterward. No runtime
+permissions, dependencies or model policy changed. A new four-call subscription
+comparison uses bugfix-03 and feature-03, identical existing task/quality criteria,
+configured balanced model/medium effort and one attempt per arm. No paid API,
+install replacement or release; synthetic results exclude answer/code bodies.
+
+That comparison completed 4/4, both arms passed both hidden-function/scope
+checks, complete usage and no fallback/compaction. Observed total reductions
+were 11.85% and 22.08%; feature-03 output increased, so output gains are not
+uniform. Only two synthetic pairs: general savings claim remains false. See
+TOKEN_COMPARISON_2026-10-11.md for cached/uncached metrics, protocol fingerprint,
+ordering/coverage limits and retained negative-history boundaries. Next step is
+broader preselected coverage, not repeating these passing pairs.
+
 2026-10-11 distinguishing-test rule integration checkpoint: exact source
 07020d138a4a37989b2dfe4ea34d73e47e1c5cfa passed
 [CI 38102104932](https://github.com/Drippinblood333/layman/actions/runs/38102104932).
