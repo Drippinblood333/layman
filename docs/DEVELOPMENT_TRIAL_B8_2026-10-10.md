@@ -1,5 +1,67 @@
 # Approved eight-execution development trial
 
+## New bounded mitigation/quality diagnosis (2026-10-11)
+
+Owner explicitly authorized increasing the exhausted diagnostic limit; this
+batch selected a new ceiling of four subscription calls, separate from the
+unchanged original eight-call and later two-call journals. One attempt per task,
+no API billing, permission expansion, install replacement or release. This is
+reliability diagnosis, not a Direct comparison or token-savings experiment.
+Private mitigation-attempts.jsonl reserves/fsyncs before each invocation;
+mitigation-results.jsonl stores hashes, usage, scope/quality outcomes and
+allowlisted completed-item/error categories, not prompts, code or answer bodies.
+
+First feature-02 delivery passed independent function/scope checks: four tool
+actions, only src/target.py changed, no observed EPERM. Two MCP outputs included
+ENOENT markers, causing a conservative pause despite eventual delivery success.
+After review, continuation did not replay that task; recovered ENOENT alone no
+longer stops a passing result. EPERM/EACCES/timeout, failed native commands,
+failed quality/scope, incomplete usage or fallback still stop the batch.
+
+Second testing-02 delivery changed only tests/test_target.py but failed independent
+mutation checks. Its generated source was not retained, so the exact missing
+assertion is unknown. Offline synthetic controls demonstrated that the requested
+examples alone fail to distinguish a last-element implementation, whereas one
+multi-element contrast does; this probe did not reveal a validator cache defect.
+It does not prove the generated test had that exact omission.
+
+The test-writing workflow now requests minimal distinguishing tests rather than
+example replay. No production-case-specific instruction, new dependency or full
+mutation-test requirement was added. Three contract regression cases reproduced
+one failure before implementation; 14 contract cases and changed-file Ruff checks
+pass afterward. Other workflows and read-only testing do not load this rule.
+
+After the reviewed quality fix, call three re-ran testing-02 with a new source/
+contract fingerprint and passed all mutation/scope checks. No intermediate error
+marker was observed. This single improved result is not causal or stability
+proof; earlier failure remains in the journal. Call four bugfix-02 also passed
+function/scope checks, changing only src/target.py. All four turns executed tools;
+none projected EPERM. The completed-item envelopes show MCP and file-change
+actions, not native command_execution items, so native-shell compliance and
+internal Python execution are not established. Independent external checks
+establish artifact quality, not which internal verification mechanism ran.
+
+| Call | Task | Quality/scope | Tool actions | Total tokens |
+| --- | --- | --- | ---: | ---: |
+| 1 | feature-02 | pass | 4 | 240569 |
+| 2 | testing-02 before quality rule | mutation survived / scope pass | 5 | 269261 |
+| 3 | testing-02 after quality rule | mutation and scope pass | 5 | 267173 |
+| 4 | bugfix-02 | pass | 4 | 182973 |
+
+All usage records were complete, with no model fallback or compaction. Usage
+numbers are diagnostic measurements, not savings: there is no Direct arm and
+the source/protocol changed during diagnosis. This batch used 4/4; historical
+journals remain 8/8 and 2/2. The owner's discretionary increase authorization is
+not API billing, unlimited retry, installation or release authorization. Stop
+this verified batch rather than manufacturing another trial to consume tokens.
+
+Protocol fingerprints (do not pool them for comparisons): initial
+5b513f92e2fedc93fd8b3d27633371438d9551c9dbe5ca1ddf74d046fcad0605;
+reviewed continuation
+4bd36001da8ecd27163d954db101c37faebf087469b1d2ae4fb8a50284a37404;
+quality-fix verification
+0e982b3fc5712d7def73fac8c427222f4dcf78596931588e53ab6ffce571510a.
+
 ## Explicit re-scope of final event-diagnostic call (2026-10-11)
 
 After the stopped first event-diagnostic arm, the owner explicitly said continue

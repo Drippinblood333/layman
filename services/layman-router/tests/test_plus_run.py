@@ -40,6 +40,17 @@ def test_windows_contract_uses_native_shell_for_process_checks(monkeypatch, plat
     assert "REPL child_process" not in answer_contract
 
 
+@pytest.mark.parametrize("workflow,read_only,expected", [
+    ("discover-test-gaps-verify", False, True),
+    ("discover-test-gaps-verify", True, False),
+    ("understand-implement-verify", False, False),
+])
+def test_test_creation_contract_requires_distinguishing_cases(workflow, read_only, expected):
+    contract = _execution_contract(RouteTier.BALANCED, POLICIES[RouteTier.BALANCED],
+                                   read_only=read_only, workflow=workflow)
+    assert ("distinguish incorrect behavior, not just replay examples" in contract) == expected
+
+
 def test_command_failures_use_only_completed_envelope_and_deduplicate():
     tracker = EventBudgetTracker()
     item = {"id": "cmd-1", "type": "command_execution", "exit_code": 1,

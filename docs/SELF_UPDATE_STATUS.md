@@ -4,6 +4,26 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 new owner-authorized four-call diagnosis completed. First feature
+delivery passed; second test-writing delivery failed independent mutation checks
+despite writing the permitted test file. Offline example-only vs distinguishing
+synthetic tests reproduced this quality gap, without demonstrating a validator
+cache defect. Generated source was not retained; its exact missing assertion is
+unknown. Only test-writing contracts now request minimal distinguishing tests,
+not example replay; read-only and other workflows are unchanged. Fourteen
+contract checks, changed-file Ruff and diff checks pass. The reviewed third call
+passed the same mutation/scope checks after the rule; fourth bugfix call passed
+function/scope checks. Earlier negative result remains recorded.
+
+All four calls executed tool actions; none projected EPERM, no fallback,
+compaction or incomplete usage. They produced MCP/file-change events, not native
+command_execution items: native-shell compliance and internal Python execution
+remain unverified. Independent checks verify delivered artifacts. This is not
+proof of eliminating intermittent no-tool turns, causal quality improvement,
+general stability or token savings. New journal 4/4, older journals 8/8 and 2/2;
+no API billing, permission expansion, install replacement or release. See
+DEVELOPMENT_TRIAL_B8_2026-10-10.md for per-call outcomes and fingerprints.
+
 2026-10-11 mitigation integration checkpoint: exact source
 daab34b2c3a13b788a0570067315250dd7ca64ac passed
 [CI 38098772692](https://github.com/Drippinblood333/layman/actions/runs/38098772692).

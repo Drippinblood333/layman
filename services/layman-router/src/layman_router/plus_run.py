@@ -89,6 +89,11 @@ def _completion_read_only_intent(task: str) -> bool:
 
 
 def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_only: bool, workflow: str) -> str:
+    test_quality = (
+        "Use minimal tests that distinguish incorrect behavior, not just replay examples. "
+        if not read_only and workflow == "discover-test-gaps-verify"
+        else ""
+    )
     process_checks = (
         "Windows: run process/test commands with native shell, not REPL child_process; never bypass denials. "
         if os.name == "nt" and workflow in {
@@ -111,7 +116,7 @@ def _execution_contract(tier: RouteTier, policy: TierExecutionPolicy, *, read_on
     )
     return (
         f"Layman {tier.value}/{workflow}. Preserve request/scope. {action} "
-        f"Search symbols/tests first; read only completion evidence. {development_safety}{process_checks}"
+        f"Search symbols/tests first; read only completion evidence. {development_safety}{process_checks}{test_quality}"
         f"File ceilings, not targets: {policy.initial_files} initially; {policy.expanded_files} only for a concrete "
         f"evidence gap; at most {policy.tool_calls} tool calls. "
         "Reuse evidence; avoid broad scans, repeated reads and full logs. "
