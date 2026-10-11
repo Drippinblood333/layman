@@ -4,6 +4,16 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 bounded command-path review: three one-call observations provide
+visible assistant reports of native Windows sandbox rejection despite occasional
+externally passing artifacts. A child-only unified_exec=false delivery failed
+quality/scope, and another passed only with an internal-validation gap. Two
+zero-model standalone sandbox startup paths passed; they do not prove the model
+tool path. No default flag/profile, privilege, installation or global config
+change is justified. The batch consumed 575382 observed tokens; raw messages
+are not retained in aggregate records. Exact tool-error provenance remains
+unestablished. See TOKEN_COMPARISON_2026-10-11.md for positive/negative outcomes.
+
 2026-10-11 local App-scope screen completed its four-call ceiling: three
 counterbalanced screen calls then one separately reviewed fault observation.
 The only passing pair used 26.43% more total tokens with child Apps disabled;

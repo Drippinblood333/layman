@@ -265,3 +265,50 @@ plus the failed refactor arm totals 311448 tokens, not a successful paired
 efficiency result. The cumulative ceiling is now 4/4: three screen calls plus
 one observation; negative records remain. Raw answers/code are not retained in
 aggregate results. No production tool-scope default or installation change.
+
+## Command-path review: Windows-default override does not establish a repair
+
+Three new separately reserved one-call observations added bounded private
+visible-message review and allowlisted MCP backend counts. They do not retain
+message/code bodies in aggregate results and are not replacement comparisons.
+
+The unchanged-runtime observation passed strengthened external quality/scope
+checks (300632 total tokens, six actions). The assistant explicitly reported
+that Windows sandbox configuration blocked native reading/Python verification,
+then used other file-access tools and reported static checks only. Four completed
+MCP actions were from node_repl; one native command item was present. Raw command
+output was not collected in this observation, so the assistant's report is not
+itself an independently verified native error.
+
+Fingerprint 9588dc6a7fdc26b6ded83913352cc6f5f76d63183c611f19a787f0299ecb282a.
+
+A child-only stable-CLI unified_exec=false observation then FAILED external
+checks with no file changes (75332 tokens, one command item). The assistant
+reported that sandbox enforcement rejected the requested write configuration.
+The observed command item nevertheless had status completed and exit_code 0;
+without its original output, do not reinterpret that metadata or claim its
+command succeeded. It is a negative delivery result, not a cheap successful run.
+Fingerprint b0874b74a9cb213bcfc00da9faf65eb51e4e332941f4ed411f2871ce18fadbc6.
+
+The third observation retained that override and added private filtering for
+native command error lines. It passed external quality/scope checks (199418
+tokens, four actions), but the assistant again reported native commands blocked
+and Python tests not run. No command item was emitted in this call, so the
+native-output filter could not establish the exact rejection. No repair follows.
+Fingerprint 5288112e6c1b46e197a6f92b15ab945da95f2d5b57a14604e82cf72ee518cd81.
+
+Separately, zero-model stable-CLI sandbox startup checks using cmd.exe echo
+passed both the legacy workspace-write configuration and explicit :workspace
+profile with managed requirements included. These prove only those command
+startup paths, not the model's command path, internal Python validation or the
+absence of sandbox configuration problems. Saved Windows mode remains
+unelevated; no sandbox disabling, privilege escalation, profile migration,
+global config edit or installed-binary replacement was performed.
+
+The [official CLI reference](https://learn.chatgpt.com/docs/cli/reference) documents
+the standalone sandbox command; [Windows sandbox guidance](https://learn.chatgpt.com/docs/windows/windows-sandbox)
+explains implementation/policy limits. These sources do not identify this
+machine's exact model-tool rejection. Total observed diagnosis usage in this
+three-call batch is 575382 tokens, complete usage/no fallback, not a token
+benefit or a reliable-execution claim. Further unchanged retries are not the
+next step; exact model-tool error provenance remains unestablished.
