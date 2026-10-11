@@ -28,6 +28,23 @@ def test_benchmark_has_exact_category_distribution():
     assert counts == {"bugfix": 6, "feature": 6, "refactor": 5, "testing": 5, "docs_config": 4, "high_risk": 4}
 
 
+@pytest.mark.parametrize("reject_negative", [False, True])
+def test_chunk_quality_covers_requested_negative_size(tmp_path, reject_negative):
+    case = _selected_cases(False, ["bugfix-04"])[0]
+    workspace = tmp_path / "fixture"
+    prepare_workspace(case, workspace)
+    if reject_negative:
+        (workspace / "src" / "target.py").write_text(
+            "def chunks(values, size):\n"
+            "    if size < 1: raise ValueError(size)\n"
+            "    return [values[i:i + size] for i in range(0, len(values), size)]\n",
+            encoding="utf-8",
+        )
+    result = validate_workspace(case, workspace, "")
+    assert result["quality_ok"] is reject_negative
+    assert result["scope_ok"] is True
+
+
 def test_benchmark_expected_tiers_match_current_lean_policy(router_config):
     routes = {
         case.id: plus_task_plan(case.prompt, config=router_config)["route_tier"]
@@ -39,6 +56,15 @@ def test_benchmark_expected_tiers_match_current_lean_policy(router_config):
         "balanced": 22,
         "deep": 4,
     }
+
+
+@pytest.mark.parametrize("case", [case for case in CASES if case.validator == "function"], ids=lambda case: case.id)
+def test_function_benchmarks_reject_broken_baselines(tmp_path, case):
+    workspace = tmp_path / "fixture"
+    prepare_workspace(case, workspace)
+    result = validate_workspace(case, workspace, "")
+    assert result["quality_ok"] is False
+    assert result["scope_ok"] is True
 
 
 def test_dry_run_plans_sixty_calls_without_codex(tmp_path: Path):

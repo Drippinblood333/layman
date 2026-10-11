@@ -41,7 +41,7 @@ CASES: list[BenchmarkCase] = [
     _function_case(
         "bugfix-04", "bugfix", "修复 src/target.py 的 chunks：正常分块，并在 size 小于1时抛出 ValueError。",
         "def chunks(values, size):\n    return [values[i:i + size] for i in range(0, len(values), size)]\n",
-        "from src.target import chunks\nassert chunks([1,2,3,4,5], 2) == [[1,2],[3,4],[5]]\ntry:\n    chunks([1], 0)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('expected ValueError')\n", "balanced",
+        "from src.target import chunks\nassert chunks([1,2,3,4,5], 2) == [[1,2],[3,4],[5]]\nfor values, size in [([1], 0), ([1], -1), ([], -1)]:\n    try:\n        chunks(values, size)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('expected ValueError')\n", "balanced",
     ),
     _function_case(
         "bugfix-05", "bugfix", "修复 src/target.py 的 word_counts，使统计忽略大小写并跳过空白项。",

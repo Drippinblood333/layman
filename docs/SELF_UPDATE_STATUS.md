@@ -4,6 +4,24 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 negative-size evaluation gate correction: broader coverage paused
+after 4/8 calls when offline review established bugfix-04's original buggy source
+passed its hidden checks despite the explicit size<1 requirement. Added negative
+size checks, including empty input; 51 benchmark tests pass, including rejection
+of all 17 original function-task baselines. Changed-file Ruff and diff pass.
+Previous bugfix-04 model artifacts were not retained and cannot be revalidated;
+old completed/passed records do not prove requested negative-size behavior or
+equivalent-delivery token benefit. Keep them as historical records, not savings
+evidence. Remaining four calls are pre-scoped to repaired bugfix-04 and new
+refactor-02 under a separate fingerprint/journal; testing-03 remains pending.
+No runtime policy, dependency, permission, installation or release change.
+
+2026-10-11 equivalent-delivery guard exact source
+5b15c838b5539fd239a7df4cb3b4aa591b6dbcf9 passed
+[CI 38103937134](https://github.com/Drippinblood333/layman/actions/runs/38103937134).
+All ten validation jobs passed; publish skipped. This confirms integration,
+not broader token savings or completeness of each historical quality criterion.
+
 2026-10-11 equivalent-delivery token evaluation guard: bounded selections now
 stop on external quality/scope failure even if the native process completed.
 Token/output reduction estimates require both arms to pass validation; failed

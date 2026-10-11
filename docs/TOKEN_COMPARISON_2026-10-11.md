@@ -50,3 +50,33 @@ fd340c2efc7e571b3502269d5a609a8e3a97f7fb286880f6c218ac380236046a.
 Next: broaden preselected task categories under a fixed fingerprint and quality
 criteria; investigate whole-task waste if benefits fail to generalize. Do not
 rerun these passing pairs just to consume the remaining subscription allowance.
+
+## Broader coverage paused on a weak validation criterion
+
+A subsequent preselected eight-call set covered bugfix-04, feature-04,
+refactor-02 and testing-03. It paused after four calls, before the latter two
+categories, when offline review found bugfix-04's hidden checks did not cover
+the requested negative size. Its original buggy source already passed the old
+checks. The generated model sources had been cleaned up, so historical negative-
+size correctness cannot be recovered; neither bugfix-04 arm is evidence of
+equivalent successful delivery. Do not retrospectively rewrite those raw records.
+
+Private token-coverage-2026-10-11 journal/results retain four calls. Legacy totals:
+bugfix-04 Direct 281375, Layman 253763; feature-04 Direct 266650, Layman 239812.
+All native turns completed with complete usage and no fallback, but native
+completion/usage cannot repair the weak bugfix quality gate. No aggregate savings
+claim follows. Fingerprint:
+8d7362de5d50c9334d2c88af390380f49ff520d9141a39332e64f810ad980f78.
+
+The hidden criterion now includes zero and negative sizes, including negative
+size on empty input. The new regression rejected the original validator before
+the fix; the full 51-case benchmark test suite passes afterward, including all
+17 function tasks rejecting their original broken source. No model call was
+needed to establish this defect. Other criteria/prompts remain unchanged.
+
+The remaining four calls of that eight-call allowance are re-scoped, before
+execution, to revalidate bugfix-04 with its repaired criterion and compare the
+previously untested refactor-02. A separate four-call journal avoids replay and
+pooling across the changed case fingerprint; original four plus new four is
+still eight, not a replenished unlimited allowance. Testing-03 coverage remains
+pending. No change to runtime model policy, permissions, installation or release.
