@@ -4,6 +4,21 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 POSIX installer caught-error recovery: a controlled install failure
+reproduced the old program/new records mismatch before the fix. The installer
+now stages both components, preserves extra record files and restores records
+on caught notice-switch or executable-commit failure. No dependency was added
+and the user's live installation was untouched. Local Git Bash tests exercise
+the POSIX script, not native Linux/macOS guarantees; native CI remains required.
+This is not crash recovery or a globally atomic two-directory installation.
+
+2026-10-11 native launch-refusal reporting source
+46e689bec313b9031e3442c274649f08454298ae passed
+[CI 38137064935](https://github.com/Drippinblood333/layman/actions/runs/38137064935):
+all ten validation jobs passed and publish skipped. The Windows runtime refusal
+remains unresolved; passing CI does not demonstrate that this account's model
+command path can execute under its managed Windows sandbox.
+
 2026-10-11 native launch-refusal provenance and reporting fix: CLI stderr
 finally captured the Windows unelevated restricted-token sandbox refusing
 split writable root sets, rather than relying on the assistant's report.

@@ -23,7 +23,17 @@ fi
 url="https://github.com/${REPOSITORY}/releases/download/${VERSION}/${asset}"
 checksums_url="https://github.com/${REPOSITORY}/releases/download/${VERSION}/SHA256SUMS.txt"
 tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
+binary_stage=
+notice_stage=
+notice_backup=
+cleanup() {
+  rm -rf "$tmp"
+  if [ -n "$binary_stage" ]; then rm -f "$binary_stage"; fi
+  if [ -n "$notice_stage" ]; then rm -rf "$notice_stage"; fi
+  # A nonempty backup means restoration failed: never delete that evidence.
+  if [ -n "$notice_backup" ]; then rmdir "$notice_backup" 2>/dev/null || :; fi
+}
+trap cleanup 0
 curl -fsSL -H 'User-Agent: Layman-Installer' "$url" -o "$tmp/$asset"
 curl -fsSL -H 'User-Agent: Layman-Installer' "$checksums_url" -o "$tmp/SHA256SUMS.txt"
 expected=$(awk -v name="$asset" '$2 == name { print toupper($1); exit }' "$tmp/SHA256SUMS.txt")
@@ -42,13 +52,42 @@ for name in layman BUILD.json bundle-audit.json runtime-dependencies.json standa
 done
 if [ ! -d "$tmp/unpacked/THIRD_PARTY_LICENSES" ]; then echo 'Required package directory not found: THIRD_PARTY_LICENSES' >&2; exit 1; fi
 notice_root="${XDG_DATA_HOME:-$HOME/.local/share}/layman/installation"
-mkdir -p "$notice_root"
+binary_root="$HOME/.local/bin"
+mkdir -p "$(dirname "$notice_root")" "$binary_root"
+if [ -d "$binary_root/layman" ]; then echo 'Executable destination is a directory' >&2; exit 1; fi
+# Prepare both destinations before changing either installed component.
+binary_stage=$(mktemp "$binary_root/.layman-stage.XXXXXX")
+install -m 755 "$tmp/unpacked/layman" "$binary_stage"
+notice_stage=$(mktemp -d "$(dirname "$notice_root")/.installation-stage.XXXXXX")
+if [ -d "$notice_root" ]; then cp -R "$notice_root/." "$notice_stage/"; fi
 for name in BUILD.json bundle-audit.json runtime-dependencies.json standalone-components.json THIRD_PARTY_NOTICES.md; do
-  cp "$tmp/unpacked/$name" "$notice_root/$name"
+  cp "$tmp/unpacked/$name" "$notice_stage/$name"
 done
-cp -R "$tmp/unpacked/THIRD_PARTY_LICENSES" "$notice_root/"
-mkdir -p "$HOME/.local/bin"
-install -m 755 "$tmp/unpacked/layman" "$HOME/.local/bin/layman"
+cp -R "$tmp/unpacked/THIRD_PARTY_LICENSES" "$notice_stage/"
+notice_backup=$(mktemp -d "$(dirname "$notice_root")/.installation-backup.XXXXXX")
+notice_saved=0
+notice_switched=0
+restore_notices() {
+  if [ "$notice_switched" = 1 ]; then
+    if ! mv "$notice_root" "$notice_stage"; then
+      echo "Could not restore records; preserved backup: $notice_backup" >&2; return 1
+    fi
+  fi
+  if [ "$notice_saved" = 1 ]; then
+    if ! mv "$notice_backup/installation" "$notice_root"; then
+      echo "Could not restore records; preserved backup: $notice_backup" >&2; return 1
+    fi
+  fi
+}
+if [ -e "$notice_root" ] || [ -L "$notice_root" ]; then
+  mv "$notice_root" "$notice_backup/installation"
+  notice_saved=1
+fi
+if ! mv "$notice_stage" "$notice_root"; then restore_notices; exit 1; fi
+notice_switched=1
+# Same-directory rename leaves the old binary intact if the commit fails.
+if ! mv "$binary_stage" "$binary_root/layman"; then restore_notices; exit 1; fi
+if ! rm -rf "$notice_backup"; then echo "Old records backup remains: $notice_backup" >&2; fi
 echo "Installed Layman to $HOME/.local/bin/layman"
 case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) echo 'Add $HOME/.local/bin to PATH.' ;; esac
 "$HOME/.local/bin/layman" setup --mode "$MODE"

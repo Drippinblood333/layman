@@ -156,7 +156,16 @@ directory. Successful updates remove the staging/backup directories, or warn
 when an old backup cannot be fully removed. This needs temporary staging space.
 It is not crash/power-loss recovery, concurrent-installer coordination, or rollback
 of `setup` changes; a failed setup still reports failure with installed files
-preserved. macOS/Linux do not yet have this directory-switch protection.
+preserved.
+
+On macOS/Linux, the installer stages both the executable and its records beside
+their destinations. It preserves extra record files and restores the old records
+if their switch or the final executable rename fails; staging failure leaves both
+old components untouched. A failed restoration keeps the backup and reports its
+path. This is caught-error recovery, not a single atomic transaction across the
+two directories, concurrent-installer coordination, interruption/power-loss
+recovery, or rollback of subsequent `setup` changes. Temporary staging space is
+required. Setup failure remains a failure after the files have been installed.
 
 Run `layman uninstall` to stop the service, remove the Layman plugin and local marketplace, and restore managed Codex settings. Data and backups remain in `~/.layman`. Add `--purge-data` only when permanent deletion is intended. Purging succeeds only when plugin/marketplace references are resolved, the home has a valid Layman ownership marker, Layman originally created the directory, and every remaining entry appears in its managed-path manifest. A pre-existing custom `LAYMAN_HOME`, an unknown file, a malformed marker or an unavailable Codex CLI when references may remain causes a refusal and preserves the data. A fresh installation created with `setup --skip-plugin` records that no plugin was managed and can purge its isolated Layman-created home without calling Codex. Re-running that option never downgrades an existing or legacy installation's conservative cleanup state.
 
