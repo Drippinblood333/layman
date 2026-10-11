@@ -4,6 +4,14 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 mitigation integration checkpoint: exact source
+daab34b2c3a13b788a0570067315250dd7ca64ac passed
+[CI 38098772692](https://github.com/Drippinblood333/layman/actions/runs/38098772692).
+All ten validation jobs succeeded: three OS suites, five standalone build/smoke
+jobs, Docker and candidate assembly. Publish skipped. No model call, install
+replacement, permission expansion or release occurred. These results establish
+build/test compatibility, not model compliance, stable execution or token gains.
+
 2026-10-11 zero-model EPERM path reproduction and scoped mitigation: native
 doctor reports optional node_repl missing forwarded CODEX_WINDOWS_REGISTERED_CORE;
 configuration/install/connectivity were otherwise readable, no failing doctor
