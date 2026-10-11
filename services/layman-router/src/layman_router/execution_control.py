@@ -194,8 +194,16 @@ class EventBudgetTracker:
             self.usage_available = True
             for key in USAGE_KEYS:
                 self.usage[key] += turn[key]
-        self._visit_paths(event)
-        self._visit_operations(event, envelope=event if isinstance(event, dict) else {})
+        if isinstance(event, dict):
+            # CLI envelopes/items are metadata; their nested result bodies are
+            # untrusted tool/assistant content, not additional protocol events.
+            self._visit_operations(event, envelope=event)
+            if event.get("type") in {"item.started", "item.updated", "item.completed"}:
+                item = event.get("item")
+                if isinstance(item, dict):
+                    self._visit_operations(item, envelope=event)
+                    if item.get("type") in _TOOL_TYPES:
+                        self._visit_paths(item)
 
     def _visit_paths(self, value: Any) -> None:
         if isinstance(value, dict):
@@ -209,7 +217,7 @@ class EventBudgetTracker:
                         command = command.replace(match.group(0), " ")
                     for match in _TOKEN_PATH_PATTERN.finditer(command):
                         self._add_path(match.group(1))
-                elif key not in {"output", "aggregated_output", "stdout", "stderr", "message", "text"}:
+                elif key not in {"output", "aggregated_output", "stdout", "stderr", "message", "text", "result"}:
                     self._visit_paths(child)
         elif isinstance(value, list):
             for child in value:
@@ -237,11 +245,6 @@ class EventBudgetTracker:
                 if key not in self._compaction_ids:
                     self._compaction_ids.add(key)
                     self.compactions += 1
-            for child in value.values():
-                self._visit_operations(child, envelope=envelope)
-        elif isinstance(value, list):
-            for child in value:
-                self._visit_operations(child, envelope=envelope)
 
 
 def _reader(stream: IO[str], channel: str, output: queue.Queue[tuple[str, str | None]]) -> None:

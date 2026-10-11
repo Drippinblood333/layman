@@ -4,6 +4,14 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 native event accounting fix: nested tool/assistant result dictionaries
+were incorrectly counted as actions, files and compactions. Two regressions
+failed before the fix. Accounting now visits only native event envelopes/items,
+and does not traverse result bodies as protocol metadata. A real zero-model
+streamed child also confirms that a quoted nested operation does not exhaust
+the one-call budget. This prevents false budget stops/delivery observations;
+it does not demonstrate measured token savings. No model or prompt was added.
+
 2026-10-11 configuration delivery criteria fixed: eight before-fix regressions
 showed docs-03/docs-04 accepting deleted/changed original fields, comment-only
 settings and malformed YAML, while rejecting equivalent valid formatting.

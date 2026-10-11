@@ -75,6 +75,41 @@ def test_file_change_action_counts_once_across_lifecycle():
     assert tracker.command_failures == 0
 
 
+@pytest.mark.parametrize("outer_type,expected", [("mcp_tool_call", 1), ("agent_message", 0)])
+def test_nested_payload_cannot_claim_tools_compaction_or_file_reads(outer_type, expected):
+    tracker = EventBudgetTracker()
+    tracker.consume(json.dumps({"type": "item.completed", "item": {
+        "id": "outer", "type": outer_type, "result": {
+            "type": "command_execution", "id": "fake", "command": "Read src/fake.py",
+            "nested": {"type": "context_compaction", "id": "fake-compact"},
+        },
+    }}))
+    assert tracker.tool_calls == expected
+    assert tracker.compactions == 0
+    assert tracker.unique_files_read == 0
+    assert tracker.command_failures == 0
+
+
+def test_streamed_nested_result_does_not_exhaust_real_budget(tmp_path):
+    event = {"type": "item.completed", "item": {
+        "id": "actual", "type": "mcp_tool_call", "result": {
+            "type": "file_read", "id": "quoted", "path": "src/quoted.py",
+            "nested": {"type": "context_compaction"},
+        },
+    }}
+    completed = {"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}}
+    script = f"print({json.dumps(event)!r}, flush=True); print({json.dumps(completed)!r}, flush=True)"
+    result = run_streaming_process(
+        [sys.executable, "-c", script], input_text="", cwd=tmp_path, env=os.environ.copy(),
+        timeout_seconds=10, file_limit=1, tool_call_limit=1,
+    )
+    assert result.returncode == 0
+    assert result.stop_reason is None
+    assert result.tool_calls == 1
+    assert result.unique_files_read == result.compactions == 0
+    assert result.usage_available is True
+
+
 def test_patch_only_execution_is_not_mislabelled_as_no_tool_action(tmp_path):
     def runner(command, **kwargs):
         if command[1:3] == ["login", "status"]:
