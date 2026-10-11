@@ -4,6 +4,30 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 refactor evaluation correction: an unused normalize_name helper
+previously passed refactor-02 despite unchanged duplication in both callers.
+An offline regression reproduced the false positive; hidden checks now verify
+actual helper execution by each caller, preserving behavior/scope checks.
+Previous model artifacts were cleaned up and cannot establish the stronger
+reuse criterion. No extra model call, runtime default, installation or permission
+change accompanies this correction. All 53 benchmark tests, changed-file Ruff
+and diff checks pass. See TOKEN_COMPARISON_2026-10-11.md.
+
+2026-10-11 reliability qualification: stable 0.162.1 again returned
+needs_verification with zero actions and failed artifact checks on refactor-02.
+The App-scope comparison stopped after its first arm; no savings pair exists.
+Two earlier child-only unified_exec=false observations passed, but used MCP/file
+actions and do not prove the native command path or a causal repair. Two newly
+observed unknown CLI item tags are error; message contents/causality are not yet
+established. A single separately reserved apps-off diagnostic follows, with no
+global config, installation or permission changes. See token comparison evidence.
+
+Follow-up: apps-off passed independent refactor checks but included one failed
+native command; no general causal repair or savings claim follows. A separate
+synthetic error review identifies two observed error tags as duplicate ignored
+configuration-key warnings, not execution failures. Existing user configuration
+is preserved. Failed attempts and diagnosis costs remain in release evidence.
+
 2026-10-11 isolated stable-CLI screen: private 0.162.1 starts and uses ChatGPT
 login; existing installation/global settings unchanged. A two-call bugfix-04
 comparison passed both arms, followed by two stable-only delivery observations

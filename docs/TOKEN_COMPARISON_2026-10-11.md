@@ -152,3 +152,69 @@ two-call alpha-CLI observation restores only unified_exec=false for each child
 invocation, with the existing model/effort, sandbox and approval settings intact.
 No global flag, install, MCP service or permission changes. Its preselected tasks
 are repaired bugfix-04 and refactor-02, stopping on first delivery failure.
+
+Outcome: both child-only Windows-default observations passed independent
+quality/scope checks: bugfix-04 used 294132 total tokens and four actions;
+refactor-02 used 184959 and five actions. Both had complete usage/no fallback.
+Fingerprint ff6f7a419d7d303ab3752bca2f4203f192e5cb9583ac2cb372e79f1103c94bb1.
+Their actions were MCP calls/file changes, not observed native command execution;
+these successes do not verify the internal Python path or establish causality.
+Do not change the product default based on these observations.
+
+## Stable-version recurrence and App-scope diagnosis
+
+A preselected same-task App-scope comparison stopped on its first arm, apps-on:
+stable 0.162.1 performed zero tool actions, changed no files, failed refactor-02
+hidden checks and returned needs_verification. Total 76776 tokens; complete
+usage/no fallback. Fingerprint
+ad1ea314dad65f6aa7da110d62b894934f9f0fced480152b882573a78a830496.
+Only 1/2 reservations were used; the apps-off arm was not executed as part of
+this comparison. Stable-version success above therefore does not establish a
+repair. No App-scope savings or equivalent-delivery pair can be computed.
+
+A separately reserved one-call apps-off diagnostic tests the narrower tool
+scope after this failure, not a replacement positive comparison. Streaming
+inspection identifies two previously unknown completed-item tags as `error`.
+The tag alone does not establish their contents, fatality, or the cause of
+nonexecution; do not retroactively classify earlier unknown items. No raw
+messages are retained in aggregate evaluation records. Existing global App/MCP
+configuration, permission policy and installation remain unchanged.
+
+The one-call apps-off diagnostic completed and passed function/scope checks:
+261182 total tokens, five actions, complete usage/no fallback, only src/target.py
+changed. It also observed one failed native command plus three MCP calls and a
+file change; external validation success is not evidence of internal command
+success. Fingerprint
+40195af97fb5cdfe015664e711bded293740d4bbbe29b21bc104fa416dd2bbdb.
+One successful follow-up after a failed baseline cannot establish tool-scope
+causality or savings. Failed baseline plus this diagnosis consumed 337958 tokens;
+neither may be excluded to advertise cheap successful delivery.
+
+A separate one-call synthetic native-error review identifies the two `error`
+items as duplicate warnings about ignored configuration key
+computer_use.windows.always_allowed_app_ids. This is a nonfatal configuration
+compatibility warning, not evidence of a failed tool action or the cause of
+zero-tool turns. No user configuration is removed or changed, and no raw
+messages are added to aggregate records. Earlier unknown types remain unknown
+unless directly observed; do not retrospectively infer their contents.
+
+The error-review call passed the then-current function/scope checks (241155
+total tokens, four actions, no command failures, complete usage/no fallback).
+Fingerprint 22643a44a28de166063a26ef7d7fe3ee43f7cc3b12e25f088bf1ac9cefb8034d.
+It is diagnostic coverage, not a new comparison or proof of reliable execution.
+
+## Refactor reuse quality-gate correction
+
+Offline review then established that refactor-02 accepted an unused
+normalize_name helper while both public functions retained the duplicated
+implementation. A regression reproduced that false positive before the fix.
+Hidden checks now observe actual helper execution from each public function,
+without mandating an AST shape or prohibiting aliases. Existing behavior and
+scope checks remain. The correct delegated implementation passes; the unused
+helper implementation fails. No model call was needed for this correction.
+
+Earlier refactor-02 records prove only their original function/scope criterion,
+not elimination of duplicate logic. Generated model artifacts were cleaned up
+and cannot be revalidated; retain those outcomes as historical evidence rather
+than promoting them to stronger quality or token-savings claims. The changed
+case fingerprint requires future experiments to remain separate.

@@ -93,7 +93,17 @@ CASES: list[BenchmarkCase] = [
     _function_case(
         "refactor-02", "refactor", "重构 src/target.py，用单一 normalize_name 辅助函数消除两个公开函数中的重复清洗逻辑。",
         "def display_name(value):\n    return ' '.join(value.strip().split()).title()\n\ndef greeting(value):\n    name = ' '.join(value.strip().split()).title()\n    return f'Hello, {name}'\n",
-        "from src.target import display_name,greeting,normalize_name\nassert normalize_name('  aLi  ce ') == 'Ali Ce'\nassert display_name(' bob ') == 'Bob'\nassert greeting(' bob ') == 'Hello, Bob'\n", "balanced",
+        "from src.target import display_name,greeting,normalize_name\nassert normalize_name('  aLi  ce ') == 'Ali Ce'\nassert display_name(' bob ') == 'Bob'\nassert greeting(' bob ') == 'Hello, Bob'\n"
+        "import sys\n"
+        "for caller in (display_name, greeting):\n"
+        "    calls = []\n"
+        "    previous = sys.getprofile()\n"
+        "    try:\n"
+        "        sys.setprofile(lambda frame, event, arg: calls.append(1) if event == 'call' and frame.f_code is normalize_name.__code__ else None)\n"
+        "        caller(' bob ')\n"
+        "    finally:\n"
+        "        sys.setprofile(previous)\n"
+        "    assert calls, 'public function must reuse normalize_name'\n", "balanced",
     ),
     _function_case(
         "refactor-03", "refactor", "重构 src/target.py，把状态判断集中到 is_terminal，保持 can_edit 与 should_notify 行为。",

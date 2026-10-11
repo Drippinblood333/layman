@@ -469,6 +469,21 @@ def test_testing_fixture_reports_untracked_test_file_not_parent_directory(tmp_pa
     assert result["changed_files"] == ["tests/test_target.py"]
 
 
+@pytest.mark.parametrize("delegates", [False, True])
+def test_refactor_name_requires_both_public_functions_to_reuse_helper(tmp_path, delegates):
+    case = next(case for case in CASES if case.id == "refactor-02")
+    workspace = tmp_path / "fixture"
+    prepare_workspace(case, workspace)
+    helper = "def normalize_name(value):\n    return ' '.join(value.strip().split()).title()\n\n"
+    callers = (
+        "def display_name(value):\n    return normalize_name(value)\n\n"
+        "def greeting(value):\n    return f'Hello, {normalize_name(value)}'\n"
+        if delegates else (workspace / "src" / "target.py").read_text(encoding="utf-8")
+    )
+    (workspace / "src" / "target.py").write_text(helper + callers, encoding="utf-8")
+    assert validate_workspace(case, workspace, "")["passed"] is delegates
+
+
 def test_public_record_never_contains_answer_text():
     case = CASES[0]
     record = _public_record(
