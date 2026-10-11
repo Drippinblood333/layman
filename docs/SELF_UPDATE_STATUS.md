@@ -4,6 +4,19 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 native launch-refusal provenance and reporting fix: CLI stderr
+finally captured the Windows unelevated restricted-token sandbox refusing
+split writable root sets, rather than relying on the assistant's report.
+A zero-model managed-profile MXC probe exited 1: native MXC unavailable on
+this executor. No sandbox, global configuration or installed CLI was changed.
+Layman and the direct benchmark now conservatively return needs_verification
+when the narrowly matched native refusal is observed, including exit-zero
+sessions that edited files. Usage and actual command-exit counters remain
+unchanged; no retry, privilege fallback or raw diagnostic telemetry is added.
+All 153 scoped runtime/evaluation/benchmark regression tests passed. This
+fix reports the failure; it does not repair Windows execution compatibility.
+See TOKEN_COMPARISON_2026-10-11.md for the two diagnostic observations.
+
 2026-10-11 bounded command-path review: three one-call observations provide
 visible assistant reports of native Windows sandbox rejection despite occasional
 externally passing artifacts. A child-only unified_exec=false delivery failed

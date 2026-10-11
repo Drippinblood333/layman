@@ -20,6 +20,7 @@ from .config import load_config
 from .execution_control import (
     CODEX_USAGE_PROTOCOL_VERSION,
     EventBudgetTracker,
+    native_execution_error,
     usage_from_events,
 )
 from .models import RouteTier
@@ -290,6 +291,9 @@ def event_metrics(stdout: str) -> dict[str, Any]:
 
 
 def _safe_error(stderr: str, returncode: int) -> str:
+    native_error = native_execution_error(stderr)
+    if native_error is not None:
+        return native_error
     lower = stderr.lower()
     if "rate limit" in lower or "usage limit" in lower or "quota" in lower:
         return "subscription_limit"
@@ -353,6 +357,9 @@ def run_arm(
         }
         if result.returncode != 0:
             record["error_category"] = _safe_error(result.stderr, result.returncode)
+        elif native_execution_error(result.stderr) is not None:
+            record["status"] = "needs_verification"
+            record["error_category"] = native_execution_error(result.stderr)
         if store_outputs and answer:
             record["answer_text"] = answer
         if review_sink is not None and answer:

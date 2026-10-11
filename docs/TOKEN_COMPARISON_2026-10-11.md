@@ -1,5 +1,39 @@
 # Bounded equivalent-delivery token comparison
 
+## Native sandbox refusal provenance, subsequent reporting repair
+
+Two separately reserved one-call observations used the same private stable
+0.162.1 CLI, Apps-on configuration and strengthened refactor-02 quality gate.
+No runtime flags, permission profiles or user installation were changed.
+The tool-event-only observation consumed 77018 tokens and failed delivery
+with zero actions; it exposed no native error. Its digest is
+70104e4a3e20202a174cddde7e4269126ce67b7d51ff355121842b523dd31526.
+
+The stderr observation consumed 232752 tokens and produced an externally
+passing artifact with four actions, but internal command validation could not
+run. Its native CLI router stderr explicitly refused to launch exec_command:
+the Windows unelevated restricted-token sandbox cannot enforce split writable
+root sets directly and refuses unsandboxed execution. Its digest is
+7ccc2758fc78ad4507dada31bac8352af55bfcdd10171b59cfda845e562e85d7.
+This is direct provenance for that call, not proof of the cause of every
+historical no-action failure. Aggregate records retain fixed categories/counts,
+hashes and usage only, not raw prompts, answers or diagnostics.
+
+Total diagnostic cost: 309770 tokens, not savings. A subsequent zero-model
+official managed-profile MXC probe failed with native MXC unavailable on this
+executor. No OS capability installation, permission expansion or config change
+followed. [Official Windows sandbox guidance](https://learn.chatgpt.com/docs/windows/windows-sandbox)
+describes platform requirements; this executor has not passed that capability
+check.
+
+The reporting repair now recognizes only the observed native router signature
+in CLI stderr. Layman and the direct benchmark both mark such a call
+needs_verification even when the outer CLI exits zero or edits files. Native
+nonzero command-exit counters and completed-turn usage retain their separate
+semantics; no automatic retry is added. All 153 scoped regression tests passed.
+The compatibility problem remains open. Historical completed records are not
+retroactively rewritten or promoted into savings evidence.
+
 Date: 2026-10-11. Owner authorized discretionary diagnostic ceilings and continued
 use of the current subscription five-hour window. This batch selected four calls,
 one attempt per arm, without API billing, permission expansion, installation or

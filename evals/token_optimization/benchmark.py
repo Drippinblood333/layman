@@ -220,9 +220,13 @@ def _direct_run(case: BenchmarkCase, workspace: Path, codex_path: str) -> dict[s
         except subprocess.TimeoutExpired:
             return {"status": "failed", "error_category": "timeout", "latency_ms": 1_800_000, "answer": ""}
         answer = last_message.read_text(encoding="utf-8") if last_message.exists() else ""
+        native_error = _safe_error(result.stderr, result.returncode)
+        launch_refused = native_error == "windows_sandbox_split_roots_unsupported"
         return {
-            "status": "completed" if result.returncode == 0 else "failed",
-            "error_category": None if result.returncode == 0 else _execution_error(result.stdout, result.stderr, result.returncode),
+            "status": "needs_verification" if launch_refused else ("completed" if result.returncode == 0 else "failed"),
+            "error_category": native_error if launch_refused else (
+                None if result.returncode == 0 else _execution_error(result.stdout, result.stderr, result.returncode)
+            ),
             "route_tier": "direct",
             "model": spec.model,
             "effort": "medium",

@@ -88,6 +88,23 @@ _TOKEN_PATH_PATTERN = re.compile(
 _STDERR_LIMIT = 16_384
 
 
+def native_execution_error(stderr: str) -> str | None:
+    """Classify only the observed native router launch refusal, not model reports.
+
+    Callers pass CLI stderr, never answer text or tool output. Return a fixed
+    category without retaining the diagnostic, paths, or request content.
+    """
+    for line in stderr.splitlines():
+        if (
+            " ERROR codex_core::tools::router: error=exec_command failed: CreateProcess {" in line
+            and "UnsupportedOperation" in line
+            and "windows unelevated restricted-token sandbox cannot enforce split writable root sets directly; "
+            "refusing to run unsandboxed" in line
+        ):
+            return "windows_sandbox_split_roots_unsupported"
+    return None
+
+
 class CancellationToken:
     """A process-local cancellation signal that never stores request content."""
 

@@ -16,6 +16,7 @@ from .config import load_config
 from .execution_control import (
     USAGE_KEYS,
     CancellationToken,
+    native_execution_error,
     run_streaming_process,
     usage_from_events,
 )
@@ -378,7 +379,9 @@ def run_plus_task(
             if stop_reason in {"budget_exceeded", "cancelled", "timeout"}:
                 error_category = stop_reason
             else:
-                error_category = None if returncode == 0 else _safe_error(stderr, returncode)
+                error_category = (
+                    native_execution_error(stderr) if returncode == 0 else _safe_error(stderr, returncode)
+                )
             if error_category not in {"budget_exceeded", "cancelled", "timeout"}:
                 answer = last_message.read_text(encoding="utf-8") if last_message.exists() else ""
             for key in PLUS_USAGE_KEYS:
@@ -397,6 +400,10 @@ def run_plus_task(
             final_tier = tier
             if error_category is None and returncode == 0:
                 status = "completed"
+                break
+            if error_category == "windows_sandbox_split_roots_unsupported":
+                status = "needs_verification"
+                answer = "Windows 沙箱拒绝启动命令，修改结果仍需验证；未自动重试或降低权限。\n" + answer
                 break
             if error_category in {"budget_exceeded", "cancelled"}:
                 status = error_category
