@@ -113,3 +113,42 @@ Zero-model app-server schema export exposes additional item variants, including
 functionCallOutput, dynamicToolCall and collabAgentToolCall. It does not establish
 the unknown CLI item types or explain earlier failure turns. Do not alter native
 event accounting based only on hypothetical correspondence between APIs.
+
+## Private stable-CLI compatibility screen
+
+Registry metadata reported @openai/codex 0.162.1. A project-private, ignored build
+directory installed that exact resolved version with lifecycle scripts disabled;
+it is not part of Layman's package and did not replace the existing installation
+or global config. Version/startup and ChatGPT-login checks succeeded before model
+calls. Native executable SHA256:
+dd13bdb162a184fa04039488b234a8258ef9b76f84e926c505d5742b19249a6a.
+
+A separate two-call comparison of repaired bugfix-04 passed both arms: Direct
+255437 total tokens, Layman 228623, four tool actions each, complete usage, no
+fallback. Fingerprint:
+f8f79303cc9a28eb11223b19f77227ec7543343eef79b4aecf9712d3cb5fcb02.
+One pair/version screen cannot establish that the alpha version caused failures,
+that stable eliminates them, or that general token savings exist. Do not pool it
+with the alpha-version records or silently change the default resolved binary.
+
+Two preselected stable-only delivery observations then passed refactor-02 and
+testing-03 independent function/mutation and scope checks: 213055 and 268038 total
+tokens, four and five actions respectively, only allowed files changed, complete
+usage/no fallback. This is reliability coverage, not a Direct comparison.
+Fingerprint:
+035ec3c8fb637d6583a43c03b07b2131254942545a2bc75260bf496d284731f3.
+Each trace included two unknown completed-item types even after adding known
+app-server enum mappings. Their actual types are not established; no speculative
+event-accounting change follows. No failure-body review was needed in these two
+calls. Private synthetic review, if a future check fails, may appear in this
+Codex diagnostic chat but is not persisted in Layman aggregate telemetry.
+
+The official [config basics](https://learn.chatgpt.com/docs/config-file/config-basic)
+documents unified_exec as enabled except on Windows. Effective local alpha/stable
+feature inspection showed unified_exec and unified_exec_tty enabled, and prior
+zero-model Windows streaming/PTY rejection evidence exists. This is a concrete
+compatibility hypothesis, not established causality for zero-tool turns. A new
+two-call alpha-CLI observation restores only unified_exec=false for each child
+invocation, with the existing model/effort, sandbox and approval settings intact.
+No global flag, install, MCP service or permission changes. Its preselected tasks
+are repaired bugfix-04 and refactor-02, stopping on first delivery failure.

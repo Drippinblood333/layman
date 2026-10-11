@@ -4,6 +4,20 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 isolated stable-CLI screen: private 0.162.1 starts and uses ChatGPT
+login; existing installation/global settings unchanged. A two-call bugfix-04
+comparison passed both arms, followed by two stable-only delivery observations
+passing refactor-02 and testing-03. Complete usage/no fallback. Four successful
+small observations are not proof of eliminating intermittent failures or of
+general savings; do not switch default runtime or pool alpha/stable data.
+Known app-server enum mapping still leaves two unknown CLI completed-item kinds
+per successful trace; no speculative accounting change. Official documentation
+and effective features now identify a Windows-default discrepancy:
+unified_exec is enabled locally although documented off by default on Windows.
+A new bounded two-call child-only override observation tests that hypothesis;
+existing model, sandbox, approvals, MCP services and global configuration remain
+unchanged. See TOKEN_COMPARISON_2026-10-11.md for fingerprints and limitations.
+
 2026-10-11 repaired quality gate exact source
 2ea30a33bd8cb611a63b0fb60bd35bd69ed36c4d passed
 [CI 38104299474](https://github.com/Drippinblood333/layman/actions/runs/38104299474).
