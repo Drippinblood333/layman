@@ -80,3 +80,36 @@ previously untested refactor-02. A separate four-call journal avoids replay and
 pooling across the changed case fingerprint; original four plus new four is
 still eight, not a replenished unlimited allowance. Testing-03 coverage remains
 pending. No change to runtime model policy, permissions, installation or release.
+
+Outcome: the repaired-criterion comparison stopped after two calls. Direct
+passed (208053 total tokens); Layman used zero tool actions, changed no files,
+failed hidden checks and correctly returned needs_verification (70808 tokens).
+Fingerprint 0ecc44ac8d555dce730f04656705d6666f4c9a1d2a1c449326b4d8420f8f53e2.
+This negative pair is excluded from reduction estimates. Refactor-02 remains
+unexecuted. The two remaining calls were explicitly re-scoped after review to
+fault observation, not blind retry or a replacement positive comparison.
+
+First observation again used zero tools, failed artifact checks and returned
+needs_verification (76999 tokens); two agent messages matched none of the fixed
+answer-reported blocker categories. Raw text was not retained, so the nonexecution
+rationale remains unknown. Extended observation added fixed completion/code
+categories and allowlisted completed-item type counts; that call executed three
+actions and passed the repaired checks (153184 tokens), with a completion claim,
+two MCP calls and one file change. Two additional item kinds remained unknown.
+Neither observation saw an EPERM marker. No runtime contract changed between
+these calls; success after failures contradicts a deterministic repair claim.
+
+Private nonexecution-result.json / nonexecution-extended-result.json fingerprints:
+3d9daa217e5a034c4d9ba5d487ed6af85a193efbbcd69afdb12a808aa251539f;
+a188dd5154b028efac8e0c0f2d1662f2cc6dce5c0aca426380e9424e8f1aeeb8.
+The broad-coverage allowance is now 8/8 (four legacy, two repaired comparisons,
+two observations), not four successful pairs. The three Layman calls on the
+same task consumed 300991 tokens in total, including fault diagnosis; do not
+advertise only the final successful 153184-token call as equivalent delivery
+savings against the 208053-token Direct run. This was diagnosis, not a controlled
+automatic-retry experiment; do not pool its fingerprints into aggregate savings.
+
+Zero-model app-server schema export exposes additional item variants, including
+functionCallOutput, dynamicToolCall and collabAgentToolCall. It does not establish
+the unknown CLI item types or explain earlier failure turns. Do not alter native
+event accounting based only on hypothetical correspondence between APIs.

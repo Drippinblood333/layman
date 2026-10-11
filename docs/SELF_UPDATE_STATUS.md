@@ -4,6 +4,23 @@ Updated: 2026-10-11
 
 ## Verified checkpoint
 
+2026-10-11 repaired quality gate exact source
+2ea30a33bd8cb611a63b0fb60bd35bd69ed36c4d passed
+[CI 38104299474](https://github.com/Drippinblood333/layman/actions/runs/38104299474).
+All ten validation jobs passed; publish skipped. Repaired-criterion comparison
+then established another zero-tool Layman failure while Direct passed. Two
+reviewed, transient-classification observations used the remaining allowance:
+first zero tools/failed quality, second three actions/passed quality. No fixed
+blocker category appeared in the first answer; its raw text is not retained.
+No runtime contract changed between outcomes; intermittent nonexecution remains
+unresolved. The entire coverage/diagnosis allowance is 8/8, not four positive
+pairs, and no savings estimate may use only the successful final observation.
+Source-only schema inspection does not establish what the unknown native CLI
+items were. Existing alpha CLI 0.162.0-alpha.2 differs from registry stable
+0.162.1; this difference is not yet causal. A private compatibility directory may
+test the latter without replacing existing installation or global settings.
+See TOKEN_COMPARISON_2026-10-11.md for failed outcomes, diagnosis costs and limits.
+
 2026-10-11 negative-size evaluation gate correction: broader coverage paused
 after 4/8 calls when offline review established bugfix-04's original buggy source
 passed its hidden checks despite the explicit size<1 requirement. Added negative
