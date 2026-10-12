@@ -28,6 +28,28 @@ def test_polite_suffix_does_not_make_an_unspecified_request_actionable(task):
 
 
 @pytest.mark.parametrize("task", [
+    "请帮我优化整个项目", "帮我修个bug", "请修复这个错误，谢谢！",
+    "解决问题", "fix the bug, please", "please fix bugs",
+])
+def test_objectless_bug_requests_need_details_without_rewriting(task):
+    result = prompt_guidance(task)
+    assert result["needs_clarification"] is True
+    assert len(result["questions"]) == 2
+    assert result["rewritten"] is False
+    assert result["model_calls"] == 0
+
+
+@pytest.mark.parametrize("task", [
+    "请帮我修复 src/login.py 登录报错，不改接口",
+    "修复这个错误：ValueError 在 src/a.py 第12行出现",
+    "fix the bug in src/login.py; preserve the public API",
+    "把按钮文字改成‘帮我修个bug’", "总结这句话：fix the bug",
+])
+def test_bug_wording_with_context_or_quotation_is_not_blocked(task):
+    assert prompt_guidance(task)["needs_clarification"] is False
+
+
+@pytest.mark.parametrize("task", [
     "请修复登录时的空指针异常，不改变接口，运行已有回归测试",
     "增加一个设置页面", "不要优化整个项目，只修复src/a.py",
     "总结这句话：帮我优化整个项目", "```\nfix it\n```",
@@ -57,11 +79,12 @@ def test_concrete_plan_keeps_normal_implementation_next_steps(tmp_path):
     assert "Make the smallest complete change" in result["next_steps"][1]
 
 
-def test_mcp_vague_run_exposes_questions_without_model_execution(monkeypatch, tmp_path):
+@pytest.mark.parametrize("task", ["帮我优化整个项目", "帮我修个bug", "fix the bug, please"])
+def test_mcp_vague_run_exposes_questions_without_model_execution(monkeypatch, tmp_path, task):
     from layman_router import mcp_server
 
     monkeypatch.setattr("layman_router.plus_run.find_codex", lambda *a, **k: pytest.fail("No model preflight permitted"))
-    result = mcp_server._call_tool("run", {"task": "帮我优化整个项目", "workspace": str(tmp_path)})
+    result = mcp_server._call_tool("run", {"task": task, "workspace": str(tmp_path)})
     assert result["isError"] is True
     assert result["structuredContent"]["error_category"] == "prompt_clarification_required"
     assert "具体结果" in result["content"][0]["text"]

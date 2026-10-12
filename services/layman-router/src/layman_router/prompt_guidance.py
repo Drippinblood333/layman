@@ -10,15 +10,18 @@ def prompt_guidance(task: str) -> dict[str, object]:
     # Match courtesy endings only as part of a wholly unspecified request.
     # Do not strip them from concrete tasks, quotes or the original prompt.
     zh_end = r"\s*(?:吧)?(?:[，,\s]*谢谢)?[。！!\s]*"
+    zh_start = r"(?:请\s*)?(?:帮我\s*)?"
     en_end = r"(?:,?\s+please)?[.!\s]*"
     broad = bool(re.fullmatch(
-        rf"(?:请|帮我)?\s*(?:优化|完善|改进|重构)\s*(?:一下)?\s*(?:我的|这个|整个|全部)?\s*项目{zh_end}|"
+        rf"{zh_start}(?:优化|完善|改进|重构)\s*(?:一下)?\s*(?:我的|这个|整个|全部)?\s*项目{zh_end}|"
         rf"(?:please\s+)?(?:optimize|improve|refactor)\s+(?:my|this|the whole|the entire)\s+project{en_end}",
         request,
     ))
     unspecified = bool(re.fullmatch(
-        rf"(?:请|帮我)?\s*(?:优化|完善|改进|修复|重构)(?:一下)?{zh_end}|"
-        rf"(?:please\s+)?(?:fix|improve|optimize|refactor)\s+(?:it|this){en_end}",
+        rf"{zh_start}(?:优化|完善|改进|修复|重构)(?:一下)?{zh_end}|"
+        rf"{zh_start}(?:修复|修|解决)(?:一下)?\s*(?:这个|那个|个)?\s*(?:bugs?|问题|错误|报错){zh_end}|"
+        rf"(?:please\s+)?(?:fix|improve|optimize|refactor)\s+(?:it|this){en_end}|"
+        rf"(?:please\s+)?fix\s+(?:(?:the|this)\s+)?bugs?{en_end}",
         request,
     ))
     questions = []

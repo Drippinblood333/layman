@@ -4,6 +4,17 @@ Updated: 2026-10-12
 
 ## Verified checkpoint
 
+2026-10-12 bounded clarification coverage: six before-fix regressions showed
+objectless bug requests and combined courtesy prefixes bypassing clarification.
+The offline full-request rules now recognize these narrow Chinese/English
+forms, ask at most two questions and leave original input untouched. Concrete
+file/error context, quotations and explicit project goals still pass. All 113
+prompt/planner/execution tests passed, including MCP no-preflight guards. One
+native CLI call on an isolated fixture returned prompt_clarification_required,
+zero attempts and zero model usage. No optimizer model or new dependency was
+added. This is bounded wording coverage, not general semantic validation or a
+representative measurement of successful-delivery token savings.
+
 2026-10-12 standalone gate correction: Plus-doctor source
 d7b5e4502c5511b948ca98d756648a0f8d6564fe failed
 [CI 38207071047](https://github.com/Drippinblood333/layman/actions/runs/38207071047)
