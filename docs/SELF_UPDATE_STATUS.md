@@ -4,6 +4,17 @@ Updated: 2026-10-12
 
 ## Verified checkpoint
 
+2026-10-12 read-only follow-up on the legacy refresh failure: the current
+process does not have an administrator token. Existing managed sandbox helper
+cache contains command runners and a Codex executable; file presence is not
+compatibility proof and does not establish a missing-component cause. The
+structured setup failure contains only the generic setup-refresh message,
+and bounded log categorization exposed no specific native error number.
+Insufficient evidence remains to attribute the failure to one ACL/account rule
+or to prescribe a targeted mutation. No new command/model trial or sandbox
+provisioning was attempted. Administrator-led sandbox maintenance is an
+external execution prerequisite, not a verified code repair or token gain.
+
 2026-10-12 corrected smoke and clarification source
 05b9ce2512e0f8b39de74863dffd2e27cdfca31b passed
 [CI 38207757196](https://github.com/Drippinblood333/layman/actions/runs/38207757196):
