@@ -4,6 +4,26 @@ Updated: 2026-10-12
 
 ## Verified checkpoint
 
+2026-10-12 corrected smoke and clarification source
+05b9ce2512e0f8b39de74863dffd2e27cdfca31b passed
+[CI 38207757196](https://github.com/Drippinblood333/layman/actions/runs/38207757196):
+all ten validation jobs passed, including all five standalone smoke jobs;
+publish skipped. The preceding failed gate is retained below, not erased.
+
+2026-10-12 existing legacy sandbox observation: read-only local inspection
+found two enabled CodexSandbox accounts and a version-5 setup marker. The
+stable private CLI app-server windowsSandbox/readiness request, with a child-only
+elevated selection, returned ready without a thread, turn or setup request.
+A single zero-model managed :workspace sandbox printing command nevertheless
+exited 1 with helper_unknown_error / setup refresh had errors. The CLI attempted
+its own setup refresh during execution; readiness therefore did not establish
+working command execution. No model retry, explicit setup request, account
+creation command, OS update, installed CLI replacement or saved sandbox-mode
+change was requested. Partial effects of the failed native refresh were not
+audited and must not be described as a clean system rollback. Reliable Windows
+model command validation remains unresolved; further sandbox provisioning is
+system maintenance, not an ordinary project refactor.
+
 2026-10-12 bounded clarification coverage: six before-fix regressions showed
 objectless bug requests and combined courtesy prefixes bypassing clarification.
 The offline full-request rules now recognize these narrow Chinese/English
