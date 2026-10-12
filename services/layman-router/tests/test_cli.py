@@ -70,6 +70,55 @@ def test_plus_status_skips_optional_router_without_claiming_login(monkeypatch, t
     assert "login is not checked" in result["meaning"]
 
 
+@pytest.mark.parametrize("available,chatgpt,expected_exit", [(True, True, 0), (True, False, 1), (False, False, 1)])
+def test_plus_doctor_checks_login_without_requesting_api_service(monkeypatch, capsys, available, chatgpt, expected_exit):
+    monkeypatch.setattr(cli, "read_state", lambda: {"mode": "plus"})
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr(cli, "find_codex", lambda: "synthetic-codex")
+    monkeypatch.setattr(cli, "codex_login_status", lambda path: {
+        "available": available, "chatgpt_login": chatgpt, "status": "private diagnostic",
+    })
+    monkeypatch.setattr(cli, "_fetch", lambda *a, **k: pytest.fail("Plus doctor must not require the API router"))
+    monkeypatch.setattr(cli, "_writable_ancestor", lambda *a: pytest.fail("Plus doctor must not require an API database"))
+    assert cli.main(["doctor"]) == expected_exit
+    result = json.loads(capsys.readouterr().out)
+    assert result["configured_mode"] == "plus"
+    assert result["openai_api_key"] == result["admin_token"] == "not_required"
+    assert result["service"] == "not_required"
+    assert result["codex_cli"] == "available"
+    assert result["chatgpt_login"] == ("credentials_present" if available and chatgpt else "not_detected")
+    assert "sandboxed execution are not verified" in result["meaning"]
+    assert "private diagnostic" not in json.dumps(result)
+
+
+def test_plus_doctor_missing_cli_is_actionable_without_configuration_writes(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "read_state", lambda: {"mode": "plus"})
+    monkeypatch.setattr(cli, "find_codex", lambda: (_ for _ in ()).throw(FileNotFoundError("private path")))
+    monkeypatch.setattr(cli, "codex_login_status", lambda *a: pytest.fail("No executable to check"))
+    monkeypatch.setattr(cli, "_fetch", lambda *a: pytest.fail("No API service needed"))
+    monkeypatch.setattr(cli, "write_state", lambda *a: pytest.fail("Doctor must not write state"))
+    assert cli.main(["doctor"]) == 1
+    result = json.loads(capsys.readouterr().out)
+    assert result["codex_cli"] == "unavailable"
+    assert result["chatgpt_login"] == "not_detected"
+    assert "Install Codex CLI" in result["next_step"]
+    assert "private path" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("mode", ["api", None, []])
+def test_doctor_preserves_api_or_unknown_mode_checks(monkeypatch, capsys, mode):
+    monkeypatch.setattr(cli, "read_state", lambda: {"mode": mode})
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr(cli, "_writable_ancestor", lambda *a: True)
+    monkeypatch.setattr(cli, "find_codex", lambda: pytest.fail("API doctor does not inspect Plus login"))
+    monkeypatch.setattr(cli, "_fetch", lambda *a: {"status": "ok"})
+    assert cli.main(["doctor"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["database_parent_writable"] is True
+    assert result["openai_api_key"] == "missing"
+    assert result["service"] == "ok"
+
+
 @pytest.mark.parametrize("mode,service_only", [
     ("api", False), (None, False), ([], False), ({"unexpected": "plus"}, False), ("plus", True),
 ])

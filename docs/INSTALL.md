@@ -56,6 +56,14 @@ presenting an offline API service as part of Plus setup. This does not check
 ChatGPT login; use `layman codex-plus status` for that. `layman status --service-only`
 still explicitly checks the API service, as do API-mode or unknown-mode status requests.
 
+`layman doctor` also follows the saved Plus setup mode: it checks CLI startup and
+stored ChatGPT login, and labels the API key, dashboard token and router service
+`not_required`. It does not require the API database. Exit zero means credentials
+were detected, not that subscription access, the selected model or sandboxed
+task execution was verified. No login credentials or raw login diagnostics are
+printed. API and unknown setup modes retain the API configuration/service checks.
+[Official CLI login reference](https://learn.chatgpt.com/docs/developer-commands#codex-login).
+
 For a short task, you can instead enter `layman plan` or `layman run --dry-run`
 directly. When prompted, type one line and press Enter. This input is read by
 Layman rather than the shell, so it is not placed in shell command history;

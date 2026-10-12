@@ -345,12 +345,35 @@ def main(argv: list[str] | None = None) -> int:
                     print(answer)
             return 0 if result.get("status", "completed") == "completed" else 1
         if args.command == "doctor":
+            state = read_state()
+            if state.get("mode") == "plus":
+                cli_available = False
+                try:
+                    executable = find_codex()
+                    cli_available = True
+                    login = codex_login_status(executable)
+                except (FileNotFoundError, OSError, subprocess.SubprocessError):
+                    login = {"available": False, "chatgpt_login": False}
+                credentials_present = bool(login.get("available") and login.get("chatgpt_login"))
+                checks = {
+                    "configured_mode": "plus",
+                    "codex_cli": "available" if cli_available else "unavailable",
+                    "chatgpt_login": "credentials_present" if credentials_present else "not_detected",
+                    "openai_api_key": "not_required",
+                    "admin_token": "not_required",
+                    "database_parent_writable": "not_checked",
+                    "service": "not_required",
+                    "meaning": "Checks CLI startup and stored ChatGPT login only; account access, model availability and sandboxed execution are not verified.",
+                    "next_step": "Run one scoped task to verify delivery." if credentials_present else "Install Codex CLI and log in using ChatGPT.",
+                }
+                print(json.dumps(checks, indent=2, ensure_ascii=False))
+                return 0 if credentials_present else 1
             config = load_config()
             checks = {
                 "config": "ok",
                 "listen_is_loopback": config.listen_host in {"127.0.0.1", "::1", "localhost"},
                 "openai_api_key": "set" if os.getenv("OPENAI_API_KEY") else "missing",
-                "admin_token": "set" if (os.getenv(config.admin_token_env) or read_state().get("admin_token")) else "missing",
+                "admin_token": "set" if (os.getenv(config.admin_token_env) or state.get("admin_token")) else "missing",
                 "database_parent_writable": _writable_ancestor(config.database_path),
             }
             try:

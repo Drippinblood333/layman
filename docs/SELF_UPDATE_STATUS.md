@@ -4,6 +4,17 @@ Updated: 2026-10-12
 
 ## Verified checkpoint
 
+2026-10-12 Plus onboarding diagnosis: three regressions reproduced doctor
+requiring the optional API database in saved Plus mode. Doctor now checks the
+existing Codex CLI/login path, labels API key/token/service not_required and
+does not probe the optional API router. Missing CLI or non-ChatGPT credentials
+are actionable failures; credentials_present is not account/model/execution
+verification. API/unknown mode behavior is preserved. All 43 CLI/lifecycle tests
+passed. One isolated-state native doctor invocation returned exit zero with
+stored ChatGPT credentials detected, no model task or router health request,
+and only the original state.json in the isolated Layman home. The actual user
+installation/configuration was not changed; no dependency was added.
+
 2026-10-12 exact accounting-fix source
 f0a7b653d5c891e40286bf4ecb14286a2f736835 passed
 [CI 38138172215](https://github.com/Drippinblood333/layman/actions/runs/38138172215):
