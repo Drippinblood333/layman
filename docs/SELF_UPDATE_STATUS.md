@@ -1,8 +1,26 @@
 # Project update status
 
-Updated: 2026-10-11
+Updated: 2026-10-12
 
 ## Verified checkpoint
+
+2026-10-12 exact accounting-fix source
+f0a7b653d5c891e40286bf4ecb14286a2f736835 passed
+[CI 38138172215](https://github.com/Drippinblood333/layman/actions/runs/38138172215):
+all ten validation jobs passed and publish skipped. Configuration-criteria
+source 131585ab6b2928e4835d92938b96bef6d72af3a1 also passed
+[CI 38137957550](https://github.com/Drippinblood333/layman/actions/runs/38137957550).
+No formal release or live installation replacement occurred.
+
+Host compatibility evidence: the registry reports build 26100, UBR 4349
+(24H2). This is below the documented MXC introduction build 26100.9278;
+the explicit zero-model MXC probe failed. WSL enumeration also reported the
+subsystem unavailable. These observations do not authorize an OS update,
+administrator sandbox provisioning or an unsandboxed fallback. The existing
+unelevated split-root refusal remains a runtime blocker for reliable native
+model command validation; offline tests and CI are not a substitute for it.
+Representative same-quality token gains and first-user installation remain
+unproven. [Official sandbox requirements](https://learn.chatgpt.com/docs/windows/windows-sandbox).
 
 2026-10-11 native event accounting fix: nested tool/assistant result dictionaries
 were incorrectly counted as actions, files and compactions. Two regressions
