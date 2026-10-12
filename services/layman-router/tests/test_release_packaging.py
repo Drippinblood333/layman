@@ -66,6 +66,31 @@ def runtime_inventory_module():
     return module
 
 
+@pytest.mark.parametrize("credentials,cli,returncode,valid", [
+    ("credentials_present", "available", 0, True),
+    ("not_detected", "unavailable", 1, True),
+    ("not_detected", "available", 1, True),
+    ("not_detected", "unavailable", 0, False),
+    ("credentials_present", "unavailable", 0, False),
+])
+def test_standalone_plus_doctor_requires_consistent_offline_diagnosis(credentials, cli, returncode, valid):
+    spec = importlib.util.spec_from_file_location("layman_test_smoke", ROOT / "scripts/smoke-standalone.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    doctor = {
+        "config": "ok", "configured_mode": "plus", "openai_api_key": "not_required",
+        "admin_token": "not_required", "database_parent_writable": "not_checked",
+        "service": "not_required", "chatgpt_login": credentials, "codex_cli": cli,
+    }
+    result = subprocess.CompletedProcess([], returncode, stdout=json.dumps(doctor), stderr="")
+    if valid:
+        assert module.validate_plus_doctor(result) == doctor
+    else:
+        with pytest.raises(RuntimeError, match="contradicted"):
+            module.validate_plus_doctor(result)
+
+
 def fake_runtime_compliance(lock_content: bytes | None = None) -> tuple[bytes, bytes]:
     inventory = runtime_inventory_module()
     if lock_content is None:

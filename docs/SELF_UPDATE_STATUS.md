@@ -4,6 +4,19 @@ Updated: 2026-10-12
 
 ## Verified checkpoint
 
+2026-10-12 standalone gate correction: Plus-doctor source
+d7b5e4502c5511b948ca98d756648a0f8d6564fe failed
+[CI 38207071047](https://github.com/Drippinblood333/layman/actions/runs/38207071047)
+in all five standalone smoke jobs, while source tests passed. The obsolete smoke
+required API diagnostics and unconditional exit zero after isolated Plus setup.
+The smoke now validates the Plus fields and requires an exit code consistent
+with detected/absent credentials; arbitrary startup/config failures remain
+failures. All 42 packaging tests passed. A fresh local Windows candidate built
+with Python 3.14.3/PyInstaller 6.22.3 passed the actual standalone smoke, including
+isolated no-login diagnosis, planning, dry run, local router/MCP checks and
+guarded test-home cleanup. No models ran; no installed executable or user data
+was replaced. Native five-platform CI must still confirm this corrected gate.
+
 2026-10-12 Plus onboarding diagnosis: three regressions reproduced doctor
 requiring the optional API database in saved Plus mode. Doctor now checks the
 existing Codex CLI/login path, labels API key/token/service not_required and

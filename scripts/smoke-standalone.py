@@ -30,6 +30,7 @@ def run(
     environment: dict[str, str],
     *,
     input_text: str | None = None,
+    allowed_returncodes: tuple[int, ...] = (0,),
 ) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         command,
@@ -41,7 +42,7 @@ def run(
         timeout=60,
         check=False,
     )
-    if result.returncode != 0:
+    if result.returncode not in allowed_returncodes:
         rendered = " ".join(command)
         raise RuntimeError(
             f"standalone command failed ({result.returncode}): {rendered}\n"
@@ -58,6 +59,27 @@ def parse_json(result: subprocess.CompletedProcess[str], command: str) -> dict[s
     if not isinstance(value, dict):
         raise RuntimeError(f"{command} returned a non-object JSON value")  # noqa: TRY004 - smoke failures consistently use RuntimeError.
     return value
+
+
+def validate_plus_doctor(result: subprocess.CompletedProcess[str]) -> dict[str, object]:
+    doctor = parse_json(result, "doctor")
+    expected_fields = {
+        "config": "ok", "configured_mode": "plus",
+        "openai_api_key": "not_required", "admin_token": "not_required",
+        "database_parent_writable": "not_checked", "service": "not_required",
+    }
+    if any(doctor.get(key) != value for key, value in expected_fields.items()):
+        raise RuntimeError(f"standalone Plus doctor returned invalid checks: {doctor}")
+    credentials = doctor.get("chatgpt_login")
+    cli = doctor.get("codex_cli")
+    if (
+        credentials not in {"credentials_present", "not_detected"}
+        or cli not in {"available", "unavailable"}
+        or (credentials == "credentials_present" and cli != "available")
+        or result.returncode != (0 if credentials == "credentials_present" else 1)
+    ):
+        raise RuntimeError(f"standalone Plus doctor contradicted its login status: {doctor}")
+    return doctor
 
 
 def _start_managed_server(
@@ -304,9 +326,12 @@ def main() -> int:
         if state.get("codex_plugin_managed") is not False:
             raise RuntimeError(f"standalone setup did not record the skipped plugin state: {state}")
 
-        doctor = parse_json(run([str(executable), "doctor"], environment), "doctor")
-        if not doctor.get("listen_is_loopback") or not doctor.get("database_parent_writable"):
-            raise RuntimeError(f"standalone doctor failed: {doctor}")
+        # This offline packaging fixture intentionally has no provisioned Codex
+        # login. Exit 1 is valid only with the matching structured Plus diagnosis;
+        # it is not silently accepted for arbitrary startup/config failures.
+        doctor = validate_plus_doctor(run(
+            [str(executable), "doctor"], environment, allowed_returncodes=(0, 1),
+        ))
 
         plan = parse_json(
             run(
