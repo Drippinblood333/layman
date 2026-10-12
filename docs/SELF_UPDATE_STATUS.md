@@ -9,7 +9,8 @@ requiring the optional API database in saved Plus mode. Doctor now checks the
 existing Codex CLI/login path, labels API key/token/service not_required and
 does not probe the optional API router. Missing CLI or non-ChatGPT credentials
 are actionable failures; credentials_present is not account/model/execution
-verification. API/unknown mode behavior is preserved. All 43 CLI/lifecycle tests
+verification. Shared routing configuration remains validated; one regression
+guards against skipping it. API/unknown mode behavior is preserved. All 44 CLI/lifecycle tests
 passed. One isolated-state native doctor invocation returned exit zero with
 stored ChatGPT credentials detected, no model task or router health request,
 and only the original state.json in the isolated Layman home. The actual user

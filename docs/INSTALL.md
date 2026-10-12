@@ -58,7 +58,8 @@ still explicitly checks the API service, as do API-mode or unknown-mode status r
 
 `layman doctor` also follows the saved Plus setup mode: it checks CLI startup and
 stored ChatGPT login, and labels the API key, dashboard token and router service
-`not_required`. It does not require the API database. Exit zero means credentials
+`not_required`. It still validates the shared routing configuration, but does not
+require the API database. Exit zero means credentials
 were detected, not that subscription access, the selected model or sandboxed
 task execution was verified. No login credentials or raw login diagnostics are
 printed. API and unknown setup modes retain the API configuration/service checks.

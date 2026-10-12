@@ -105,6 +105,14 @@ def test_plus_doctor_missing_cli_is_actionable_without_configuration_writes(monk
     assert "private path" not in json.dumps(result)
 
 
+def test_plus_doctor_still_rejects_invalid_shared_routing_config(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "read_state", lambda: {"mode": "plus"})
+    monkeypatch.setattr(cli, "load_config", lambda: (_ for _ in ()).throw(ValueError("invalid routing configuration")))
+    monkeypatch.setattr(cli, "find_codex", lambda: pytest.fail("Invalid configuration must stop before login checks"))
+    assert cli.main(["doctor"]) == 1
+    assert "invalid routing configuration" in capsys.readouterr().err
+
+
 @pytest.mark.parametrize("mode", ["api", None, []])
 def test_doctor_preserves_api_or_unknown_mode_checks(monkeypatch, capsys, mode):
     monkeypatch.setattr(cli, "read_state", lambda: {"mode": mode})

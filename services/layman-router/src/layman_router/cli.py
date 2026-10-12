@@ -345,6 +345,7 @@ def main(argv: list[str] | None = None) -> int:
                     print(answer)
             return 0 if result.get("status", "completed") == "completed" else 1
         if args.command == "doctor":
+            config = load_config()
             state = read_state()
             if state.get("mode") == "plus":
                 cli_available = False
@@ -356,6 +357,7 @@ def main(argv: list[str] | None = None) -> int:
                     login = {"available": False, "chatgpt_login": False}
                 credentials_present = bool(login.get("available") and login.get("chatgpt_login"))
                 checks = {
+                    "config": "ok",
                     "configured_mode": "plus",
                     "codex_cli": "available" if cli_available else "unavailable",
                     "chatgpt_login": "credentials_present" if credentials_present else "not_detected",
@@ -368,7 +370,6 @@ def main(argv: list[str] | None = None) -> int:
                 }
                 print(json.dumps(checks, indent=2, ensure_ascii=False))
                 return 0 if credentials_present else 1
-            config = load_config()
             checks = {
                 "config": "ok",
                 "listen_is_loopback": config.listen_host in {"127.0.0.1", "::1", "localhost"},
