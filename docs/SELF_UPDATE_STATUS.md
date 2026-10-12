@@ -4,6 +4,20 @@ Updated: 2026-10-12
 
 ## Verified checkpoint
 
+2026-10-12 user-authorized sandbox maintenance: the Codex configuration was
+backed up and hash-checked before an administrator helper ran official elevated
+sandbox setup. Setup exited zero and saved elevated selection. Normal-session
+execution still failed. The current dated sandbox log (not historical
+sandbox.log) identified Windows error 32 while updating runtime executable/DLL
+ACLs: live computer-use services held the files, and the main app restarted a
+service after selected runtime processes were stopped. No browser or main app
+was forcibly closed. A separate administrator helper is now waiting, with a
+ten-minute limit, for the locked DLL to become available after the user exits
+Codex; it will perform one setup and one managed-workspace printing probe.
+Its verified current phase is waiting_for_codex_exit, not repair success.
+After reopening the app, ordinary-session execution must be rechecked before
+resuming model trials. No model/API call, OS update or sandbox bypass occurred.
+
 2026-10-12 read-only follow-up on the legacy refresh failure: the current
 process does not have an administrator token. Existing managed sandbox helper
 cache contains command runners and a Codex executable; file presence is not
