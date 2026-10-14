@@ -85,7 +85,7 @@ jobs:
       - run: python -m pip install pyinstaller==6.22.3 pyinstaller-hooks-contrib==2026.7
       - run: python scripts/build-standalone.py
       - run: python scripts/smoke-standalone.py
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ${{ matrix.artifact }}
           path: release/layman-v1.0.0/${{ matrix.platform }}/
@@ -106,7 +106,7 @@ jobs:
       - run: python -m pip install --require-hashes -r services/layman-router/requirements.lock
       - run: python -m pip install --no-deps "./services/layman-router"
       - run: python -m pip check
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           path: build/platform-artifacts
           pattern: layman-*
@@ -117,7 +117,7 @@ jobs:
       - run: python scripts/scan-release.py release/layman-v1.0.0
       - run: python scripts/stage-release-assets.py --require-all-platforms
       - run: python scripts/scan-release.py build/release-assets
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-assets
           path: build/release-assets/*
@@ -130,7 +130,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: release-assets
           path: build/release-assets
