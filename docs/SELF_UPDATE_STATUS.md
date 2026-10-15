@@ -14,8 +14,12 @@ counterexamples. All 76 Plus-run tests and scoped Ruff checks passed locally;
 git diff --check passed. Tests use controlled runners, not real model calls.
 This prevents these false completion reports; it does not prove edits or
 semantic correctness whenever a tool was observed, nor measure token savings.
-Hosted validation of this follow-up remains pending. The last verified hosted
-code remains 05b9ce2512e0f8b39de74863dffd2e27cdfca31b / CI 38207757196.
+Hosted validation of code 655c3228024be6bb9d6a0f181c99b5485c2e730e passed
+[CI 38743606120](https://github.com/Drippinblood333/layman/actions/runs/38743606120):
+all ten validation jobs succeeded, including three-platform source checks,
+five standalone builds/smokes and combined release-asset assembly. Publish was
+skipped. This closes this regression's code/build gate, not the native Windows
+sandbox, invited-user acceptance or representative token-efficiency gates.
 
 2026-10-12 post-restart verification: the after-close helper terminated with
 file_still_locked; setup and probe exit codes were null, so neither operation
