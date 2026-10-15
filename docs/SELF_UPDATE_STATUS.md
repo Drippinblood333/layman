@@ -4,6 +4,18 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 follow-up offline skill-control probe rejected blanket catalog
+suppression as a default optimization. In a new synthetic named-skill/AGENTS
+fixture, omitting skill instructions shortened rendered text but removed the
+explicitly requested skill's catalog entry; all user-message text stayed identical.
+On private alpha.20, a per-skill folder-path disable was a silent no-op while
+the SKILL.md file path removed that entry. All four probes exited zero, so exit
+status alone is not an enablement check. The [updated context report](CONTEXT_DECOMPOSITION_2026-10-16.md)
+preserves the version-specific documentation mismatch and limits: no live skill
+invocation, quality comparison, or token savings was established. No model calls,
+global settings or production changes. Next inspect process/history amplification
+instead of adding a speculative dynamic skill filter.
+
 2026-10-16 offline prompt decomposition used the official debug prompt-input
 command with the matched private alpha.20 runtime, no model calls and no global
 configuration changes. The same 129-character synthetic execution task rendered
