@@ -4,6 +4,21 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 hosted verification dispatched: clean source checkpoint
+5d400ce2a428534a78acdd9799462026a7091f5b (including metric implementation 1119666)
+passed release secret scanning and diff whitespace checks, then was pushed without
+force to codex/verify-command-output-metrics. GitHub and ls-remote confirmed that
+exact SHA. [CI 38769479052](https://github.com/Drippinblood333/layman/actions/runs/38769479052)
+is the single live verification run, not a replacement/retry. Latest observed
+state: eight jobs successful (Docker, Linux/macOS tests and all five standalone
+platforms); Windows full pytest still in progress. Aggregate release-assets
+validation has not yet completed. Do not claim all checks green until terminal
+job states are inspected. The existing workflow publishes only matching version
+tags; no tag or release was created. Remote main remains 1380390. No model calls,
+new dependencies, installation replacement or automatic failure workaround.
+This is a verified wait, not an impasse: continue observing this run ID; do not
+retrigger merely because a tool observation times out. Overall goal remains active.
+
 2026-10-16 real output-volume diagnostic completed its separate 2/2 subscription
 ceiling on source 1119666 and the matched private alpha.20 runtime. Both Sol/medium
 bugfix-03 arms passed identical hidden function/scope checks with complete usage,
