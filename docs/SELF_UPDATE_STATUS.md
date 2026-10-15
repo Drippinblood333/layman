@@ -11,9 +11,12 @@ improve HTTP 429 retry handling, including valid Retry-After headers. Official
 tag refs were verified against the complete pinned commit hashes. The workflow
 now uses these patch versions for both platform and assembled artifacts; inputs,
 permissions, checksum checks and tag-only publication gates are unchanged.
-All 42 local release-packaging tests and git diff --check passed. The separate
-Dependabot action-update PR has green checks, but is not proof of this main
-commit's validation: fresh hosted verification is required. No runtime dependency,
+All 42 local release-packaging tests and git diff --check passed. Main code
+4393cc9ba0ecca8ae5bcda2a34410b6e26330c31 then passed
+[CI 38745125197](https://github.com/Drippinblood333/layman/actions/runs/38745125197):
+all ten validation jobs succeeded, including artifact transfer and combined
+release-asset assembly; publication was skipped. This verifies normal workflow
+compatibility, not a locally injected HTTP 429 recovery experiment. No runtime dependency,
 user installation, model evaluation, sandbox configuration or public release was
 changed. This is transfer resilience maintenance, not measured token savings.
 
