@@ -4,6 +4,21 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 real output-volume diagnostic completed its separate 2/2 subscription
+ceiling on source 1119666 and the matched private alpha.20 runtime. Both Sol/medium
+bugfix-03 arms passed identical hidden function/scope checks with complete usage,
+no fallback and only src/target.py changed. Both had six tool operations and five
+observed command outputs, but Direct recorded 856 output characters / 113,849
+total tokens versus Layman 6,194 / 132,554 (+16.43%). One Direct command failed
+before recovery. This verifies live metric coverage and motivates output-volume
+investigation, not causal attribution or a savings claim. Analyzer claim remains
+false; one tuning pair has no confidence interval or human quality certification.
+The [full report](OUTPUT_VOLUME_PAIR_2026-10-16.md) preserves cache accounting,
+all results and measurement limits. Process terminal exit zero; two reservations
+match two immutable results. No paid API, reset credits, installation replacement,
+source edits or redundant test/build occurred. Next prioritize hosted CI for the
+metric source change rather than repeating the same tuning case.
+
 2026-10-16 command-output observability batch: the previous offline checks were
 progress (new evidence ruled out blind prompt shortening and blanket skill
 suppression), but they cannot reconstruct internal request/history amplification.
