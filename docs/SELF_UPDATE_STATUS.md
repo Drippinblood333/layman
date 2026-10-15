@@ -1,8 +1,21 @@
 # Project update status
 
-Updated: 2026-10-15
+Updated: 2026-10-16
 
 ## Verified checkpoint
+
+2026-10-15 matched-runtime pilot completed 6/6 subscription executions with the
+full matching private alpha.20 runtime. All three preselected Direct/Layman pairs
+passed the same function/content and scope checks with complete usage, no model
+fallback and no failed terminal execution. One Direct command failed before
+successful recovery. Layman used 347,512 total tokens versus Direct 273,931
+(26.86% more); every pair was negative and median reduction was -26.77%.
+The six-call ceiling is consumed; older journals are unchanged. The
+[complete report](MATCHED_RUNTIME_PILOT_2026-10-15.md) preserves every case,
+input/cache/output accounting, latency limits and the absence of independent
+human quality/general savings evidence. No paid API, judge, reset-credit use,
+installation replacement or publication occurred. Next optimization must target
+measured overhead, not add complexity or relabel this negative result as savings.
 
 2026-10-15 code-mode host diagnosis: exact main source
 13803909ce4868772fbc8d5dd36082f55cd95566 also passed all ten main-push validation
