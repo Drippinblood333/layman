@@ -43,8 +43,14 @@ unchanged. Fingerprinting is limited to twenty named workspace files, at most
 1 MiB each; unknown/oversized/outside coverage cannot establish no change. No
 file contents or fingerprints are added to telemetry. This is not a semantic
 correctness test, and an intentional no-op may require caller verification.
-All 81 Plus-run tests, the CLI/token-benchmark suites, scoped Ruff and whitespace
-checks pass locally. Hosted validation of this source follow-up is pending.
+All 81 Plus-run tests and 83 CLI/token-benchmark tests, scoped Ruff and whitespace
+checks passed locally. Exact source 13803909ce4868772fbc8d5dd36082f55cd95566 passed
+all ten checks on the validation branch in
+[CI 38757417282](https://github.com/Drippinblood333/layman/actions/runs/38757417282),
+including combined release assets; publish skipped. Only after those checks
+succeeded was the same commit fast-forwarded to remote main, without a required
+check bypass warning. The main-push workflow is a separate observation, not
+included in that validation-branch CI claim. No release tag was created.
 
 2026-10-15 artifact-transfer maintenance: upstream
 [upload-artifact v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2)
