@@ -4,6 +4,19 @@ Updated: 2026-10-15
 
 ## Verified checkpoint
 
+2026-10-15 artifact-transfer maintenance: upstream
+[upload-artifact v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2)
+and [download-artifact v8.0.2](https://github.com/actions/download-artifact/releases/tag/v8.0.2)
+improve HTTP 429 retry handling, including valid Retry-After headers. Official
+tag refs were verified against the complete pinned commit hashes. The workflow
+now uses these patch versions for both platform and assembled artifacts; inputs,
+permissions, checksum checks and tag-only publication gates are unchanged.
+All 42 local release-packaging tests and git diff --check passed. The separate
+Dependabot action-update PR has green checks, but is not proof of this main
+commit's validation: fresh hosted verification is required. No runtime dependency,
+user installation, model evaluation, sandbox configuration or public release was
+changed. This is transfer resilience maintenance, not measured token savings.
+
 2026-10-15 native execution recheck: one ordinary-session managed :workspace
 printing probe exited 1 before command execution, now with
 helper_sandbox_lock_failed while opening/locking .sandbox-bin. The current
