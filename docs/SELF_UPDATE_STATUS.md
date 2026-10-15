@@ -4,6 +4,21 @@ Updated: 2026-10-15
 
 ## Verified checkpoint
 
+2026-10-15 native execution recheck: one ordinary-session managed :workspace
+printing probe exited 1 before command execution, now with
+helper_sandbox_lock_failed while opening/locking .sandbox-bin. The current
+dated log reported a missing/incompatible setup marker. The earlier runtime
+sharing violation is historical evidence, not the observed cause of this new
+failure. A subsequent process snapshot found no sandbox setup helper running;
+this is not a live job to wait on. No model call was made. The CLI may perform
+provisioning during this probe; marker/directory timestamps changed, so this
+must not be described as a read-only system check or a clean rollback.
+Windows remains 24H2 build 26100.4349, below the 26100.9278 MXC starting build
+in the [official sandbox documentation](https://learn.chatgpt.com/docs/windows/windows-sandbox).
+No ACL mutation, saved mode change, app replacement or OS update was requested
+in this follow-up. Working native execution and new evaluation authorization
+remain prerequisites for fresh real-task comparisons.
+
 2026-10-15 named-file completion guard: three offline regressions reproduced
 advice-only executions being reported completed for root-level target.py,
 README.md and a Windows backslash path. The existing narrow named-file guard
