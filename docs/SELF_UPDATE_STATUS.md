@@ -4,6 +4,18 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 offline prompt decomposition used the official debug prompt-input
+command with the matched private alpha.20 runtime, no model calls and no global
+configuration changes. The same 129-character synthetic execution task rendered
+18,083 Direct versus 18,829 Layman text characters. A shared skills-instruction
+and catalog block accounts for 11,458 characters; the Layman contract plus newline
+adds exactly 746. Assertions confirmed all other rendered message text identical.
+These are character counts, not request token measurements or savings evidence.
+The [bounded diagnostic report](CONTEXT_DECOMPOSITION_2026-10-16.md) records
+limitations and the next hypothesis: investigate supported task-scoped skill
+discovery without dropping named capabilities, project instructions or safety.
+No production code changed; no redundant model trial or platform build ran.
+
 2026-10-16 single-sentence ablation completed 4/4 subscription executions,
 same Sol/medium model, matched runtime and identical task/quality conditions.
 All passed, but target-first wording increased bugfix tokens by 37.05% while
