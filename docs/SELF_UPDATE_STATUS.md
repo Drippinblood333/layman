@@ -4,6 +4,30 @@ Updated: 2026-10-15
 
 ## Verified checkpoint
 
+2026-10-15 code-mode host diagnosis: exact main source
+13803909ce4868772fbc8d5dd36082f55cd95566 also passed all ten main-push validation
+jobs in [CI 38758096646](https://github.com/Drippinblood333/layman/actions/runs/38758096646);
+publication was skipped. A separate one-call synthetic diagnostic under the
+renewed goal authorization returned needs_verification, no edits and failed
+function checks, with complete usage (49,042 input, 278 output). Its inspected
+synthetic answer identified missing codex-code-mode-host.exe, independently
+confirmed absent from the private CLI directory. The official package-layout
+source lists that component. The earlier three-component subset's native shell
+success was therefore not proof of complete model-tool packaging.
+The matching alpha.20 host archive was downloaded, checked against the official
+SHA-256 996b55d9f8361614be089cc86067b17a904a5d7fc6e8f207ab820068e9750b9c,
+and its OpenAI Authenticode signature was valid. It was added only to the private
+compatibility directory. The separate, at-most-one-call post-fix diagnostic then
+completed with only src/target.py changed, independent hidden-function/scope
+checks passed, three native commands exited zero and a native file-change item
+was observed. Usage was complete: 99,211 input (86,784 cached subset), 630 output,
+total 99,841. Two error items preceded successful native actions, so this single
+recovered task is not evidence of error-free operation. Both diagnostic ceilings
+are 1/1 consumed and their results remain separate; raw transcripts/answers are
+absent from result records. This establishes one synthetic model-tool delivery
+under the private matched runtime, not general stability, semantic acceptance
+or token savings. The original desktop installation was not replaced.
+
 2026-10-15 native recovery and delivery evidence follow-up: read-only Win32/NT
 handle checks succeeded as the directory owner, while the LocalSystem sandbox
 service lacked directory WRITE_DAC. A verified ACL backup preceded a root-only
@@ -15,8 +39,8 @@ lock failure and exposed the separate active-runtime sharing violation.
 The official 0.162.0-alpha.20 setup helper uses narrower file-handle access than
 the installed alpha.2 helper. Its GitHub archive digest and OpenAI Authenticode
 signature were verified. A private copied alpha.2 CLI plus that helper passed
-zero-model native execution and Python boundary checks. The complete official
-alpha.20 CLI/helper/runner bundle was subsequently downloaded with resume,
+zero-model native execution and Python boundary checks. The official
+alpha.20 CLI/helper/runner subset was subsequently downloaded with resume,
 verified against all three official archive digests and valid signatures, and
 passed the same workspace and read-only boundary checks: workspace writes
 allowed only in workspace mode, outside writes denied in both, dedicated sandbox
