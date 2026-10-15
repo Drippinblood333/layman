@@ -287,6 +287,8 @@ def event_metrics(stdout: str) -> dict[str, Any]:
         "unique_files_read": tracker.unique_files_read,
         "compactions": tracker.compactions,
         "command_failures": tracker.command_failures,
+        "command_output_chars": tracker.command_output_chars,
+        "command_outputs_observed": tracker.command_outputs_observed,
     }
 
 

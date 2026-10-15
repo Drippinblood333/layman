@@ -66,6 +66,28 @@ def test_command_failures_use_only_completed_envelope_and_deduplicate():
     assert tracker.command_failures == 1
 
 
+def test_command_output_sizes_use_completed_native_metadata_without_retaining_text():
+    tracker = EventBudgetTracker()
+    item = {"id": "cmd-output", "type": "command_execution", "exit_code": 0,
+            "aggregated_output": "private-output中"}
+    tracker.consume(json.dumps({"type": "item.updated", "item": item}))
+    assert tracker.command_outputs_observed == tracker.command_output_chars == 0
+    for _ in range(2):
+        tracker.consume(json.dumps({"type": "item.completed", "item": item}))
+    tracker.consume(json.dumps({"type": "item.completed", "item": {
+        "id": "empty", "type": "command_execution", "aggregated_output": ""}}))
+    for output in (None, {}, 12, False):
+        tracker.consume(json.dumps({"type": "item.completed", "item": {
+            "id": "missing", "type": "command_execution", "aggregated_output": output}}))
+    for outer in ("agent_message", "mcp_tool_call"):
+        tracker.consume(json.dumps({"type": "item.completed", "item": {
+            "type": outer, "result": item, "aggregated_output": "ignore-me"}}))
+    assert tracker.command_outputs_observed == 2
+    assert tracker.command_output_chars == len(item["aggregated_output"])
+    assert "private-output" not in repr(vars(tracker))
+    assert "ignore-me" not in repr(vars(tracker))
+
+
 def test_file_change_action_counts_once_across_lifecycle():
     tracker = EventBudgetTracker()
     item = {"id": "patch-1", "type": "file_change", "status": "completed",
@@ -321,6 +343,8 @@ def test_streamed_named_file_completion_uses_observed_tool_metadata(
             returncode=0, stderr="", usage={"input_tokens": 10, "cached_input_tokens": 0, "output_tokens": 3, "reasoning_tokens": 0},
             usage_available=True, tool_calls=tool_calls, unique_files_read=0, compactions=0,
             command_failures=command_failures,
+            command_output_chars=tool_calls * 13,
+            command_outputs_observed=tool_calls,
         )
 
     monkeypatch.setattr("layman_router.plus_run.run_streaming_process", fake_stream)
@@ -329,6 +353,10 @@ def test_streamed_named_file_completion_uses_observed_tool_metadata(
     assert result["tool_calls"] == tool_calls
     assert result["command_failures"] == command_failures
     assert result["attempts"][0]["command_failures"] == command_failures
+    assert result["command_output_chars"] == tool_calls * 13
+    assert result["command_outputs_observed"] == tool_calls
+    assert result["attempts"][0]["command_output_chars"] == tool_calls * 13
+    assert result["attempts"][0]["command_outputs_observed"] == tool_calls
     assert len(executions) == 1
     assert result["usage"]["input_tokens"] == 10
 
@@ -617,6 +645,8 @@ def test_streaming_process_exports_only_numeric_command_failures(tmp_path: Path)
     )
     assert result.returncode == 0
     assert result.command_failures == 1
+    assert result.command_outputs_observed == 1
+    assert result.command_output_chars == len("private-output")
     assert result.stop_reason is None
     assert "private-command" not in repr(result)
     assert "private-output" not in repr(result)

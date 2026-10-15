@@ -4,6 +4,26 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 command-output observability batch: the previous offline checks were
+progress (new evidence ruled out blind prompt shortening and blanket skill
+suppression), but they cannot reconstruct internal request/history amplification.
+The production streaming tracker and buffered Direct parser now expose additive
+command_output_chars and command_outputs_observed counters from completed native
+command items only. Layman attempt totals and benchmark records preserve these
+numbers without storing output text. Missing output remains uncovered, not proof
+of zero output; MCP and other tool outputs are not included. No execution budgets,
+prompts, routing, permissions, output truncation or dependencies were changed.
+Two focused regressions failed on the pre-change implementation, then all 165
+scoped plus-run/plus-eval/token-benchmark tests passed (17.29s); scoped Ruff and
+git diff --check passed. Checks cover lifecycle/ID deduplication, empty/unknown
+output, Unicode character counts, nested-payload exclusion, streaming/result/
+attempt propagation and answer privacy. [Metric definitions and limits](BENCHMARKS.md#subscription-command-output-diagnostics)
+are documented. No model call or paid API was needed; no token benefit is claimed.
+Existing immutable trial records were not rewritten. This source batch is locally
+verified, not yet hosted-CI validated, installed or published. The next controlled
+quality-matched trial can now measure observed command-output volume in both arms
+instead of inferring it from tool counts. Broader goal gates remain open.
+
 2026-10-16 follow-up offline skill-control probe rejected blanket catalog
 suppression as a default optimization. In a new synthetic named-skill/AGENTS
 fixture, omitting skill instructions shortened rendered text but removed the

@@ -150,6 +150,8 @@ class StreamedProcessResult:
     compactions: int
     stop_reason: str | None = None
     command_failures: int = 0
+    command_output_chars: int = 0
+    command_outputs_observed: int = 0
 
 
 class EventBudgetTracker:
@@ -161,6 +163,9 @@ class EventBudgetTracker:
         self.tool_calls = 0
         self.compactions = 0
         self.command_failures = 0
+        self.command_output_chars = 0
+        self.command_outputs_observed = 0
+        self._output_command_ids: set[str] = set()
         self._failed_command_ids: set[str] = set()
         self._files: set[str] = set()
         self._tool_ids: set[str] = set()
@@ -180,6 +185,17 @@ class EventBudgetTracker:
         if isinstance(event, dict) and event.get("type") == "item.completed":
             item = event.get("item")
             if isinstance(item, dict) and item.get("type") == "command_execution":
+                # Count the CLI's observed output text, not tokens or recursive
+                # payloads. Missing output is unknown; an empty string is observed.
+                output = item.get("aggregated_output")
+                identifier = item.get("id")
+                if isinstance(output, str):
+                    identified = isinstance(identifier, str) and bool(identifier)
+                    if not identified or identifier not in self._output_command_ids:
+                        self.command_output_chars += len(output)
+                        self.command_outputs_observed += 1
+                        if identified:
+                            self._output_command_ids.add(identifier)
                 code = item.get("exit_code")
                 if isinstance(code, int) and not isinstance(code, bool) and code != 0:
                     identifier = item.get("id")
@@ -360,6 +376,8 @@ def _consume_bound_process(
         unique_files_read=tracker.unique_files_read,
         compactions=tracker.compactions,
         command_failures=tracker.command_failures,
+        command_output_chars=tracker.command_output_chars,
+        command_outputs_observed=tracker.command_outputs_observed,
         stop_reason=stop_reason,
     )
 

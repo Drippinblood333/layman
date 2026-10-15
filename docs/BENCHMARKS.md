@@ -1,5 +1,25 @@
 # Cost, quality and routing benchmarks
 
+## Subscription command-output diagnostics
+
+The streamed Layman runner and buffered Direct runner expose two additive numeric
+fields: `command_output_chars` (Unicode characters in native completed command
+items' string `aggregated_output`) and `command_outputs_observed` (number of such
+outputs, including empty strings). Repeated completed items with the same nonempty
+string command ID count once. Items without usable IDs cannot be deduplicated.
+Started/updated items, nested tool results, assistant text and non-string or absent
+outputs are excluded. Only lengths and counts are returned; no output text or
+command arguments are added to records. Both fields also propagate through Layman
+attempts and synthetic benchmark records.
+
+These fields help investigate large tool results, not measure per-request token
+growth. Zero observed outputs means no size coverage, not proof of no output.
+Older records without these fields are unknown, not zero. CLI output may already
+be truncated; MCP/file/search outputs and internal model requests are not covered.
+The official [JSONL event contract](https://learn.chatgpt.com/docs/non-interactive-mode#make-output-machine-readable)
+provides completed-turn usage; do not infer a per-model-request usage trace from
+tool counts or output characters. No savings claim follows from these diagnostics.
+
 ## Lossless repeated tool output (offline only)
 
 The [RTK strategy](https://github.com/rtk-ai/rtk) of folding repeated log lines with counts informed an original reversible Python encoder; no upstream source or executable is bundled. Run the zero-call regression measurement with:

@@ -289,7 +289,10 @@ def run_plus_task(
     answer = ""
     usage = {key: 0 for key in PLUS_USAGE_KEYS}
     usage_incomplete = False
-    aggregate_metrics = {"tool_calls": 0, "unique_files_read": 0, "compactions": 0, "command_failures": 0}
+    aggregate_metrics = {
+        "tool_calls": 0, "unique_files_read": 0, "compactions": 0, "command_failures": 0,
+        "command_output_chars": 0, "command_outputs_observed": 0,
+    }
     status = "failed"
     error_category: str | None = None
     final_tier = selected
@@ -365,6 +368,8 @@ def run_plus_task(
                     "unique_files_read": streamed.unique_files_read,
                     "compactions": streamed.compactions,
                     "command_failures": streamed.command_failures,
+                    "command_output_chars": streamed.command_output_chars,
+                    "command_outputs_observed": streamed.command_outputs_observed,
                 }
                 stop_reason = streamed.stop_reason
             else:

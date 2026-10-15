@@ -20,10 +20,22 @@ from layman_router.plus_eval import (
 )
 
 
+def test_buffered_output_sizes_match_streamed_numeric_metadata():
+    event = json.dumps({"type": "item.completed", "item": {
+        "id": "cmd-output", "type": "command_execution", "aggregated_output": "private-output中"}})
+    metrics = event_metrics(event + "\n" + event)
+    assert metrics["command_output_chars"] == len("private-output中")
+    assert metrics["command_outputs_observed"] == 1
+    assert "private-output" not in json.dumps(metrics)
+
+
 def test_buffered_event_metrics_deduplicate_started_and_completed_operations():
     item = {"id": "cmd-1", "type": "command_execution", "command": "Get-Content src/target.py"}
     events = "\n".join(json.dumps({"type": kind, "item": item}) for kind in ("item.started", "item.completed"))
-    assert event_metrics(events) == {"tool_calls": 1, "unique_files_read": 1, "compactions": 0, "command_failures": 0}
+    assert event_metrics(events) == {
+        "tool_calls": 1, "unique_files_read": 1, "compactions": 0, "command_failures": 0,
+        "command_output_chars": 0, "command_outputs_observed": 0,
+    }
 
 
 def test_release_plan_is_eighteen_cases_and_thirty_six_calls(router_config):

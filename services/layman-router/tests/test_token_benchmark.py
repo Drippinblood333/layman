@@ -509,9 +509,12 @@ def test_public_record_never_contains_answer_text():
     record = _public_record(
         case,
         "layman",
-        {"status": "completed", "usage": {"input_tokens": 10, "output_tokens": 2}, "answer": "private answer"},
+        {"status": "completed", "usage": {"input_tokens": 10, "output_tokens": 2}, "answer": "private answer",
+         "command_output_chars": 123, "command_outputs_observed": 2},
         {"passed": True, "quality_ok": True, "scope_ok": True, "changed_files": [], "validation_reason": "ok"},
     )
     assert "answer" not in record
     assert "private answer" not in str(record)
     assert record["answer_chars"] == len("private answer")
+    assert record["command_output_chars"] == 123
+    assert record["command_outputs_observed"] == 2
