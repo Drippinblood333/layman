@@ -4,6 +4,48 @@ Updated: 2026-10-15
 
 ## Verified checkpoint
 
+2026-10-15 native recovery and delivery evidence follow-up: read-only Win32/NT
+handle checks succeeded as the directory owner, while the LocalSystem sandbox
+service lacked directory WRITE_DAC. A verified ACL backup preceded a root-only
+SYSTEM ChangePermissions addition on .sandbox-bin; no sandbox-user/Everyone
+access was expanded. Native provisioning rewrote that directory DACL back to
+its original value, verified against the backup. This removed the provisioning
+lock failure and exposed the separate active-runtime sharing violation.
+
+The official 0.162.0-alpha.20 setup helper uses narrower file-handle access than
+the installed alpha.2 helper. Its GitHub archive digest and OpenAI Authenticode
+signature were verified. A private copied alpha.2 CLI plus that helper passed
+zero-model native execution and Python boundary checks. The complete official
+alpha.20 CLI/helper/runner bundle was subsequently downloaded with resume,
+verified against all three official archive digests and valid signatures, and
+passed the same workspace and read-only boundary checks: workspace writes
+allowed only in workspace mode, outside writes denied in both, dedicated sandbox
+account observed, both exit codes zero. Desktop/installed CLI executables were
+not replaced. Native provisioning did update helper caches; this is not a claim
+of a clean system rollback or that the existing desktop runtime is repaired.
+The verified alternate CLI remains private and is selectable with --codex-path.
+
+Under renewed broad task/discretionary-limit authorization, the assistant chose
+a separate two-execution ceiling for one predeclared feature-03 pair. Its first
+Layman invocation (private mixed runtime, before the source fix below) reported
+completed, but changed no files and failed independent function checks. Usage
+was complete: 67,335 input tokens (57,728 cached subset), 426 output, total
+67,761; one tool action was observed. The batch stopped at that first failure,
+1/2 used; Direct was not launched and the unspent call is not an automatic retry.
+Old journals remain unchanged. No paired saving or model-task recovery is proved.
+
+Two before-fix offline regressions reproduced the completion-report gap. For
+explicit named-file modification tasks, execution now compares transient content
+fingerprints before and after tool use. Unchanged named files yield
+needs_verification / requested_files_unchanged without retry; changed MCP-written
+files still pass this narrow observation gate. Explicit read-only requests are
+unchanged. Fingerprinting is limited to twenty named workspace files, at most
+1 MiB each; unknown/oversized/outside coverage cannot establish no change. No
+file contents or fingerprints are added to telemetry. This is not a semantic
+correctness test, and an intentional no-op may require caller verification.
+All 81 Plus-run tests, the CLI/token-benchmark suites, scoped Ruff and whitespace
+checks pass locally. Hosted validation of this source follow-up is pending.
+
 2026-10-15 artifact-transfer maintenance: upstream
 [upload-artifact v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2)
 and [download-artifact v8.0.2](https://github.com/actions/download-artifact/releases/tag/v8.0.2)

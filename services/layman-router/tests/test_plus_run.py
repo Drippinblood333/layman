@@ -20,6 +20,7 @@ from layman_router.models import RouteTier
 from layman_router.plus_run import (
     POLICIES,
     _execution_contract,
+    _named_file_snapshot,
     plus_task_plan,
     run_plus_task,
 )
@@ -115,6 +116,9 @@ def test_patch_only_execution_is_not_mislabelled_as_no_tool_action(tmp_path):
         if command[1:3] == ["login", "status"]:
             return subprocess.CompletedProcess(command, 0, stdout="Logged in using ChatGPT", stderr="")
         Path(command[command.index("--output-last-message") + 1]).write_text("modified", encoding="utf-8")
+        target = tmp_path / "src" / "target.py"
+        target.parent.mkdir(exist_ok=True)
+        target.write_text("modified", encoding="utf-8")
         events = [
             {"type": "item.completed", "item": {"id": "patch-1", "type": "file_change",
              "status": "completed", "changes": [{"path": "src/target.py", "kind": "update"}]}},
@@ -125,6 +129,31 @@ def test_patch_only_execution_is_not_mislabelled_as_no_tool_action(tmp_path):
     result = run_plus_task("修复 src/target.py 的顺序", cwd=tmp_path, codex_path=sys.executable, runner=runner)
     assert result["tool_calls"] == 1
     assert result["error_category"] is None
+
+
+@pytest.mark.parametrize("changed", [False, True])
+@pytest.mark.parametrize("existing", [False, True])
+def test_mcp_action_without_named_file_changes_needs_verification(tmp_path, changed, existing):
+    target = tmp_path / "target.py"
+    if existing:
+        target.write_text("original", encoding="utf-8")
+
+    def runner(command, **kwargs):
+        if command[1:3] == ["login", "status"]:
+            return subprocess.CompletedProcess(command, 0, stdout="Logged in using ChatGPT", stderr="")
+        if changed:
+            target.write_text("changed", encoding="utf-8")
+        Path(command[command.index("--output-last-message") + 1]).write_text("done", encoding="utf-8")
+        events = [
+            {"type": "item.completed", "item": {"type": "mcp_tool_call", "id": "one", "result": {}}},
+            {"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}},
+        ]
+        return subprocess.CompletedProcess(command, 0, stdout="\n".join(map(json.dumps, events)), stderr="")
+
+    result = run_plus_task("修复 target.py 中 unique 的顺序", cwd=tmp_path, codex_path=sys.executable, runner=runner)
+    assert result["status"] == ("completed" if changed else "needs_verification")
+    assert result["error_category"] == (None if changed else "requested_files_unchanged")
+    assert len(result["attempts"]) == 1
 
 
 @pytest.mark.parametrize("recovered", [False, True])
@@ -139,6 +168,9 @@ def test_only_failed_commands_are_not_delivered_but_recovery_is_not_blocked(tmp_
         events = [{"type": "item.completed", "item": {
             "id": "cmd", "type": "command_execution", "status": "failed", "exit_code": 1}}]
         if recovered:
+            target = tmp_path / "src" / "target.py"
+            target.parent.mkdir(exist_ok=True)
+            target.write_text("fixed", encoding="utf-8")
             events.append({"type": "item.completed", "item": {
                 "id": "patch", "type": "file_change", "status": "completed"}})
         events.append({"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}})
@@ -280,6 +312,10 @@ def test_streamed_named_file_completion_uses_observed_tool_metadata(
     def fake_stream(command, **kwargs):
         assert kwargs["input_text"] == task
         executions.append(command)
+        if expected == "completed":
+            target = tmp_path / "src" / "target.py"
+            target.parent.mkdir(exist_ok=True)
+            target.write_text("fixed", encoding="utf-8")
         Path(command[command.index("--output-last-message") + 1]).write_text("response", encoding="utf-8")
         return StreamedProcessResult(
             returncode=0, stderr="", usage={"input_tokens": 10, "cached_input_tokens": 0, "output_tokens": 3, "reasoning_tokens": 0},
@@ -295,6 +331,15 @@ def test_streamed_named_file_completion_uses_observed_tool_metadata(
     assert result["attempts"][0]["command_failures"] == command_failures
     assert len(executions) == 1
     assert result["usage"]["input_tokens"] == 10
+
+
+def test_named_file_snapshot_is_bounded_and_cannot_inspect_outside_workspace(tmp_path):
+    assert _named_file_snapshot("修复 ../outside.py", tmp_path) is None
+    target = tmp_path / "large.py"
+    target.write_bytes(b"x" * 1_048_577)
+    assert _named_file_snapshot("修复 large.py", tmp_path) is None
+    many = "修复 " + " ".join(f"target{i}.py" for i in range(21))
+    assert _named_file_snapshot(many, tmp_path) is None
 
 
 def test_plan_uses_deep_read_only_for_high_risk(router_config):

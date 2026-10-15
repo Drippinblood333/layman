@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -58,6 +59,33 @@ POLICIES = {
     RouteTier.DEEP: TierExecutionPolicy(10, 20, 60, 6_000, 2_500, 64_000, "medium"),
 }
 PLUS_USAGE_KEYS = USAGE_KEYS
+_NAMED_FILE_PATTERN = re.compile(
+    r"(?:^|[\s`])((?:[\w.-]+[/\\])*[\w.-]+\.(?:py|js|ts|tsx|go|rs|java|md|toml|yaml|yml))\b"
+)
+
+
+def _named_file_snapshot(task: str, workspace: Path) -> dict[str, str] | None:
+    """Bounded, transient fingerprints; unknown coverage cannot prove no change."""
+    names = {match.group(1) for match in _NAMED_FILE_PATTERN.finditer(task)}
+    if not names or len(names) > 20:
+        return None
+    snapshot = {}
+    try:
+        for name in names:
+            path = workspace.joinpath(*re.split(r"[/\\]", name)).resolve()
+            if not path.is_relative_to(workspace):
+                return None
+            if not path.exists():
+                snapshot[name] = "missing"
+                continue
+            with path.open("rb") as stream:
+                data = stream.read(1_048_577)
+            if len(data) > 1_048_576:
+                return None
+            snapshot[name] = hashlib.sha256(data).hexdigest()
+    except (OSError, ValueError, RuntimeError):
+        return None
+    return snapshot
 
 
 def _toml_string(value: str) -> str:
@@ -248,6 +276,13 @@ def run_plus_task(
     if not login["available"] or not login["chatgpt_login"]:
         raise RuntimeError("Codex must be logged in with ChatGPT; refusing API-key billing")
 
+    expects_file_change = (
+        preview["sandbox"] == "workspace-write"
+        and preview["task_type"] in {TaskType.NORMAL_CODING.value, TaskType.TESTING.value, TaskType.DOCUMENTATION.value}
+        and not _completion_read_only_intent(task)
+        and bool(_NAMED_FILE_PATTERN.search(task))
+    )
+    files_before = _named_file_snapshot(task, workspace) if expects_file_change else None
     selected = RouteTier(preview["route_tier"])
     started = time.perf_counter()
     attempts: list[dict[str, Any]] = []
@@ -421,10 +456,7 @@ def run_plus_task(
     )
     if (
         status == "completed"
-        and preview["sandbox"] == "workspace-write"
-        and preview["task_type"] in {TaskType.NORMAL_CODING.value, TaskType.TESTING.value, TaskType.DOCUMENTATION.value}
-        and not _completion_read_only_intent(task)
-        and re.search(r"(?:^|[\s`])(?:[\w.-]+[/\\])*[\w.-]+\.(?:py|js|ts|tsx|go|rs|java|md|toml|yaml|yml)\b", task)
+        and expects_file_change
         and (aggregate_metrics["tool_calls"] == 0 or only_failed_commands)
     ):
         status = "needs_verification"
@@ -434,6 +466,10 @@ def run_plus_task(
         else:
             error_category = "workspace_execution_not_observed"
             answer = "未观察到指定文件的工具操作，不能确认任务已完成；未自动重试。\n" + answer
+    if status == "completed" and files_before is not None and _named_file_snapshot(task, workspace) == files_before:
+        status = "needs_verification"
+        error_category = "requested_files_unchanged"
+        answer = "指定文件未观察到内容变化，不能确认修改已交付；未自动重试。\n" + answer
     return {
         "mode": "run",
         "status": status,
