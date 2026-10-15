@@ -223,6 +223,11 @@ def test_vague_dry_run_reports_block_without_model_execution(tmp_path):
 
 @pytest.mark.parametrize("task,expected", [
     ("修复 src/target.py 中 unique 的顺序", "needs_verification"),
+    ("修复 target.py 中 unique 的顺序", "needs_verification"),
+    ("更新 README.md 中的安装命令", "needs_verification"),
+    (r"修复 src\target.py 中 unique 的顺序", "needs_verification"),
+    ("解释 target.py 的代码，不要修改文件", "completed"),
+    (r"只分析 src\target.py 的修复方案，不要修改文件", "completed"),
     ("修复 src/target.py 中 unique 的顺序，不要修改接口。", "needs_verification"),
     ("修复 src/target.py 中 unique 的顺序，不要修改其他文件。", "needs_verification"),
     ("Fix src/target.py; do not change the API.", "needs_verification"),

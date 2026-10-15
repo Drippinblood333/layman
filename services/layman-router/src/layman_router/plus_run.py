@@ -424,7 +424,7 @@ def run_plus_task(
         and preview["sandbox"] == "workspace-write"
         and preview["task_type"] in {TaskType.NORMAL_CODING.value, TaskType.TESTING.value, TaskType.DOCUMENTATION.value}
         and not _completion_read_only_intent(task)
-        and re.search(r"(?:^|[\s`])(?:[\w.-]+/)+[\w.-]+\.(?:py|js|ts|tsx|go|rs|java|md|toml|yaml|yml)\b", task)
+        and re.search(r"(?:^|[\s`])(?:[\w.-]+[/\\])*[\w.-]+\.(?:py|js|ts|tsx|go|rs|java|md|toml|yaml|yml)\b", task)
         and (aggregate_metrics["tool_calls"] == 0 or only_failed_commands)
     ):
         status = "needs_verification"

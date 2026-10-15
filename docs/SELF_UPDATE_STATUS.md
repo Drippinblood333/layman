@@ -1,8 +1,42 @@
 # Project update status
 
-Updated: 2026-10-12
+Updated: 2026-10-15
 
 ## Verified checkpoint
+
+2026-10-15 named-file completion guard: three offline regressions reproduced
+advice-only executions being reported completed for root-level target.py,
+README.md and a Windows backslash path. The existing narrow named-file guard
+now recognizes root files and both path separators. Requests explicitly asking
+for read-only analysis remain completed, and the unchanged original request is
+still passed to execution. Five added cases cover these failures and read-only
+counterexamples. All 76 Plus-run tests and scoped Ruff checks passed locally;
+git diff --check passed. Tests use controlled runners, not real model calls.
+This prevents these false completion reports; it does not prove edits or
+semantic correctness whenever a tool was observed, nor measure token savings.
+Hosted validation of this follow-up remains pending. The last verified hosted
+code remains 05b9ce2512e0f8b39de74863dffd2e27cdfca31b / CI 38207757196.
+
+2026-10-12 post-restart verification: the after-close helper terminated with
+file_still_locked; setup and probe exit codes were null, so neither operation
+ran. After the user reported restarting Codex, an ordinary-session, zero-model
+managed-workspace printing probe still failed. The fresh dated log identified
+error 32 on the running node_repl.exe. Child-only notify/MCP overrides and the
+private stable 0.162.1 printing probe did not resolve the failure. These checks
+do not establish that the user failed to exit the app; runtime locks recur
+after startup. The earlier waiting_for_codex_exit checkpoint below is historical,
+and there is no live repair helper now.
+
+The observations match existing upstream reports, including
+[runtime sharing violations](https://github.com/openai/codex/issues/52488) and
+[access-mask investigation](https://github.com/openai/codex/issues/51613).
+Those reports are not a maintainer-confirmed repair on this machine. The app's
+information-only update check returned unavailable because Store eligibility
+checking may download updates; it did not confirm up-to-date status or install
+anything. Repeating restarts or model trials is not justified by these results.
+No runtime ACL workaround, sandbox bypass, application downgrade, OS update,
+model call or publication occurred in this follow-up. Native execution remains
+an open gate; a supported app update requires fresh ordinary-session validation.
 
 2026-10-12 user-authorized sandbox maintenance: the Codex configuration was
 backed up and hash-checked before an administrator helper ran official elevated
