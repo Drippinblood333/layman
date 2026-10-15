@@ -4,6 +4,17 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 single-sentence ablation completed 4/4 subscription executions,
+same Sol/medium model, matched runtime and identical task/quality conditions.
+All passed, but target-first wording increased bugfix tokens by 37.05% while
+reducing feature tokens by 43.79%. Aggregate reduction 8.48% does not satisfy
+the predeclared requirement that both candidates improve. The candidate was
+rejected; no production prompt, route, dependency, installation or release was
+changed. The [full control report](TARGET_FIRST_ABLATION_2026-10-16.md) preserves
+all results and limitations. The next step is an offline decomposition of
+actual context/process overhead, not further blind wording changes. No default
+change means no redundant platform build/test cycle was launched.
+
 2026-10-15 matched-runtime pilot completed 6/6 subscription executions with the
 full matching private alpha.20 runtime. All three preselected Direct/Layman pairs
 passed the same function/content and scope checks with complete usage, no model
