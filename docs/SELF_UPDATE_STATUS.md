@@ -4,6 +4,21 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 native-instruction hosted gate: [CI 38872715414](https://github.com/Drippinblood333/layman/actions/runs/38872715414)
+completed SUCCESS without retries on exact commit
+d00109d0c960a3e501095aba3592bad24d5b2810. All ten validation jobs passed,
+including the three OS test suites, five standalone targets, Docker and combined
+release assets; publish skipped. This also gives hosted coverage to the previously
+local deferred-tool compatibility regressions. No timeout, safety floor or test
+assertion was relaxed during this verification batch. The branch watch exited zero.
+Fetched main and confirmed ancestry, then fast-forwarded that same verified SHA
+non-force from 0cecd2b to main; remote lookup confirms d00109d. [Automatic main CI 38873218824](https://github.com/Drippinblood333/layman/actions/runs/38873218824)
+was observed queued on the same SHA and is not yet claimed green. Continue that
+run rather than dispatching another. Source promotion is not an installed update
+or a release. No model execution, paid API, new dependency, tag or publication
+occurred in this batch. The configuration-correctness change does not establish
+live task quality or token savings; broader objective gates remain open.
+
 2026-10-16 developer-instruction preservation fix: a synthetic native render
 proved the unconditional Layman developer_instructions override removed an
 existing user constraint. The executor now uses a bounded native config/read
