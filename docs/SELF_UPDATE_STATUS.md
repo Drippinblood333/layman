@@ -4,6 +4,24 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 verified source promotion: CI 38769479052 attempt 2 is terminal
+SUCCESS for exact SHA 5d400ce2a428534a78acdd9799462026a7091f5b. All ten validation
+jobs succeeded and publish was skipped. Windows retry logs confirm 489 service
+tests passed in 55.33s and 41 adaptive-reasoning tests passed. Previously successful
+jobs retain their original timestamps; the failed-job-only retry did not repeat
+those eight builds/tests. Attempt 1's legacy-PowerShell 30-second timeout remains
+recorded and unexplained, not reclassified as a repaired product defect.
+After rechecking the remote and verifying ancestry, that exact validated SHA was
+pushed non-force as a fast-forward from remote main 1380390. ls-remote confirms
+main now equals 5d400ce. No newer source was substituted, no bypass warning was
+reported, and no release/tag or installed copy was changed.
+The existing push trigger automatically started [main CI 38862116747](https://github.com/Drippinblood333/layman/actions/runs/38862116747)
+on the same SHA; it is confirmed in progress, not yet claimed green. Observe this
+specific run without dispatching duplicates. Current source availability is
+distinct from binary publication or installed-version updates. Evidence-only
+local commits after 5d400ce are not claimed to have that hosted validation. No
+model execution or extra dependency change was needed for this batch.
+
 2026-10-16 CI failure audit: run 38769479052 attempt 1 is terminal FAILURE,
 not a verified pass. Eight validation jobs succeeded; Windows full pytest had
 488 passed and one failure: legacy PowerShell clean_install exceeded the existing
