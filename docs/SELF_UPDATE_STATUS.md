@@ -4,6 +4,25 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 loopback request-shape probe completed with zero model inference.
+Three diagnostic snapshots each sent one Direct and one Layman request to a local
+synthetic Responses server with a verified dummy bearer credential; no upstream
+model endpoint was used. Final request bodies measured 89,646/90,423 bytes and
+contained seven input items each. Top-level tools was absent, but additional_tools
+contained four namespaces / 13 definitions, 30,986 canonical JSON bytes in both
+arms, with identical tool-array hashes. Non-treatment message content hashes also
+matched; transient item IDs are not treated as content changes. This explains why
+top-level-only tool counting is incomplete, not actual token usage or savings.
+The [full scope/limitations report](REQUEST_SHAPE_PROBE_2026-10-16.md) records
+startup warning/error categories, custom-provider/read-only capability differences,
+and the absence of upstream availability or complete-MCP evidence. Global config
+hash stayed unchanged; no raw request/credential/log text was retained. Strengthened
+the existing additional_tools mock fixture to cover the observed nested namespace
+shape (one affected test passed, 48 deselected; Ruff passed), without adding a new
+test or production behavior. All local servers/CLI processes terminated. No paid
+API, real model execution, default changes, installation replacement or release.
+Do not infer a 34.27% token benefit from the tool-array byte share.
+
 2026-10-16 lighter-model pair completed its separate 2/2 subscription execution
 ceiling. A new first_duplicate synthetic task and 2,807-input value/non-mutation
 validator were fixed before outcomes; original source failed and reference passed

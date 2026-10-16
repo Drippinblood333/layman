@@ -81,7 +81,9 @@ async def test_client_tool_search_roundtrip_and_additional_tool_order_are_opaque
     discovery = {"type": "tool_search_output", "execution": "client", "call_id": "call_fixture",
                  "status": "completed", "tools": [function]}
     additional = {"type": "additional_tools", "role": "developer", "tools": [
-        {"type": "function", "name": "shipping_status", "description": marker, "parameters": schema},
+        {"type": "namespace", "name": "shipping_extra", "description": marker, "tools": [
+            {"type": "function", "name": "shipping_status", "description": marker, "parameters": schema},
+        ]},
     ]}
     history = [{"role": "user", "content": "Find the shipping ETA."}, call, discovery, additional]
     seen = []
