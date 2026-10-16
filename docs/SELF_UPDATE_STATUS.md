@@ -4,6 +4,23 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 CI failure audit: run 38769479052 attempt 1 is terminal FAILURE,
+not a verified pass. Eight validation jobs succeeded; Windows full pytest had
+488 passed and one failure: legacy PowerShell clean_install exceeded the existing
+30-second subprocess limit. release-assets and publish were skipped. No functional
+assertion established an installer defect; a hosted transient is plausible but
+not proven. The exact failing clean-install and companion rollback tests passed
+locally unchanged (2 passed, 7 deselected, Python 3.14.3; 2.02s total), which does
+not reproduce the hosted Python 3.11.9 environment or erase the failure.
+One bounded failed-job-only rerun was requested on the same SHA/run ID. Attempt 2
+is confirmed in progress on Windows dependency installation; the eight successful
+jobs were not redundantly rerun. Do not automatically retry again, increase test
+timeouts, skip assertions or declare fixed without inspecting the result. The old
+attempt-1 watch process exited 1 and is closed; observe GitHub run ID/attempt 2,
+not that terminal process. No production code, main branch, dependency, installed
+runtime or release changed; overall goal remains active. This checkpoint records
+the discovered failure and bounded diagnosis, not token savings or release readiness.
+
 2026-10-16 hosted verification dispatched: clean source checkpoint
 5d400ce2a428534a78acdd9799462026a7091f5b (including metric implementation 1119666)
 passed release secret scanning and diff whitespace checks, then was pushed without
