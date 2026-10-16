@@ -4,6 +4,24 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 first-install hosted gate: [CI 38864556854](https://github.com/Drippinblood333/layman/actions/runs/38864556854)
+completed SUCCESS without retries on exact source
+f6c4193231710948f45fa1b09d7efa4f3aaa5132. All ten validation jobs passed,
+including Windows/macOS/Linux test suites, five standalone platforms, Docker and
+combined asset validation; publish was skipped. The new POSIX release-lookup
+regression is covered by the Linux/macOS suites, supplementing the local native
+PowerShell checks and POSIX syntax check. No timeout was relaxed or test skipped
+to obtain this result.
+After fetching main and confirming ancestry, that same validated SHA was pushed
+non-force from 5d400ce to main; remote lookup confirms f6c4193. The README/source
+install defaults and release-lookup guidance are now public source, not a released
+binary or an installed-copy update. [Automatic main CI 38865111555](https://github.com/Drippinblood333/layman/actions/runs/38865111555)
+was observed queued on the same SHA. It has not yet been claimed successful;
+continue observing that run rather than dispatching duplicates. The CLI watch
+for the validation branch exited zero and is terminal. This batch used no model
+execution, API billing, dependency changes, tag or formal release. No token or
+installed-size benefit is inferred from the installation/documentation change.
+
 2026-10-16 first-install entry batch: live GitHub releases REST listing returned
 an empty array. README already mentioned the missing target, but only after its
 copyable one-line commands, and source installation defaulted to [dev] tooling.
