@@ -4,6 +4,24 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 continuation guard hosted gate: [CI 38865747509](https://github.com/Drippinblood333/layman/actions/runs/38865747509)
+completed SUCCESS without retries on exact commit
+0cecd2b30a9c10dc63e1027691e39eaa3ed8a05e. All ten validation jobs succeeded,
+including three OS suites, five standalone targets, Docker and combined assets;
+publish was skipped. The scoped clarification change therefore has cross-platform
+verification in addition to its 170 local related tests. The branch CLI watch
+exited zero and is terminal. No test/budget/safety setting was relaxed.
+Fetched main, checked ancestry and fast-forwarded that same verified commit
+non-force from f6c4193; remote lookup confirms main equals 0cecd2b. Initial run
+listing still showed the previous SHA immediately after push, so it was not used
+as evidence for the new commit. A subsequent commit-filtered lookup confirmed
+[automatic main CI 38866200381](https://github.com/Drippinblood333/layman/actions/runs/38866200381)
+in progress on 0cecd2b. Observe this run; no duplicate dispatch is needed. Source
+promotion is not an installed-copy update or a formal release. No model calls,
+paid API, extra dependencies, tag or release were part of this batch. The guard
+prevents only demonstrated context-free dispatch, not measured total-token waste;
+fresh quality-matched savings and broader public-release gates remain open.
+
 2026-10-16 context-only continuation batch: repository evidence shows each new
 Layman execution receives the supplied task text, not the caller's prior task
 conversation. The offline wording guard previously allowed bare "继续"/"continue"
