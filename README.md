@@ -36,6 +36,10 @@ A ChatGPT subscription does not include API billing. Layman never retries a Plus
 
 ## Install
 
+No public release exists yet. Use [source installation](docs/INSTALL.md#source-installation)
+for now; the standalone commands below require a published release with verified
+artifacts and intentionally have no installable target yet.
+
 Windows PowerShell:
 
 ```powershell
@@ -48,7 +52,7 @@ macOS or Linux:
 curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install.sh | sh
 ```
 
-The standalone installer does not require Python. Until a GitHub release with verified artifacts is published, contributors should use the [source installation](docs/INSTALL.md#source-installation); the one-line commands above intentionally have no installable target yet.
+The standalone installer does not require Python.
 
 ## First use
 

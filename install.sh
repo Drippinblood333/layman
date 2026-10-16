@@ -17,7 +17,11 @@ esac
 asset="layman-${os}-${arch}.zip"
 api="https://api.github.com/repos/${REPOSITORY}/releases"
 if [ "$VERSION" = latest ]; then
-  latest=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/${REPOSITORY}/releases/latest")
+  if ! latest=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/${REPOSITORY}/releases/latest"); then
+    echo 'Could not resolve the latest release. Check release availability and GitHub/network access.' >&2
+    echo "Source installation: https://github.com/${REPOSITORY}/blob/main/docs/INSTALL.md#source-installation" >&2
+    exit 1
+  fi
   VERSION=${latest##*/}
 fi
 url="https://github.com/${REPOSITORY}/releases/download/${VERSION}/${asset}"

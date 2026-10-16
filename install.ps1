@@ -12,7 +12,11 @@ $releaseUrl = if ($Version -eq 'latest') {
 } else {
   "https://api.github.com/repos/$Repository/releases/tags/$Version"
 }
-$release = Invoke-RestMethod -Headers @{ 'User-Agent' = 'Layman-Installer' } -Uri $releaseUrl
+try {
+  $release = Invoke-RestMethod -Headers @{ 'User-Agent' = 'Layman-Installer' } -Uri $releaseUrl
+} catch {
+  throw "Could not load release metadata for '$Repository' ($Version). Check release availability and GitHub/network access. Source installation: https://github.com/$Repository/blob/main/docs/INSTALL.md#source-installation . Original error: $($_.Exception.Message)"
+}
 $asset = $release.assets | Where-Object { $_.name -eq $assetName } | Select-Object -First 1
 if (-not $asset) { throw "Release asset not found: $assetName" }
 $checksumsAsset = $release.assets | Where-Object { $_.name -eq 'SHA256SUMS.txt' } | Select-Object -First 1

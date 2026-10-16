@@ -32,6 +32,9 @@ ChatGPT 订阅不等于 API 额度。Plus 任务失败时，Layman 不会自动�
 
 ## 开始使用
 
+目前尚无公开发布包，请先按[源码安装](docs/INSTALL.md#source-installation)操作。
+普通使用只需运行依赖，不必安装测试、审计和打包工具；一键独立安装要等验证后的发布包上线。
+
 在 Codex 中直接说人话：
 
 ```text

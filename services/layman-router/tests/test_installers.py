@@ -14,6 +14,41 @@ ROOT = Path(__file__).resolve().parents[3]
 NOTICES = ("BUILD.json", "bundle-audit.json", "runtime-dependencies.json", "standalone-components.json", "THIRD_PARTY_NOTICES.md")
 
 
+@pytest.mark.parametrize("legacy", [False, True])
+def test_release_lookup_failure_explains_source_install_before_changes(tmp_path, legacy):
+    windows = os.name == "nt"
+    if legacy and not windows:
+        pytest.skip("Windows PowerShell regression")
+    if windows:
+        shell = shutil.which("powershell") if legacy else shutil.which("pwsh") or shutil.which("powershell")
+    else:
+        shell = shutil.which("sh")
+    if not shell:
+        pytest.skip("Native installer shell unavailable")
+    profile = tmp_path / "untouched-profile"
+    env = {key: value for key, value in os.environ.items() if key.casefold() != "psmodulepath"}
+    if windows:
+        env.update(LOCALAPPDATA=str(profile), LAYMAN_TEST_INSTALLER=str(ROOT / "install.ps1"))
+        command = [shell, "-NoProfile", "-NonInteractive", "-Command",
+                   ('function Invoke-RestMethod { throw "fixture release unavailable" }; '
+                    '& $env:LAYMAN_TEST_INSTALLER -NoSetup -NoPathUpdate')]
+    else:
+        mocks = tmp_path / "mocks"
+        mocks.mkdir()
+        curl = mocks / "curl"
+        curl.write_text("#!/bin/sh\nexit 22\n", encoding="utf-8")
+        curl.chmod(0o755)
+        env.update(HOME=str(profile), LAYMAN_VERSION="latest", PATH=str(mocks) + os.pathsep + env["PATH"])
+        command = [shell, str(ROOT / "install.sh")]
+    result = subprocess.run(command, env=env, capture_output=True, text=True, timeout=30, check=False)
+    assert result.returncode != 0
+    assert "source-installation" in result.stdout + result.stderr
+    if windows:
+        assert "fixture release unavailable" in result.stdout + result.stderr
+    assert not profile.exists()
+    assert "Installed Layman" not in result.stdout + result.stderr
+
+
 @pytest.mark.parametrize("missing", [None, "clean_install", "THIRD_PARTY_NOTICES.md", "THIRD_PARTY_LICENSES", "setup_failure", "locked_executable", "commit_failure"])
 def test_installer_preserves_notices_and_refuses_incomplete_package(tmp_path, missing):
     windows = os.name == "nt"

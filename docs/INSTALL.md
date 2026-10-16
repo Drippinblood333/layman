@@ -134,22 +134,25 @@ layman dashboard
 
 ## Source installation
 
-Python 3.11 or newer is required only for source development:
+Until a standalone release is available, use the source checkout with Python
+3.11 or newer. Ordinary use needs only the locked runtime dependencies, not the
+test, audit or packaging tools:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python -m pip install -e ".\services\layman-router[dev]"
+.\.venv\Scripts\python -m pip install --require-hashes -r .\services\layman-router\requirements.lock
+.\.venv\Scripts\python -m pip install --no-deps .\services\layman-router
+.\.venv\Scripts\python -m pip check
 .\.venv\Scripts\layman setup --mode auto
 ```
 
 On macOS/Linux, use `.venv/bin/python` and `.venv/bin/layman`.
 
-To reproduce the release runtime dependency set instead of resolving the compatible ranges again:
+Only contributors who need tests, audits or builds should additionally install
+the development tools:
 
 ```powershell
-python -m pip install --require-hashes -r .\services\layman-router\requirements.lock
-python -m pip install --no-deps .\services\layman-router
-python -m pip check
+.\.venv\Scripts\python -m pip install -e ".\services\layman-router[dev]"
 ```
 
 ## Upgrade and uninstall

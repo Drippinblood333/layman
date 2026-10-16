@@ -4,6 +4,24 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 first-install entry batch: live GitHub releases REST listing returned
+an empty array. README already mentioned the missing target, but only after its
+copyable one-line commands, and source installation defaulted to [dev] tooling.
+Moved the no-release/source-entry notice before the commands, added the Chinese
+entry notice, and made the ordinary source path use the hashed runtime lock plus
+--no-deps package install/pip check; developer extras now have a separate opt-in
+command. This removes unnecessary tools from the documented default, not a
+measured installed-byte or token reduction.
+PowerShell release-metadata lookup and POSIX latest-release resolution now fail
+with a source-install link and GitHub/network guidance before creating installation
+directories. PowerShell retains the underlying diagnostic; failure remains nonzero.
+Two new native-shell regressions failed before the fix; all 11 local installer
+cases then passed (10.72s). After a lint/readability adjustment and stronger error
+preservation assertion, the two affected regressions passed again. Scoped Ruff and
+diff checks passed. Local tests use isolated synthetic profiles, no model, network
+downloads or real installation replacement. POSIX runtime behavior and hosted CI
+for this source batch remain unverified; no release/tag or new dependencies.
+
 2026-10-16 main gate and downloaded-binary checkpoint: [main CI 38862116747](https://github.com/Drippinblood333/layman/actions/runs/38862116747)
 is terminal SUCCESS on 5d400ce2a428534a78acdd9799462026a7091f5b: ten validation
 jobs succeeded, publish skipped, with no manual retry of this main run. The prior
