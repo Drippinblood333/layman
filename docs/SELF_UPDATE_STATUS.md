@@ -4,6 +4,29 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 main gate and downloaded-binary checkpoint: [main CI 38862116747](https://github.com/Drippinblood333/layman/actions/runs/38862116747)
+is terminal SUCCESS on 5d400ce2a428534a78acdd9799462026a7091f5b: ten validation
+jobs succeeded, publish skipped, with no manual retry of this main run. The prior
+branch run's initial PowerShell timeout remains a separate historical failure.
+Downloaded the verified branch run's layman-windows-x64 artifact (ID 11989234407,
+17,406,547 archive bytes) into an ignored fresh directory. Download session exited
+zero. Its executable is 17,264,704 bytes, SHA-256
+b24271f03e35e1782c0a88d497df13c1a303c5e252133a7bdbb70532bbed24f1.
+BUILD.json's executable and three component-manifest digests all match local
+files. The artifact was selected from run 38769479052's artifact listing; individual
+artifact metadata retrieval subsequently returned EOF twice, so no independent
+GitHub archive-digest verification or embedded source-commit claim is made.
+Existing smoke-standalone.py passed against this downloaded binary in isolated
+Chinese/space-containing temporary homes: help, Plus setup with plugin skipped,
+structured missing-login diagnosis, read-only plan, execution dry run, local HTTP
+health, MCP discovery/plan/project inspection, managed-server cleanup, and scoped
+uninstall/purge. This is local binary/configuration smoke, not a clean-machine
+public-release bootstrap, plugin-install, account-access or model-execution test.
+No user's installed copy/configuration was replaced and no model/API call,
+dependency change, release/tag or default prompt change occurred. The measured
+file size is a snapshot, not a reduction claim. Public installer/tester and human
+quality/savings gates remain open; the overall goal is not complete.
+
 2026-10-16 verified source promotion: CI 38769479052 attempt 2 is terminal
 SUCCESS for exact SHA 5d400ce2a428534a78acdd9799462026a7091f5b. All ten validation
 jobs succeeded and publish was skipped. Windows retry logs confirm 489 service
