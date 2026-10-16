@@ -26,6 +26,48 @@ from layman_router.plus_run import (
 )
 
 
+@pytest.mark.parametrize("mode", ["blocked_input", "output_before_input", "early_exit"])
+def test_streaming_large_stdin_does_not_block_timeout_or_output_draining(tmp_path, mode):
+    token = CancellationToken()
+    # A final independent watchdog prevents the pre-fix regression from hanging
+    # pytest. Cancellation is not success: timeout/draining must work first.
+    watchdog = threading.Timer(5, token.cancel)
+    watchdog.daemon = True
+    scripts = {
+        "blocked_input": "import time; time.sleep(30)",
+        "early_exit": "import sys; sys.stderr.write('synthetic refusal\\n'); sys.exit(3)",
+        "output_before_input": (
+            "import sys,json; sys.stderr.write('diagnostic line\\n'*20000); sys.stderr.flush(); "
+            "data=sys.stdin.read(); "
+            "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':1,'output_tokens':1}}))"
+        ),
+    }
+    watchdog.start()
+    try:
+        result = run_streaming_process(
+            [sys.executable, "-u", "-c", scripts[mode]], input_text="x" * (1024 * 1024),
+            cwd=tmp_path, env=os.environ.copy(), timeout_seconds=1 if mode == "blocked_input" else 3,
+            file_limit=0, tool_call_limit=0, cancel_token=token,
+        )
+    finally:
+        watchdog.cancel()
+        watchdog.join(timeout=2)
+    assert token.cancelled is False, "Independent watchdog, not the executor, ended the deadlock"
+    if mode == "blocked_input":
+        assert result.stop_reason == "timeout"
+        assert result.returncode != 0
+        assert result.usage_available is False
+    elif mode == "output_before_input":
+        assert result.stop_reason is None
+        assert result.returncode == 0
+        assert result.usage_available is True
+    else:
+        assert result.stop_reason is None
+        assert result.returncode == 3
+        assert "synthetic refusal" in result.stderr
+        assert result.usage_available is False
+
+
 @pytest.mark.parametrize("platform_name", ["nt", "posix"])
 def test_windows_contract_uses_native_shell_for_process_checks(monkeypatch, platform_name):
     monkeypatch.setattr("layman_router.plus_run.os.name", platform_name)

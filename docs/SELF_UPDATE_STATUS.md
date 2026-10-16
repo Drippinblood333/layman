@@ -4,6 +4,21 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 large-stdin timeout repair: two zero-model Python-child tests proved
+the synchronous input write could block both timeout enforcement and output
+draining until a five-second independent watchdog cancelled the process. Output
+readers and a bounded-lifecycle input writer now run concurrently, with the timeout
+clock active before the write; early-exit pipe errors are explicitly closed.
+103 execution + 96 related evaluation/benchmark/MCP + 28 codec tests passed,
+Ruff/Bandit/secret/diff checks passed. Offline native config refusal with 1 MiB
+stdin retained its original error without a finalizer flush error. [Report](STREAMING_STDIN_TIMEOUT_2026-10-16.md)
+records lifecycle limits and a failed private codec-pilot startup: the assistant
+used prohibited built-in-provider retry overrides, so reservation one exited with
+no usage. Offline rendering isolated that harness mistake. The two-execution
+pilot was closed after that first failure; encoded arm not launched, no replay,
+no token/quality comparison. No paid API, reset, installed update or release.
+Hosted validation of the source repair is pending; overall goal remains active.
+
 2026-10-16 current artifact size audit: downloaded Windows artifact 12034227581
 from successful branch CI 38873966973 on exact d9c5bfe. Executable 17,269,436 bytes,
 SHA d45b7708e17e0a67377264a44d6796c3ca79025b4442db5b5f740e232990ded7; executable

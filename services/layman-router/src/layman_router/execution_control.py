@@ -271,6 +271,21 @@ def _reader(stream: IO[str], channel: str, output: queue.Queue[tuple[str, str | 
         output.put((channel, None))
 
 
+def _write_stdin(stream: IO[str], text: str) -> None:
+    # The child may reject configuration or exit before consuming the prompt.
+    # Close explicitly even after a failed write, without destructor-time flush
+    # errors. Never block the timeout/event consumer on a full input pipe.
+    try:
+        stream.write(text)
+    except OSError:
+        pass
+    finally:
+        try:
+            stream.close()
+        except OSError:
+            pass
+
+
 def _terminate_process_tree(process: subprocess.Popen[str], *, force: bool = False) -> None:
     if process.poll() is not None:
         return
@@ -305,22 +320,18 @@ def _consume_bound_process(
     assert process.stdin is not None
     assert process.stdout is not None
     assert process.stderr is not None
-    try:
-        process.stdin.write(input_text)
-        process.stdin.close()
-    except (BrokenPipeError, OSError):
-        pass
-
+    started = time.monotonic()
     output: queue.Queue[tuple[str, str | None]] = queue.Queue()
     stdout_reader = threading.Thread(target=_reader, args=(process.stdout, "stdout", output), daemon=True)
     stderr_reader = threading.Thread(target=_reader, args=(process.stderr, "stderr", output), daemon=True)
+    stdin_writer = threading.Thread(target=_write_stdin, args=(process.stdin, input_text), daemon=True)
     stdout_reader.start()
     stderr_reader.start()
+    stdin_writer.start()
     tracker = EventBudgetTracker()
     stderr_tail: deque[str] = deque()
     stderr_size = 0
     closed_channels: set[str] = set()
-    started = time.monotonic()
     stop_started: float | None = None
     stop_reason: str | None = None
 
@@ -367,6 +378,7 @@ def _consume_bound_process(
             returncode = process.wait(timeout=2)
         except subprocess.TimeoutExpired:
             returncode = process.poll() if process.poll() is not None else -9
+    stdin_writer.join(timeout=1)
     return StreamedProcessResult(
         returncode=returncode,
         stderr="".join(stderr_tail),
