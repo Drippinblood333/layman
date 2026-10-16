@@ -3,9 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import queue
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 import uuid
 from collections import Counter
@@ -20,7 +22,9 @@ from .config import load_config
 from .execution_control import (
     CODEX_USAGE_PROTOCOL_VERSION,
     EventBudgetTracker,
+    _terminate_process_tree,
     native_execution_error,
+    process_launch_options,
     usage_from_events,
 )
 from .models import RouteTier
@@ -276,6 +280,89 @@ def public_plan(
 
 def _usage_from_events(stdout: str) -> dict[str, int]:
     return usage_from_events(stdout)[0]
+
+
+def codex_developer_instruction_state(codex_path: str, workspace: Path, *, timeout_seconds: float = 3) -> bool | None:
+    """Read native resolved config; return presence only, unknown never means absent."""
+    process = None
+    reader = None
+    messages: queue.Queue[Any] = queue.Queue(maxsize=16)
+    try:
+        process = subprocess.Popen(
+            [codex_path, "app-server", "--listen", "stdio://"], cwd=workspace,
+            env=subscription_environment(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, text=True, encoding="utf-8", errors="replace",
+            **process_launch_options(),
+        )
+
+        def collect() -> None:
+            try:
+                while line := process.stdout.readline(1_048_577):
+                    if len(line) > 1_048_576:
+                        break
+                    messages.put_nowait(json.loads(line))
+            except (OSError, ValueError, queue.Full):
+                pass
+            finally:
+                try:
+                    messages.put_nowait(None)
+                except queue.Full:
+                    pass
+
+        reader = threading.Thread(target=collect, daemon=True)
+        reader.start()
+        deadline = time.monotonic() + timeout_seconds
+
+        def response(identifier: int) -> dict[str, Any]:
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise queue.Empty
+                item = messages.get(timeout=remaining)
+                if item is None:
+                    raise ValueError("Native config response unavailable")
+                if isinstance(item, dict) and item.get("id") == identifier:
+                    return item
+
+        process.stdin.write(json.dumps({"id": 1, "method": "initialize", "params": {
+            "clientInfo": {"name": "layman_config_check", "version": "1.0.0"}}}) + "\n")
+        process.stdin.flush()
+        initialized = response(1)
+        if "result" not in initialized or "error" in initialized:
+            return None
+        for request in ({"method": "initialized"}, {"id": 2, "method": "config/read", "params": {
+            "includeLayers": False, "cwd": str(workspace)}}):
+            process.stdin.write(json.dumps(request) + "\n")
+        process.stdin.flush()
+        reply = response(2)
+        if "error" in reply:
+            return None
+        result = reply.get("result")
+        config = result.get("config") if isinstance(result, dict) else None
+        if not isinstance(config, dict) or "developer_instructions" not in config:
+            return None
+        value = config["developer_instructions"]
+        return bool(value.strip()) if isinstance(value, str) else (False if value is None else None)
+    except (OSError, ValueError, queue.Empty):
+        return None
+    finally:
+        if process is not None:
+            try:
+                process.stdin.close()
+            except OSError:
+                pass
+            try:
+                process.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                _terminate_process_tree(process, force=True)
+                try:
+                    process.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+            if reader is not None:
+                reader.join(timeout=1)
+                if not reader.is_alive():
+                    process.stdout.close()
 
 
 def event_metrics(stdout: str) -> dict[str, Any]:

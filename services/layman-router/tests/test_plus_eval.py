@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,56 @@ from layman_router.plus_eval import (
     run_arm,
     run_plus_eval,
 )
+
+
+@pytest.mark.parametrize("config,expected", [
+    ({"developer_instructions": "PRIVATE_USER_CONSTRAINT"}, True),
+    ({"developer_instructions": "  "}, False),
+    ({"developer_instructions": None}, False),
+    ({}, None),
+    ({"developer_instructions": 12}, None),
+    (None, None),
+])
+def test_native_config_presence_uses_initialized_rpc_without_exporting_text(monkeypatch, tmp_path, config, expected):
+    real_popen = subprocess.Popen
+    reply = {"id": 2, "error": {"code": -32600, "message": "PRIVATE_ERROR"}} if config is None else {
+        "id": 2, "result": {"config": config},
+    }
+    script = (
+        "import json,sys\n"
+        "for line in sys.stdin:\n"
+        " request=json.loads(line)\n"
+        " if request.get('id')==1: print(json.dumps({'id':1,'result':{}}),flush=True)\n"
+        " if request.get('id')==2:\n"
+        "  assert request['params']['includeLayers'] is False\n"
+        f"  assert request['params']['cwd']=={str(tmp_path)!r}\n"
+        f"  print(json.dumps({reply!r}),flush=True)\n"
+    )
+
+    def start(command, **kwargs):
+        assert command == ["codex-fixture", "app-server", "--listen", "stdio://"]
+        assert kwargs["stderr"] == subprocess.DEVNULL
+        assert kwargs["cwd"] == tmp_path
+        return real_popen([sys.executable, "-u", "-c", script], **kwargs)
+
+    monkeypatch.setattr(plus_eval.subprocess, "Popen", start)
+    assert plus_eval.codex_developer_instruction_state("codex-fixture", tmp_path) is expected
+
+
+def test_native_config_timeout_is_unknown_and_reaps_owned_process(monkeypatch, tmp_path):
+    real_popen = subprocess.Popen
+    owned = []
+
+    def start(command, **kwargs):
+        if command[1:3] != ["app-server", "--listen"]:
+            return real_popen(command, **kwargs)
+        process = real_popen([sys.executable, "-c", "import time; time.sleep(60)"], **kwargs)
+        owned.append(process)
+        return process
+
+    monkeypatch.setattr(plus_eval.subprocess, "Popen", start)
+    assert plus_eval.codex_developer_instruction_state("codex-fixture", tmp_path, timeout_seconds=0.05) is None
+    assert owned[0].poll() is not None
 
 
 def test_buffered_output_sizes_match_streamed_numeric_metadata():

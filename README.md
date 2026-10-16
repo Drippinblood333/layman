@@ -79,6 +79,12 @@ verification before starting a new execution. Supply a concise summary, not the
 whole conversation. Concrete continuation requests and quoted text are unchanged;
 this does not pause a separately saved ongoing goal or request new permission.
 
+Before execution, Layman checks native resolved configuration without retaining its
+text. Existing developer instructions are left to Codex rather than overwritten
+by Layman's guidance. If the check is unavailable, Layman also avoids an override;
+original task text, sandbox and hard budgets remain unchanged. Results identify
+the instruction policy, not the instruction contents.
+
 API users can preview every Codex configuration change before applying it:
 
 ```powershell

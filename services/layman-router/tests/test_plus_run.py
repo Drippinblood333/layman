@@ -41,6 +41,35 @@ def test_windows_contract_uses_native_shell_for_process_checks(monkeypatch, plat
     assert "REPL child_process" not in answer_contract
 
 
+@pytest.mark.parametrize("state,expected", [
+    (False, "layman_guidance"), (True, "preserve_configured"), (None, "preserve_unknown"),
+])
+def test_native_developer_instruction_policy_preserves_user_config(monkeypatch, tmp_path, state, expected):
+    monkeypatch.setattr("layman_router.plus_run.codex_login_status", lambda *a, **k: {"available": True, "chatgpt_login": True})
+    monkeypatch.setattr("layman_router.plus_run.codex_developer_instruction_state", lambda *a, **k: state)
+    calls = []
+
+    def fake_stream(command, **kwargs):
+        calls.append((command, kwargs))
+        Path(command[command.index("--output-last-message") + 1]).write_text("summary", encoding="utf-8")
+        return StreamedProcessResult(
+            returncode=0, stderr="", usage={"input_tokens": 10, "cached_input_tokens": 0,
+                                            "output_tokens": 3, "reasoning_tokens": 0},
+            usage_available=True, tool_calls=0, unique_files_read=0, compactions=0,
+        )
+
+    monkeypatch.setattr("layman_router.plus_run.run_streaming_process", fake_stream)
+    result = run_plus_task("请总结内容", cwd=tmp_path, codex_path=sys.executable)
+    command, options = calls[0]
+    overrides = [item for item in command if item.startswith("developer_instructions=")]
+    assert bool(overrides) is (state is False)
+    assert result["developer_instructions_policy"] == expected
+    assert options["input_text"] == "请总结内容"
+    assert options["tool_call_limit"] == POLICIES[RouteTier.FAST].tool_calls
+    assert options["file_limit"] == POLICIES[RouteTier.FAST].expanded_files
+    assert 'default_permissions=":workspace"' in command
+
+
 @pytest.mark.parametrize("workflow,read_only,expected", [
     ("discover-test-gaps-verify", False, True),
     ("discover-test-gaps-verify", True, False),
@@ -447,8 +476,9 @@ def test_run_uses_stdin_chatgpt_login_and_ephemeral_config(monkeypatch, tmp_path
     assert 'model_provider="openai"' in command
     assert 'model_auto_compact_token_limit=32000' in command
     assert 'default_permissions=":workspace"' in command
-    assert any("must edit the workspace" in argument for argument in command)
-    assert any("ceilings, not targets" in argument for argument in command)
+    assert not any(argument.startswith("developer_instructions=") for argument in command)
+    assert result["developer_instructions_policy"] == "preserve_unknown"
+    assert 'tool_output_token_limit=2000' in command
     assert result["status"] == "completed"
     assert result["answer"] == "done"
     assert result["usage"] == {

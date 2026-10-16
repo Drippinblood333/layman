@@ -4,6 +4,23 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 developer-instruction preservation fix: a synthetic native render
+proved the unconditional Layman developer_instructions override removed an
+existing user constraint. The executor now uses a bounded native config/read
+snapshot, returning presence only; configured or unknown instructions are not
+overridden. Guidance is added only for a positively empty field. No user instruction
+text is copied to argv/stdin, results or telemetry. Authentication, original task,
+sandbox and hard budgets remain intact. An initial EOF-only RPC prototype exited
+zero without a reply, so it was not treated as absence; the initialized native
+prototype read the sentinel in about 70ms. Post-fix native probes confirmed true/
+false presence and retained the sentinel in the constructed command's rendering;
+real global config hash unchanged, zero model inference. All 197 related tests
+passed, scoped Ruff/Bandit, secret and diff checks passed. [Full report](DEVELOPER_INSTRUCTION_PRESERVATION_2026-10-16.md)
+documents timeout/cleanup, synthetic verification stubs, unknown-client fallback,
+latency scope and config-change race limits. No extra dependency, installation,
+release or paid API. This is locally verified correctness, not hosted validation,
+live model quality, or measured token savings; overall goal remains active.
+
 2026-10-16 loopback request-shape probe completed with zero model inference.
 Three diagnostic snapshots each sent one Direct and one Layman request to a local
 synthetic Responses server with a verified dummy bearer credential; no upstream

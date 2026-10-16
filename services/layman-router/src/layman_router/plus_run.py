@@ -25,6 +25,7 @@ from .models import RouteTier, TaskType
 from .plus_eval import (
     _safe_error,
     _usage_from_events,
+    codex_developer_instruction_state,
     codex_login_status,
     event_metrics,
     find_codex,
@@ -276,6 +277,11 @@ def run_plus_task(
     if not login["available"] or not login["chatgpt_login"]:
         raise RuntimeError("Codex must be logged in with ChatGPT; refusing API-key billing")
 
+    started = time.perf_counter()
+    developer_state = codex_developer_instruction_state(executable, workspace) if runner is None else None
+    instruction_policy = ("layman_guidance" if developer_state is False else
+                          "preserve_configured" if developer_state is True else "preserve_unknown")
+
     expects_file_change = (
         preview["sandbox"] == "workspace-write"
         and preview["task_type"] in {TaskType.NORMAL_CODING.value, TaskType.TESTING.value, TaskType.DOCUMENTATION.value}
@@ -284,7 +290,6 @@ def run_plus_task(
     )
     files_before = _named_file_snapshot(task, workspace) if expects_file_change else None
     selected = RouteTier(preview["route_tier"])
-    started = time.perf_counter()
     attempts: list[dict[str, Any]] = []
     answer = ""
     usage = {key: 0 for key in PLUS_USAGE_KEYS}
@@ -335,8 +340,7 @@ def run_plus_task(
                 'model_auto_compact_token_limit_scope="body_after_prefix"',
                 "-c",
                 f"compact_prompt={_toml_string(COMPACT_PROMPT)}",
-                "-c",
-                f"developer_instructions={_toml_string(contract)}",
+                *(["-c", f"developer_instructions={_toml_string(contract)}"] if developer_state is False else []),
                 "-c",
                 'approval_policy="never"',
                 "-c",
@@ -494,4 +498,5 @@ def run_plus_task(
         "error_category": error_category,
         "answer": answer,
         "stores_prompt_or_answer": False,
+        "developer_instructions_policy": instruction_policy,
     }
