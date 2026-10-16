@@ -4,6 +4,22 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 current artifact size audit: downloaded Windows artifact 12034227581
+from successful branch CI 38873966973 on exact d9c5bfe. Executable 17,269,436 bytes,
+SHA d45b7708e17e0a67377264a44d6796c3ca79025b4442db5b5f740e232990ded7; executable
+and three metadata digest links match BUILD.json, help exited zero. Embedded
+plugin/marketplace contains 19 files, 26,392 raw / 14,119 compressed bytes, no
+second packaged plugin copy; six checked development module roots absent.
+Strict source-byte comparison first failed on seven CRLF/LF-only text differences;
+all source text matched after that explicit normalization. [Report](PACKAGE_SIZE_AUDIT_2026-10-16.md)
+records archive-reader method, measured boundaries and provenance limits. No
+safe size-removal candidate was established, so no speculative packaging change
+or duplicate build was made. No model calls, install replacement or release.
+Main CI [38874451848](https://github.com/Drippinblood333/layman/actions/runs/38874451848)
+is now terminal SUCCESS on exact d9c5bfe617b1d7b9a5d1399ee5312300460f8e42,
+all ten validation jobs passed; this supersedes the queued observation below.
+Overall goal remains active; this audit is not evidence of token savings.
+
 2026-10-16 explicit read-only hosted gate: [CI 38873966973](https://github.com/Drippinblood333/layman/actions/runs/38873966973)
 completed SUCCESS on exact d9c5bfe617b1d7b9a5d1399ee5312300460f8e42 without retries.
 All ten validation jobs passed (three OS tests, five standalone targets, Docker
