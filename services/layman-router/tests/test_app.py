@@ -22,6 +22,92 @@ class ChunkStream(httpx.AsyncByteStream):
             raise httpx.ReadError("interrupted")
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("stream", [False, True])
+async def test_deferred_tool_catalog_is_forwarded_without_changing_capabilities(router_config, stream):
+    marker = "PRIVATE_TOOL_SCHEMA_20261016"
+    tools = [
+        {"type": "namespace", "name": "shipping", "description": marker, "tools": [
+            {"type": "function", "name": "get_eta", "defer_loading": True, "strict": True,
+             "parameters": {"type": "object", "properties": {"order_id": {"type": "string"}},
+                            "required": ["order_id"], "additionalProperties": False}},
+            {"type": "function", "name": "health", "defer_loading": False,
+             "parameters": {"type": "object", "properties": {}, "additionalProperties": False}},
+        ]},
+        {"type": "mcp", "server_label": "fixture", "server_description": marker,
+         "server_url": "https://example.invalid/mcp", "defer_loading": True, "require_approval": "always"},
+        {"type": "tool_search"},
+    ]
+    seen = []
+    expected = response_body()
+    wire = ("event: response.completed\ndata: " + json.dumps({"type": "response.completed", "response": expected})
+            + "\n\n").encode()
+
+    async def upstream(request):
+        seen.append(json.loads(request.content))
+        if stream:
+            return httpx.Response(200, stream=ChunkStream([wire]), headers={"content-type": "text/event-stream"})
+        return httpx.Response(200, json=expected)
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post("/v1/responses", headers={"Authorization": "Bearer test-secret"}, json={
+            "model": "auto", "input": "Find the shipping ETA tool.", "tools": tools,
+            "tool_choice": "auto", "parallel_tool_calls": False, "stream": stream,
+        })
+    assert result.status_code == 200
+    assert len(seen) == 1
+    assert seen[0]["tools"] == tools
+    assert seen[0]["tool_choice"] == "auto"
+    assert seen[0]["parallel_tool_calls"] is False
+    if stream:
+        assert result.content == wire
+    else:
+        assert result.json() == expected
+    assert marker not in json.dumps(app.state.store.recent())
+
+
+@pytest.mark.asyncio
+async def test_client_tool_search_roundtrip_and_additional_tool_order_are_opaque(router_config):
+    marker = "PRIVATE_DISCOVERY_SCHEMA_20261016"
+    schema = {"type": "object", "properties": {"goal": {"type": "string"}},
+              "required": ["goal"], "additionalProperties": False}
+    search = {"type": "tool_search", "execution": "client", "description": "Find shipping tools.",
+              "parameters": schema}
+    function = {"type": "function", "name": "get_eta", "description": marker,
+                "defer_loading": True, "parameters": schema}
+    call = {"type": "tool_search_call", "execution": "client", "call_id": "call_fixture",
+            "status": "completed", "arguments": {"goal": "Find shipping ETA."}}
+    discovery = {"type": "tool_search_output", "execution": "client", "call_id": "call_fixture",
+                 "status": "completed", "tools": [function]}
+    additional = {"type": "additional_tools", "role": "developer", "tools": [
+        {"type": "function", "name": "shipping_status", "description": marker, "parameters": schema},
+    ]}
+    history = [{"role": "user", "content": "Find the shipping ETA."}, call, discovery, additional]
+    seen = []
+    expected = response_body()
+    expected["output"] = [{**call, "call_id": "call_next"}]
+
+    async def upstream(request):
+        seen.append(json.loads(request.content))
+        return httpx.Response(200, json=expected)
+
+    app = create_app(router_config, transport=httpx.MockTransport(upstream))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        result = await client.post("/v1/responses", headers={"Authorization": "Bearer test-secret"}, json={
+            "model": "auto", "input": history, "tools": [search], "previous_response_id": "resp_fixture",
+            "parallel_tool_calls": False,
+            "metadata": {"layman_context_mode": "safe", "layman_tool_output_mode": "lossless_lines"},
+        })
+    assert result.status_code == 200
+    assert len(seen) == 1
+    assert seen[0]["input"] == history
+    assert seen[0]["tools"] == [search]
+    assert seen[0]["previous_response_id"] == "resp_fixture"
+    assert result.json() == expected
+    assert marker not in json.dumps(app.state.store.recent())
+
+
 def response_body(model: str = "gpt-6-luna"):
     return {
         "id": "resp_test",

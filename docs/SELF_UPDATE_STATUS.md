@@ -4,6 +4,24 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 deferred-tool compatibility batch: official OpenAI tool-search
+documentation confirms an API-level explicit deferred-definition mechanism, not
+an automatic all-tools optimization. The local matched alpha.20 CLI reports its
+Code Mode search/incremental flags as under development/false and legacy
+tool_search as removed; defaults were not changed. Existing proxy code already
+preserves the relevant API structures, so no new optimizer, dependency, capability
+filter or setting was implemented. Added three mocked regression cases covering
+hosted mixed namespace/MCP definitions, explicit approvals, JSON/SSE preservation,
+client discovery history and additional_tools position with existing optional
+encoders enabled. All 49 API proxy tests passed (2.28s), plus scoped Ruff. Synthetic
+schema markers were absent from telemetry. These tests are not paid/live API calls
+or upstream model/schema validation and do not prove savings. [Scope and limitations](BENCHMARKS.md#deferred-tool-discovery-api-compatibility-only)
+are documented. Production code and users' installed capabilities remain unchanged;
+only regression tests/docs changed, so no redundant standalone rebuild was started.
+Separately, main CI 38866200381 reached terminal SUCCESS on exact 0cecd2b,
+closing the prior continuation-guard main-run wait. This does not give hosted
+coverage to the newly added mock regressions or close human-quality/release gates.
+
 2026-10-16 continuation guard hosted gate: [CI 38865747509](https://github.com/Drippinblood333/layman/actions/runs/38865747509)
 completed SUCCESS without retries on exact commit
 0cecd2b30a9c10dc63e1027691e39eaa3ed8a05e. All ten validation jobs succeeded,

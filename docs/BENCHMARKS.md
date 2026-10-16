@@ -1,5 +1,30 @@
 # Cost, quality and routing benchmarks
 
+## Deferred tool discovery (API compatibility only)
+
+The official [tool-search guide](https://developers.openai.com/api/docs/guides/tools-tool-search)
+describes loading tool definitions on demand. A Responses client must include a
+`tool_search` tool and set `defer_loading: true` on selected functions (including
+functions inside a namespace) or an MCP server. This is not a flag that defers
+every tool automatically. Names/descriptions still have context overhead, discovery
+adds work, and live quality/input-token/latency comparisons remain necessary.
+
+Layman does not add these fields, regroup tools, disable capabilities, remove
+approval requirements or execute a discovery loop for the caller. Three mocked
+transport cases verify that its existing API proxy preserves mixed eager/deferred
+namespace definitions, deferred MCP settings and approvals, tool choice, JSON/SSE
+responses, and client `tool_search_call`/`tool_search_output` history. The client
+case also preserves `additional_tools` position and `previous_response_id` when
+the existing optional context/log encoders are enabled. Schema markers stay out
+of local telemetry. These are local compatibility checks, not upstream schema
+acceptance, real discovery success, or measured token savings.
+
+Do not confuse this API surface with Plus CLI feature flags. On the privately
+tested `codex-cli 0.162.0-alpha.20`, `code_mode_tool_search` and `incremental_tools`
+are under development/false; `tool_search` is marked removed. No such flags or
+global configuration were changed. This version-specific inspection does not
+establish a stable Plus default or justify hiding the user's tool catalog.
+
 ## Subscription command-output diagnostics
 
 The streamed Layman runner and buffered Direct runner expose two additive numeric
