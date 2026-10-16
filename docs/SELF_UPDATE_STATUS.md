@@ -4,6 +4,15 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 large-stdin hosted gate: [CI 38876269707](https://github.com/Drippinblood333/layman/actions/runs/38876269707)
+completed SUCCESS without retries on exact eeea9ca2358d04a947da1773e6f5ead6b51cc67e.
+All ten validation jobs passed: three OS test suites, five standalone targets,
+Docker and release assets; publish skipped. Confirmed main ancestry and pushed
+that same SHA non-force to main; remote SHA verified. [Automatic main CI 38876769558](https://github.com/Drippinblood333/layman/actions/runs/38876769558)
+was observed queued on the same SHA and is not yet claimed green. This supersedes
+the local-only observation below. No repeated model trial, installed replacement
+or publication; finite repair batch verified, full objective still active.
+
 2026-10-16 large-stdin timeout repair: two zero-model Python-child tests proved
 the synchronous input write could block both timeout enforcement and output
 draining until a five-second independent watchdog cancelled the process. Output

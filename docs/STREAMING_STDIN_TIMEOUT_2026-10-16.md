@@ -64,4 +64,10 @@ execution and structured final-output behavior. Documentation does not substitut
 for actual successful usage/quality evidence. No API key, paid API, reset credit,
 installed-version replacement, tag or formal release was used.
 
-Hosted verification must be recorded with the exact source SHA separately.
+[Hosted CI 38876269707](https://github.com/Drippinblood333/layman/actions/runs/38876269707)
+completed SUCCESS without retries on exact
+`eeea9ca2358d04a947da1773e6f5ead6b51cc67e`: all ten validation jobs passed,
+including three OS test suites, five standalone targets, Docker and combined
+release assets. Publish skipped. The exact SHA was fast-forwarded non-force to
+main after an ancestry check. Automatic main CI 38876769558 was observed queued;
+its final result is not yet claimed. No additional model attempt was launched.
