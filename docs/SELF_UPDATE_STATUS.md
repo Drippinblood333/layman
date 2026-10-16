@@ -4,6 +4,15 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 explicit read-only hosted gate: [CI 38873966973](https://github.com/Drippinblood333/layman/actions/runs/38873966973)
+completed SUCCESS on exact d9c5bfe617b1d7b9a5d1399ee5312300460f8e42 without retries.
+All ten validation jobs passed (three OS tests, five standalone targets, Docker
+and release assets); publish skipped. Confirmed main ancestry and fast-forwarded
+that exact SHA non-force to main. [Automatic main CI 38874451848](https://github.com/Drippinblood333/layman/actions/runs/38874451848)
+was observed queued on the same SHA; its final result is not yet claimed.
+This supersedes the pending hosted observation below. No installation replacement
+or formal release occurred; this finite batch is verified, overall goal active.
+
 2026-10-16 explicit read-only permission fix: ordinary no-file-edit requests were
 granted workspace-write despite completion-only recognition. Six plan regressions
 and one execution regression failed first; eight quoted/scope controls passed.

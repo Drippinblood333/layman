@@ -41,5 +41,9 @@ searched and fetched on 2026-10-16, distinguishes local read-only execution from
 workspace write access. The fix uses the already-supported controls rather than
 introducing new native flags or relaxing permissions.
 
-Hosted coverage for this change must be recorded separately with its exact SHA.
+[Hosted CI 38873966973](https://github.com/Drippinblood333/layman/actions/runs/38873966973)
+subsequently completed SUCCESS without retries on exact
+`d9c5bfe617b1d7b9a5d1399ee5312300460f8e42`: all ten validation jobs passed,
+publish skipped. The exact SHA was fast-forwarded non-force to main after an
+ancestry check. Automatic main CI 38874451848 was observed queued, not yet green.
 No installed version was replaced and no release/tag was created.
