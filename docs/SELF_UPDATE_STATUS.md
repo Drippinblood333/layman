@@ -4,6 +4,24 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 lighter-model pair completed its separate 2/2 subscription execution
+ceiling. A new first_duplicate synthetic task and 2,807-input value/non-mutation
+validator were fixed before outcomes; original source failed and reference passed
+before calls. Same task/contract/scope, balanced execution policy and matched full
+alpha.20 runtime compared Sol/medium then Luna/low with only private model/effort
+overrides. Both passed the same automated function/scope checks, complete usage,
+no fallback, only src/target.py changed. Sol used 100,052 total tokens; Luna used
+110,733 (+10.68%). Tool counts were both four; observed command outputs 357 versus
+701 characters. Luna recovered one native command failure and was about 16.07%
+faster, but missed the predeclared >=15% token-reduction continuation criterion.
+Candidate rejected: no production/default route, installation, dependency, tag
+or release changed. [Full report](LIGHTER_MODEL_PAIR_2026-10-16.md) records every
+result, cache accounting, finite-validator limits and absent human quality proof.
+Process exited zero, two reserved attempts match two results; old budgets/logs
+remain untouched. No paid API/judge or reset credits. Do not rerun the same task
+or infer an API bill saving; next measure actual fixed request/tool-definition
+overhead offline. Goal remains active, general savings unproven.
+
 2026-10-16 deferred-tool compatibility batch: official OpenAI tool-search
 documentation confirms an API-level explicit deferred-definition mechanism, not
 an automatic all-tools optimization. The local matched alpha.20 CLI reports its
