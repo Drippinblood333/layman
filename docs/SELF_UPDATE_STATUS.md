@@ -4,6 +4,22 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 explicit read-only permission fix: ordinary no-file-edit requests were
+granted workspace-write despite completion-only recognition. Six plan regressions
+and one execution regression failed first; eight quoted/scope controls passed.
+A bounded explicit-clause check now selects local read-only without treating
+API-only / other-files-only constraints or quoted examples as global restrictions.
+The native sandbox, profile argument/environment and optional own guidance agree;
+original stdin and existing risk/destructive floors remain intact. All 122 scoped
+tests, Ruff, Bandit, secret and diff checks passed. [Report](EXPLICIT_READ_ONLY_PERMISSIONS_2026-10-16.md)
+records recognition and mocked-execution limits. Official permission documentation
+was searched and fetched. No model calls, new dependency, installed update, tag,
+release or token-saving claim. Hosted verification of this source batch is pending.
+
+2026-10-16 prior main gate is now terminal SUCCESS: [CI 38873218824](https://github.com/Drippinblood333/layman/actions/runs/38873218824)
+passed all ten validation jobs on exact d00109d0c960a3e501095aba3592bad24d5b2810.
+This supersedes the pending main observation below; no duplicate run was dispatched.
+
 2026-10-16 native-instruction hosted gate: [CI 38872715414](https://github.com/Drippinblood333/layman/actions/runs/38872715414)
 completed SUCCESS without retries on exact commit
 d00109d0c960a3e501095aba3592bad24d5b2810. All ten validation jobs passed,

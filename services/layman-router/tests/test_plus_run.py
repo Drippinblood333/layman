@@ -399,6 +399,61 @@ def test_named_file_snapshot_is_bounded_and_cannot_inspect_outside_workspace(tmp
     assert _named_file_snapshot(many, tmp_path) is None
 
 
+@pytest.mark.parametrize("task", [
+    "只读分析 src/target.py 的实现",
+    "解释 target.py 的代码，不要修改文件。",
+    "检查 src/target.py；请不要改动任何文件。",
+    "Read-only review of src/target.py",
+    "Analyze src/target.py; do not modify any files.",
+    "Fix src/target.py; do not change files.",
+])
+def test_explicit_read_only_plan_does_not_grant_write_access(router_config, task):
+    plan = plus_task_plan(task, config=router_config, allow_destructive=True)
+    assert plan["sandbox"] == "read-only"
+    assert plan["execution_allowed"] is True
+
+
+@pytest.mark.parametrize("task", [
+    "修复 src/target.py，不要修改接口。",
+    "修复 src/target.py，不要修改其他文件。",
+    "Fix src/target.py; do not modify other files.",
+    "Analyze src/target.py, then implement the fix.",
+    'Add the text "do not modify files" to README.md.',
+    "把‘不要修改文件’添加到 README.md。",
+    "Update README.md with this example:\n```text\n不要修改文件\n```",
+    "Implement read-only file support in src/target.py.",
+])
+def test_scoped_or_quoted_constraints_do_not_block_requested_writes(router_config, task):
+    assert plus_task_plan(task, config=router_config)["sandbox"] == "workspace-write"
+
+
+def test_explicit_read_only_execution_aligns_all_permission_controls(monkeypatch, tmp_path):
+    monkeypatch.setattr("layman_router.plus_run.codex_login_status", lambda *a, **k: {"available": True, "chatgpt_login": True})
+    monkeypatch.setattr("layman_router.plus_run.codex_developer_instruction_state", lambda *a, **k: False)
+    task = "解释 src/target.py，不要修改文件。"
+    calls = []
+
+    def fake_stream(command, **kwargs):
+        calls.append(command)
+        assert kwargs["input_text"] == task
+        assert kwargs["env"]["CODEX_PERMISSION_PROFILE"] == ":read-only"
+        assert command[command.index("--sandbox") + 1] == "read-only"
+        assert 'default_permissions=":read-only"' in command
+        contract = next(arg for arg in command if arg.startswith("developer_instructions="))
+        assert "Read-only: analyze; do not modify files." in contract
+        assert "must edit" not in contract
+        return StreamedProcessResult(
+            returncode=0, stderr="", usage={"input_tokens": 10, "cached_input_tokens": 0,
+                                            "output_tokens": 3, "reasoning_tokens": 0},
+            usage_available=True, tool_calls=0, unique_files_read=0, compactions=0,
+        )
+
+    monkeypatch.setattr("layman_router.plus_run.run_streaming_process", fake_stream)
+    result = run_plus_task(task, cwd=tmp_path, codex_path=sys.executable)
+    assert result["sandbox"] == "read-only"
+    assert len(calls) == 1
+
+
 def test_plan_uses_deep_read_only_for_high_risk(router_config):
     plan = plus_task_plan("请分析生产支付数据库迁移风险", config=router_config)
     assert plan["route_tier"] == "deep"

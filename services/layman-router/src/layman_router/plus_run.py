@@ -103,6 +103,25 @@ def _text_output(value: str | bytes | None) -> str:
     return value or ""
 
 
+def _explicit_read_only_request(task: str) -> bool:
+    # Only explicit global constraints, not broad classification heuristics such
+    # as "analyze ... then implement" or "do not modify the API". Quoted examples
+    # and code are data, not permission directives. This is deliberately bounded
+    # wording recognition, not a general natural-language authorization parser.
+    request = re.sub(
+        r"```[\s\S]*?(?:```|$)|~~~[\s\S]*?(?:~~~|$)|"
+        r'`[^`\n]*`|"[^"\n]*"|\'[^\'\n]*\'|“[^”\n]*”|‘[^’\n]*’|「[^」\n]*」',
+        " ", task,
+    )
+    return any(re.fullmatch(
+        r"\s*(?:请\s*)?(?:不要|不得)(?:修改|改动)(?:任何|任意)?文件\s*|"
+        r"\s*(?:please\s+)?do\s+not\s+(?:modify|change|edit)\s+(?:any\s+)?files\s*|"
+        r"\s*(?:请\s*)?只读(?:分析|检查|评审)[\s\S]*|"
+        r"\s*(?:please\s+)?read[- ]only\s+(?:analysis|review|inspection)\b[\s\S]*",
+        clause, re.IGNORECASE,
+    ) for clause in re.split(r"[,，;；。!！\n]|\.(?=\s|$)", request))
+
+
 def _completion_read_only_intent(task: str) -> bool:
     # Scope exclusions do not prohibit work on the requested file. Ignore only
     # these complete clauses when checking completion, never when authorizing
@@ -183,7 +202,9 @@ def plus_task_plan(
     policy = POLICIES[decision.route_tier]
     destructive_blocked = features.destructive and not allow_destructive
     guidance = prompt_guidance(task)
-    read_only = features.risk == "high" and not (features.destructive and allow_destructive)
+    read_only = _explicit_read_only_request(task) or (
+        features.risk == "high" and not (features.destructive and allow_destructive)
+    )
     preflight_finished_ns = time.perf_counter_ns()
     feature_extraction_ms = (feature_finished_ns - feature_started_ns) / 1_000_000
     policy_decision_ms = (policy_finished_ns - policy_started_ns) / 1_000_000
