@@ -73,6 +73,12 @@ layman run --dry-run --clipboard
 layman run --clipboard
 ```
 
+An independent CLI/MCP task containing only "continue" or "继续" does not identify
+the previous goal. Layman asks for the original task, remaining outcome and latest
+verification before starting a new execution. Supply a concise summary, not the
+whole conversation. Concrete continuation requests and quoted text are unchanged;
+this does not pause a separately saved ongoing goal or request new permission.
+
 API users can preview every Codex configuration change before applying it:
 
 ```powershell

@@ -4,6 +4,28 @@ Updated: 2026-10-16
 
 ## Verified checkpoint
 
+2026-10-16 context-only continuation batch: repository evidence shows each new
+Layman execution receives the supplied task text, not the caller's prior task
+conversation. The offline wording guard previously allowed bare "继续"/"continue"
+to reach CLI preflight without identifying an outcome. Added full-request-only
+Chinese/English continuation checks and two concise questions requesting the
+original task, remaining outcome and latest verification, not all conversation
+history. The original request is not rewritten, and specific, quoted, fenced or
+explicitly goal-bearing continuation requests keep their existing behavior.
+This is missing-task clarification for an independent execution, not a permission
+prompt or a pause of this saved goal. Twelve new regressions failed before the
+fix while six negative controls passed. After the fix, 148 prompt/Plus-run/plan/
+MCP tests and 22 CLI tests passed (170 total); scoped Ruff, secret scan and diff
+checks passed. Two end-to-end checks prove no CLI/model preflight starts for the
+bare continuation. No real model calls, dependencies, new workflow engine or
+prompt-history retention were added. Documentation explains the bounded behavior.
+This source change is locally verified, not yet hosted-CI validated or installed;
+prevented dispatch in tests is not measured full-task token savings.
+Separately, prior installation checkpoint f6c4193's main CI 38865111555 is terminal
+SUCCESS. One gh observation returned EOF; a read of that same run's REST endpoint
+confirmed success, with no replacement run or retry. This does not validate the
+new continuation change or close remaining human-quality/publication gates.
+
 2026-10-16 first-install hosted gate: [CI 38864556854](https://github.com/Drippinblood333/layman/actions/runs/38864556854)
 completed SUCCESS without retries on exact source
 f6c4193231710948f45fa1b09d7efa4f3aaa5132. All ten validation jobs passed,

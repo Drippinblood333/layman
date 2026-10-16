@@ -5,6 +5,39 @@ from layman_router.prompt_guidance import prompt_guidance
 from layman_router.task_plan import create_task_plan
 
 
+@pytest.mark.parametrize("task", [
+    "继续", "请继续吧", "接着做", "继续之前的任务", "继续上一个任务，谢谢！",
+    "continue", "please continue", "go on", "continue the previous task", "carry on, please.",
+])
+def test_context_only_continuations_request_missing_goal_without_rewriting(task):
+    result = prompt_guidance(task)
+    assert result["needs_clarification"] is True
+    assert len(result["questions"]) == 2
+    assert "原始任务" in result["questions"][0]
+    assert result["rewritten"] is False
+    assert result["model_calls"] == 0
+
+
+@pytest.mark.parametrize("task", [
+    "继续修复 src/a.py 的登录错误，不改接口", "Continue fixing src/a.py; keep the API unchanged.",
+    "把按钮文字改为‘继续’", 'Translate "continue" into Chinese.',
+    "```\ncontinue\n```", "继续优化整个项目，目标是安装简单、省 token，每批改一项",
+])
+def test_concrete_or_quoted_continuations_keep_the_original_scope(task):
+    assert prompt_guidance(task)["needs_clarification"] is False
+
+
+@pytest.mark.parametrize("task", ["继续", "continue the previous task"])
+def test_context_only_run_stops_before_cli_preflight(monkeypatch, tmp_path, task):
+    from layman_router.plus_run import run_plus_task
+
+    monkeypatch.setattr("layman_router.plus_run.find_codex", lambda *a, **k: pytest.fail("No model preflight permitted"))
+    result = run_plus_task(task, cwd=tmp_path)
+    assert result["error_category"] == "prompt_clarification_required"
+    assert result["attempts"] == []
+    assert result["tool_calls"] == 0
+
+
 @pytest.mark.parametrize("task", ["帮我优化整个项目", "请完善我的项目。", "重构一下", "fix it", "please improve the whole project"])
 def test_vague_requests_get_at_most_two_questions_without_rewriting(task):
     result = prompt_guidance(task)
