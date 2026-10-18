@@ -352,6 +352,46 @@ def test_skip_plugin_keeps_legacy_install_state_conservative(monkeypatch, tmp_pa
     assert "codex_plugin_managed" not in read_state()
 
 
+@pytest.mark.parametrize("existing", [False, True])
+def test_setup_missing_codex_preserves_layman_state(monkeypatch, tmp_path: Path, capsys, existing):
+    home = tmp_path / "layman-home"
+    original = '{"mode": "api", "codex_plugin_managed": false, "custom": "keep"}'
+    if existing:
+        home.mkdir()
+        (home / "state.json").write_text(original, encoding="utf-8")
+    monkeypatch.setenv("LAYMAN_HOME", str(home))
+    monkeypatch.setattr("layman_router.paths.legacy_home", lambda: tmp_path / "missing")
+    monkeypatch.setattr("layman_router.cli.detect_user_mode", lambda: (
+        "plus", {"codex_login": {"available": False}},
+    ))
+    monkeypatch.setattr("layman_router.cli.install_codex_plugin", lambda: (
+        _ for _ in ()
+    ).throw(FileNotFoundError("Codex CLI was not found")))
+
+    assert main(["setup", "--mode", "plus"]) == 1
+    assert "Codex CLI" in capsys.readouterr().err
+    if existing:
+        assert (home / "state.json").read_text(encoding="utf-8") == original
+    else:
+        assert not home.exists()
+
+
+def test_setup_plugin_does_not_require_chatgpt_login(monkeypatch, tmp_path: Path, capsys):
+    monkeypatch.setenv("LAYMAN_HOME", str(tmp_path / "layman-home"))
+    monkeypatch.setattr("layman_router.paths.legacy_home", lambda: tmp_path / "missing")
+    monkeypatch.setattr("layman_router.cli.detect_user_mode", lambda: (
+        "plus", {"codex_path": "synthetic-codex", "codex_login": {"available": False}},
+    ))
+    monkeypatch.setattr("layman_router.cli.install_codex_plugin", lambda: {"installed": True})
+    monkeypatch.setattr("layman_router.cli.find_codex", lambda: "synthetic-codex")
+    monkeypatch.setattr("layman_router.cli.codex_login_status", lambda path: {
+        "available": False, "chatgpt_login": False,
+    })
+
+    assert main(["setup", "--mode", "plus"]) == 0
+    assert json.loads(capsys.readouterr().out)["plugin"]["installed"] is True
+
+
 def test_setup_tolerates_codex_status_timeout(monkeypatch, tmp_path: Path, capsys):
     monkeypatch.setenv("LAYMAN_HOME", str(tmp_path / "layman-home"))
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))

@@ -4,6 +4,13 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 missing-CLI setup fix: default plugin setup now rejects missing/unusable
+CLI discovery before changing Layman's install state. Two first-failing cases
+cover new and existing homes; a CLI-present/login-absent control preserves plugin
+installation without requiring login. Lifecycle/CLI/MCP: 54 passed; Ruff/Bandit
+passed. No extra subprocess or model call. This is not transactional setup; see
+[limits and evidence](SETUP_PREREQUISITE_STATE_2026-10-18.md). Hosted gate pending.
+
 2026-10-18 offline-first source onboarding: documentation now lets newcomers try
 planning before setup, explicitly identifies the Codex CLI/plugin and Plus-login
 prerequisites, and explains auto/API selection. Actual CLI plan passed with Codex

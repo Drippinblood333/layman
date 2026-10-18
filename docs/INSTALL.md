@@ -158,6 +158,11 @@ Codex CLI with plugin support; Plus execution needs ChatGPT sign-in. Follow the
 [official Codex CLI installation and sign-in guide](https://developers.openai.com/codex/cli#getting-started)
 if needed. Layman does not install or upgrade Codex for you. An installed desktop
 app alone is not proof that Layman can find a compatible CLI.
+If automatic discovery cannot find/start Codex CLI, default setup now stops before
+creating or changing Layman's installation state. This is a prerequisite check,
+not an all-or-nothing installation guarantee: detection may create an explicitly
+configured Codex home, and later plugin/configuration failures can still leave
+partial setup work. Login is not required merely to install the plugin.
 
 First download the project and enter its root directory. If you already have a
 checkout, open a terminal in that directory instead; do not clone inside it:

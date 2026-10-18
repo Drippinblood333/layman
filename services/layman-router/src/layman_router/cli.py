@@ -242,6 +242,12 @@ def main(argv: list[str] | None = None) -> int:
             mode = detected_mode if args.mode == "auto" else args.mode
             if mode == "api" and not os.getenv("OPENAI_API_KEY"):
                 raise RuntimeError("API mode requires OPENAI_API_KEY in the current environment")
+            if not args.skip_plugin and not detection.get("codex_path"):
+                raise RuntimeError(
+                    "Plugin setup requires a working Codex CLI. Install or repair Codex CLI, "
+                    "then retry setup; use plan without setup for offline planning. "
+                    "Use --skip-plugin only if you do not want the Codex plugin."
+                )
             previous_state = read_state()
             state = setup_state(mode)
             if not args.skip_plugin:
