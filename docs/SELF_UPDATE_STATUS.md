@@ -4,6 +4,21 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 source-install onboarding repair: GitHub release API still returns an
+empty list. Removed non-working future release-installer command blocks from the
+English README's primary install entry; kept their clearly gated documentation
+link. Source instructions now name Git/Python prerequisites, clone/checkout-root
+steps, separate Windows and macOS/Linux commands, and full virtual-environment
+status/plan paths. Explicitly explain that source installation does not add a
+global PATH entry, needs no activation/execution-policy change, and that login
+status is not a live access test. Both READMEs link to this currently usable path.
+Windows example parsed with the native PowerShell parser; POSIX example passed
+Git Bash `-n`. Existing local venv CLI reported 1.0.0 and pip check found no broken
+requirements; diff check passed. These are syntax/current-environment checks,
+not a new clean-machine install claim. Documentation only: no source behavior,
+dependency, installed configuration, model call or release change, no repeated
+build. Evidence is committed locally for the next source promotion; goal active.
+
 2026-10-18 lossless-log v2 pilot evidence closed: corrected settings passed native
 offline rendering before two separately reserved subscription invocations on
 source 1c7e6084e214239bb9b4a97ecb20e200016fabe7. Same Sol/medium, instruction,

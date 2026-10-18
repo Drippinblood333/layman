@@ -135,8 +135,19 @@ layman dashboard
 ## Source installation
 
 Until a standalone release is available, use the source checkout with Python
-3.11 or newer. Ordinary use needs only the locked runtime dependencies, not the
-test, audit or packaging tools:
+3.11 or newer and Git installed. Ordinary use needs only the locked runtime
+dependencies, not the test, audit or packaging tools. This is the currently
+available install path, not the unavailable release installer above.
+
+First download the project and enter its root directory. If you already have a
+checkout, open a terminal in that directory instead; do not clone inside it:
+
+```text
+git clone https://github.com/Drippinblood333/layman.git
+cd layman
+```
+
+Windows PowerShell (run from the directory containing the top-level `README.md`):
 
 ```powershell
 python -m venv .venv
@@ -144,9 +155,29 @@ python -m venv .venv
 .\.venv\Scripts\python -m pip install --no-deps .\services\layman-router
 .\.venv\Scripts\python -m pip check
 .\.venv\Scripts\layman setup --mode auto
+.\.venv\Scripts\layman codex-plus status
+.\.venv\Scripts\layman plan
 ```
 
-On macOS/Linux, use `.venv/bin/python` and `.venv/bin/layman`.
+macOS/Linux (run from the same project root):
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install --require-hashes -r services/layman-router/requirements.lock
+.venv/bin/python -m pip install --no-deps services/layman-router
+.venv/bin/python -m pip check
+.venv/bin/layman setup --mode auto
+.venv/bin/layman codex-plus status
+.venv/bin/layman plan
+```
+
+Keep using the full `.venv` executable paths shown above after opening a new
+terminal in this checkout. A source install does not put `layman` on the global
+PATH; bare `layman` examples elsewhere assume a PATH-enabled installation. No
+activation script or shell execution-policy change is required. `plan` reads a
+task you type and does not launch a model. `codex-plus status` checks saved login,
+not actual model access; sign into Codex if it reports missing ChatGPT credentials.
+Restart Codex and open a new task after setup to load the installed plugin.
 
 Only contributors who need tests, audits or builds should additionally install
 the development tools:

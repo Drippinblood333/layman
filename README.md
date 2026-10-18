@@ -39,22 +39,15 @@ A ChatGPT subscription does not include API billing. Layman never retries a Plus
 ## Install
 
 No public release exists yet. Use [source installation](docs/INSTALL.md#source-installation)
-for now; the standalone commands below require a published release with verified
-artifacts and intentionally have no installable target yet.
+for now. It requires Git and Python 3.11+; the guide includes both Windows and
+macOS/Linux commands, without installing development tools or requiring virtual
+environment activation. After source installation, use the documented full
+virtual-environment command paths: the shorter `layman` examples below require
+an executable already available on PATH.
 
-Windows PowerShell:
-
-```powershell
-irm https://raw.githubusercontent.com/Drippinblood333/layman/main/install.ps1 | iex
-```
-
-macOS or Linux:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install.sh | sh
-```
-
-The standalone installer does not require Python.
+Future standalone installation will not require Python. Those installer commands
+are documented [separately](docs/INSTALL.md#standalone-installation), but have no
+installable release target yet.
 
 ## First use
 
