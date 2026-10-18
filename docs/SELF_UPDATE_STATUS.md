@@ -4,6 +4,15 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 source-plugin first hosted gate failed: CI 39115414834 terminal FAILURE
+on a2dc41f8396ea15649d8ac6ff04b8052307b3670; Windows 2 failed / 539 passed.
+New tests decoded UTF-8 launcher JSON using the system locale, corrupting Chinese
+paths on Python 3.11. Production already explicitly uses UTF-8. Corrected only the
+two test reads, kept exact path assertions, verified both cases with PYTHONUTF8=0
+locally; Ruff/diff checks passed. Network EOF affected annotation observation only;
+the same CI run was inspected directly, not restarted for polling errors. The
+failed SHA was never promoted to main. New corrected SHA requires hosted gate.
+
 2026-10-18 source install/plugin entry repair: a fresh Python 3.14.3 venv in a
 Unicode/space path installed hashed runtime + source --no-deps, pip check passed,
 26 distributions with checked dev stacks absent, isolated setup/plan/read-only

@@ -183,12 +183,12 @@ def test_install_codex_plugin_creates_configured_codex_home(monkeypatch, tmp_pat
 
     assert install_codex_plugin()["installed"] is True
     assert codex_home.is_dir()
-    durable = json.loads((tmp_path / "layman-home/marketplace/plugins/layman/.mcp.json").read_text())
+    durable = json.loads((tmp_path / "layman-home/marketplace/plugins/layman/.mcp.json").read_text(encoding="utf-8"))
     server = durable["mcpServers"]["layman"]
     assert server["command"] == executable
     assert server["args"] == (["mcp-server"] if frozen else ["-m", "layman_router.cli", "mcp-server"])
     assert server["env"] == {"EXAMPLE": "keep"}
-    assert json.loads((plugin / ".mcp.json").read_text()) == original_mcp
+    assert json.loads((plugin / ".mcp.json").read_text(encoding="utf-8")) == original_mcp
 
 
 def test_mode_detection_creates_configured_codex_home(monkeypatch, tmp_path: Path):

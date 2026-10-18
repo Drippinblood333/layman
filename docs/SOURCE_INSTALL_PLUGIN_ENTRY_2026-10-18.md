@@ -54,3 +54,14 @@ migrating formats. Native CLI/cache behavior was verified locally, not inferred
 from those docs. Private phase/results evidence is under
 build/source-onboarding-2026-10-18/; no raw model/user configuration is retained
 in the committed report. This is installation correctness, not token savings.
+
+## First hosted gate: failure retained
+
+CI 39115414834 completed FAILURE on a2dc41f8396ea15649d8ac6ff04b8052307b3670.
+Windows Python 3.11 had two new launcher-test failures and 539 passes: the tests
+read the correctly UTF-8-written JSON with locale-default decoding, corrupting
+the Chinese path before the equality assertion. The production reader/writer
+already specified UTF-8. Fixed only those test reads to use UTF-8 too; the exact
+Unicode path assertions remain. Both focused cases then passed with PYTHONUTF8=0
+locally. No production workaround, weaker assertion, timeout change or failed-job
+rerun was used to hide the initial failure. A new source SHA needs a new gate.
