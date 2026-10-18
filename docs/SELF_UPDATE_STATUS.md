@@ -4,6 +4,17 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 read-only plan hosted gate: [CI 39116330971](https://github.com/Drippinblood333/layman/actions/runs/39116330971)
+completed SUCCESS without retries on exact 13866b9e2ce50d4067cfabb73f1f74e157729407.
+All ten validation jobs passed, publish skipped. Checked main ancestry and
+fast-forwarded that same SHA non-force to main; remote ref verified. [Automatic
+main CI 39116653902](https://github.com/Drippinblood333/layman/actions/runs/39116653902)
+was observed queued on the same SHA and is not yet claimed green. Prior install
+repair main CI 39116115739 is terminal SUCCESS on exact
+408b157aa66e23443b42d711afb04d9bb84a643f, superseding its pending observation.
+No model calls, installed updates, duplicate workflow or formal release. This
+finite wording batch is verified; same-quality token benefit/full goal remain open.
+
 2026-10-18 read-only plan wording repair: three Chinese/English/release-check
 regressions showed next steps could recommend implementation or inherited full
 release execution even though the selected sandbox was read-only. Next steps and
