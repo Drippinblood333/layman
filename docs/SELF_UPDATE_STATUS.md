@@ -13,7 +13,10 @@ Python processes before/after on this host measured 387→291 loaded modules,
 19→0 Uvicorn modules, import median 298.843→221.900 ms. Fixed-order local import
 timings are not full CLI latency, all-platform speed, binary-size or token savings.
 Runtime dependencies and API capability are unchanged. No model call or installed
-replacement; hosted validation of this source batch remains required.
+replacement. Source `5dc6dd484a9679e5095fa50151c6e0737d640394` is pushed to
+`codex/verify-lazy-api-load`; exact CI 39123806291 is in progress, not green.
+This source batch also carries the earlier locally validated corpus/config
+provenance fixes and docs. Main remains at `7ee4d7c` pending this hosted gate.
 
 2026-10-18 zero-call config follow-up: two bounded nearby backup candidates did
 not match the old hash. Isolated synthetic initialize/config-read returned the
