@@ -170,6 +170,15 @@ Run three 20-call batches for all 60 subscription calls. The harness stops on su
 
 Every record also carries a UTC timestamp and an experiment fingerprint over the case corpus, routing configuration, execution policy, execution/compaction prompts, randomization seed, fixture/validator protocol and actual Codex CLI version. Resume logic and analysis only reuse records with the same fingerprint, so a policy or runtime change cannot silently inherit an older result. A changed fingerprint requires a new 60-call run; use a fresh holdout before turning that calibration into a public product claim.
 
+The fingerprint also includes the resolved user `config.toml` path identity and
+content as SHA-256 hashes plus file existence, not raw paths or config text.
+Same contents in another profile and edits at the same path therefore produce
+different experiment identities. An explicitly relative `CODEX_HOME` is rejected
+before model resolution because the child workspace could resolve it differently.
+This is a preflight snapshot, not a lock or complete effective-config attestation:
+project/managed layers, credentials and concurrent writes are not covered. Do not
+reopen a closed trial or reuse an old allowance merely because its digest changed.
+
 Layman may claim Token savings only when all published gates pass: at least 15% paired median total-token reduction, positive bootstrap lower bound, no quality regression, safe high-risk routing, at least 20% output-token reduction, and no increase in median files read.
 
 The two full-corpus gates check the exact 30 declared case IDs, not only a count

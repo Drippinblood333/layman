@@ -70,3 +70,32 @@ Next action: zero-model diagnosis with a stable configuration-path identity and
 explicit provenance before considering another separately bounded comparison.
 Do not rerun this trial, alter the historical freeze or count the unspent slot as
 a new allowance. Earlier negative and limited positive results remain unchanged.
+
+## Zero-model follow-up
+
+Only two nearby `config*` file candidates met the bounded backup search; neither
+matched the historical preflight content hash. The current file's metadata lies
+within the earlier execution window, but attribution remains unknown. No broader
+profile scan, settings rollback or config-content logging was attempted.
+
+Using the same private native runtime and existing presence-only config reader,
+a fresh isolated home with a synthetic developer-instruction sentinel returned
+the expected presence result through `initialize` and `config/read` only. Both
+that synthetic config and the real user config were unchanged during this probe.
+No auth file was copied and no model task was started. This minimal config-read
+probe did **not** reproduce historical drift; it cannot rule out exec-specific
+behavior, inherited layers or concurrent writers. Private evidence is under
+`build/config-identity-diagnostic-2026-10-18/`.
+
+Future benchmark manifests now include hashed resolved user-config path identity,
+hashed contents and existence. Relative explicit `CODEX_HOME` is rejected before
+model resolution to prevent child-cwd ambiguity. Three regressions failed first;
+the complete benchmark suite then passed **66 tests**, plus Ruff/whitespace.
+Same bytes at another profile and edits at one path now change the experiment
+digest; raw paths/config text are not retained. This is prospective provenance,
+not a concurrent-write guard, a full resolved-config proof or a retrospective
+repair of this closed trial. It does not authorize a new run or unseal its lock.
+
+Official [config RPC guidance](https://learn.chatgpt.com/docs/app-server#config-rpc-examples-for-app-settings)
+and [CLI configuration location guidance](https://learn.chatgpt.com/docs/enterprise/govcloud-configuration)
+were searched/fetched before probing. No write RPC was sent.

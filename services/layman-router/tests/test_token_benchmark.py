@@ -28,6 +28,45 @@ def test_benchmark_has_exact_category_distribution():
     assert counts == {"bugfix": 6, "feature": 6, "refactor": 5, "testing": 5, "docs_config": 4, "high_risk": 4}
 
 
+def test_manifest_tracks_user_config_identity_and_content_without_retaining_them(monkeypatch, tmp_path):
+    first_home = tmp_path / "first"
+    second_home = tmp_path / "second"
+    first_home.mkdir()
+    second_home.mkdir()
+    secret = 'developer_instructions = "synthetic-private-config-sentinel"\n'
+    (first_home / "config.toml").write_text(secret, encoding="utf-8")
+    (second_home / "config.toml").write_text(secret, encoding="utf-8")
+    monkeypatch.setenv("CODEX_HOME", str(first_home))
+    first = benchmark._experiment_manifest(7)
+    assert set(first["user_configuration"]) == {"path_sha256", "content_sha256", "exists"}
+    monkeypatch.setenv("CODEX_HOME", str(second_home))
+    moved = benchmark._experiment_manifest(7)
+    assert first["user_configuration"]["content_sha256"] == moved["user_configuration"]["content_sha256"]
+    assert first["user_configuration"]["path_sha256"] != moved["user_configuration"]["path_sha256"]
+    assert first["experiment_digest"] != moved["experiment_digest"]
+    (second_home / "config.toml").write_text(secret + "# changed\n", encoding="utf-8")
+    edited = benchmark._experiment_manifest(7)
+    assert moved["experiment_digest"] != edited["experiment_digest"]
+    serialized = json.dumps([first, moved, edited])
+    assert "synthetic-private-config-sentinel" not in serialized
+    assert str(tmp_path) not in serialized
+
+
+def test_user_config_provenance_records_default_missing_file(monkeypatch, tmp_path):
+    monkeypatch.delenv("CODEX_HOME", raising=False)
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    result = benchmark._experiment_manifest(7)["user_configuration"]
+    assert result["content_sha256"] is None
+    assert result["exists"] is False
+    assert len(result["path_sha256"]) == 64
+
+
+def test_relative_codex_home_is_rejected_before_model_resolution(monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", "relative-profile")
+    with pytest.raises(ValueError, match="absolute CODEX_HOME"):
+        benchmark._experiment_manifest(7)
+
+
 @pytest.mark.parametrize("case_id,text,expected", [
     ("docs-03", '[project]\nrequires-python = ">=3.11"\nlicense = { text = "MIT" }\n', False),
     ("docs-03", '[project]\nname = "changed"\nversion = "0.1.0"\nrequires-python = ">=3.11"\nlicense = { text = "MIT" }\n', False),

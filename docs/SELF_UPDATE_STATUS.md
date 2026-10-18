@@ -4,6 +4,18 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 zero-call config follow-up: two bounded nearby backup candidates did
+not match the old hash. Isolated synthetic initialize/config-read returned the
+expected instruction-presence result without changing its config or the real
+user config; historical drift was not reproduced or attributed. Future benchmark
+fingerprints now include hashed resolved config-path identity/content/existence,
+and reject relative explicit CODEX_HOME before native resolution. Three initial
+regressions failed; benchmark suite: 66 passed, Ruff/whitespace passed. No raw
+config retained, no model task or settings write, old trial remains locked closed.
+This is provenance, not a concurrent-write lock or all-layer config proof.
+[Details and limits](DEFAULT_ROUTE_DIAGNOSTIC_2026-10-18.md#zero-model-follow-up).
+Eval/docs-only local commit; no platform rebuild or new evaluation allowance used.
+
 2026-10-18 current-default diagnostic closed at 1/2 starts: Direct `bugfix-04`
 passed automated function/scope checks with complete 99,754 total tokens; no
 fallback. Post-call config hash differed from freeze, so the Layman arm was never

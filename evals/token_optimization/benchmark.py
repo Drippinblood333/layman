@@ -74,6 +74,23 @@ def _stable_digest(value: Any) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _user_config_provenance() -> dict[str, Any]:
+    configured = os.environ.get("CODEX_HOME")
+    home = Path(configured).expanduser() if configured is not None else Path.home() / ".codex"
+    if not home.is_absolute():
+        raise ValueError("Benchmark requires an absolute CODEX_HOME so child cwd cannot change config identity")
+    path = (home / "config.toml").resolve()
+    try:
+        content = path.read_bytes()
+    except FileNotFoundError:
+        content = None
+    return {
+        "path_sha256": hashlib.sha256(os.path.normcase(str(path)).encode("utf-8")).hexdigest(),
+        "content_sha256": hashlib.sha256(content).hexdigest() if content is not None else None,
+        "exists": content is not None,
+    }
+
+
 def _experiment_manifest(seed: int, selected: list[BenchmarkCase] | None = None) -> dict[str, Any]:
     config = load_config()
     cases = [asdict(case) for case in (selected if selected is not None else CASES)]
@@ -82,6 +99,7 @@ def _experiment_manifest(seed: int, selected: list[BenchmarkCase] | None = None)
         "randomization_seed": seed,
         "direct_baseline": "configured_balanced_medium",
         "max_model_attempts_per_arm": 1,
+        "user_configuration": _user_config_provenance(),
         "usage_protocol_sha256": hashlib.sha256(
             b"".join(
                 (SERVICE_SRC / "layman_router" / name).read_bytes()
