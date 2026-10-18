@@ -24,4 +24,9 @@ This is not transactional setup. Detection may create `CODEX_HOME` if explicitly
 configured. A CLI disappearing after discovery or a later plugin/configuration
 failure can still leave partial setup work. Tests use isolated synthetic homes,
 not the user's installation. No paid API, token-savings claim, release or installed
-version replacement. Hosted validation of the forthcoming commit is still needed.
+version replacement. Release secret scanning also passed. Source commit
+`78fdaff7cb10f3bbd3fe2c365232d6fd0a3ef0b1` was pushed to
+`codex/verify-setup-prerequisite` after one TLS handshake failure and a successful
+retry. Exact [CI run 39120437908](https://github.com/Drippinblood333/layman/actions/runs/39120437908)
+was observed queued, not passed. Main remains at the previous verified source
+`841eaa5`; no duplicate CI run or formal release was requested.
