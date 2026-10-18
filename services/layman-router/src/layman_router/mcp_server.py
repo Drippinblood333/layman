@@ -111,8 +111,14 @@ def _call_tool(
         raise ValueError("task must be a non-empty string")
     if name == "plan":
         result = create_task_plan(task, workspace)
+        guidance = result["prompt_guidance"]
+        text = (
+            "Clarification required; no execution started.\n" + "\n".join(guidance["questions"])
+            if guidance["needs_clarification"]
+            else f"Plan ready: {result['workflow']} via {result['route']['route_tier']}."
+        )
         return {
-            "content": [{"type": "text", "text": f"Plan ready: {result['workflow']} via {result['route']['route_tier']}."}],
+            "content": [{"type": "text", "text": text}],
             "structuredContent": result,
             "isError": False,
         }

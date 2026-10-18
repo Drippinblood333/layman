@@ -4,6 +4,18 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 MCP plan clarification summary: the existing execution contract already
+limits repeated reads, so it was not retuned without behavior evidence. Instead,
+three vague/context-only plan cases reproduced a text-only summary saying "Plan
+ready" while hiding its existing clarification questions in structured data.
+The summary now exposes exactly those questions and states no execution started;
+concrete-plan text, structured result, original task, route and permissions remain
+unchanged. Three first-failing cases now pass through MCP message round trips;
+concrete-text control and MCP/task-plan/prompt-guidance suites: 83 passed.
+Ruff/Bandit/whitespace passed. No model call or savings claim. Small presentation
+fix committed locally, not deployed; hosted gate deferred to the next related
+source batch to avoid rebuilding every platform for this text-only change.
+
 2026-10-18 latest frozen Windows plugin chain passed in a fresh isolated,
 unsigned-in Chinese/spaced profile: actual setup with pinned private alpha.20
 native CLI, exact frozen MCP launcher/cache match, initialize/three tools/Chinese

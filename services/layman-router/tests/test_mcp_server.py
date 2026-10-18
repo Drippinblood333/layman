@@ -5,6 +5,7 @@ import json
 import threading
 import time
 
+import pytest
 from layman_router import mcp_server
 from layman_router.mcp_server import serve
 
@@ -145,3 +146,31 @@ def test_mcp_eof_cancels_active_run(monkeypatch, tmp_path):
     assert serve(incoming, outgoing) == 0
     assert cancelled.is_set()
     assert "partial" not in outgoing.getvalue()
+@pytest.mark.parametrize("task", ["帮我优化整个项目", "fix it", "continue"])
+def test_plan_text_exposes_clarification_instead_of_claiming_ready(monkeypatch, tmp_path, task):
+    monkeypatch.setattr(mcp_server, "run_plus_task", lambda *a, **k: pytest.fail("Plan must not execute"))
+    incoming = io.StringIO(json.dumps({
+        "jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+            "name": "plan", "arguments": {"task": task, "workspace": str(tmp_path)},
+        },
+    }) + "\n")
+    outgoing = io.StringIO()
+    assert serve(incoming, outgoing) == 0
+    result = json.loads(outgoing.getvalue())["result"]
+    plan = result["structuredContent"]
+    text = result["content"][0]["text"]
+    assert plan["prompt_guidance"]["needs_clarification"] is True
+    assert all(question in text for question in plan["prompt_guidance"]["questions"])
+    assert "no execution started" in text
+    assert "Plan ready" not in text
+    assert result["isError"] is False
+
+
+def test_concrete_plan_keeps_short_ready_summary(tmp_path):
+    result = mcp_server._call_tool("plan", {
+        "task": "Fix src/login.py null handling; preserve the API", "workspace": str(tmp_path),
+    })
+    plan = result["structuredContent"]
+    assert plan["prompt_guidance"]["needs_clarification"] is False
+    assert result["content"][0]["text"] == f"Plan ready: {plan['workflow']} via {plan['route']['route_tier']}."
+    assert result["isError"] is False

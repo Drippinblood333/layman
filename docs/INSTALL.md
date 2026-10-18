@@ -82,6 +82,11 @@ When the preview matches your intent, run `layman run --clipboard`. This step ex
 
 If you are unsure how to describe the task, `layman plan --clipboard` offers an offline plan. For a few obvious vague phrases such as "improve the whole project", it asks at most two questions about the intended result and acceptance criteria and marks the plan as `plan-first`. It does not rewrite, execute or retain your task. The same limited check applies to `run` and MCP: recognized vague requests return `prompt_clarification_required` before starting Codex. Supply the original task with the intended outcome and acceptance details before trying again; no scope is silently removed. This limited wording check is not a complete prompt-quality or safety assessment; an empty question list is not proof that a request is unambiguous.
 
+For MCP `plan`, the short text summary also shows those existing questions and
+states that execution has not started, rather than saying "Plan ready". This is
+a normal planning result (`isError=false`), not execution or a permission change;
+the full structured plan remains available unchanged.
+
 Plus mode does not exercise the HTTP proxy, API fallback, or API billing.
 
 In CLI/MCP `plan` results, read clarification from the top-level `prompt_guidance`.
