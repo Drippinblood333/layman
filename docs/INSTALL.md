@@ -152,6 +152,13 @@ Until a standalone release is available, use the source checkout with Python
 dependencies, not the test, audit or packaging tools. This is the currently
 available install path, not the unavailable release installer above.
 
+Offline planning works without Codex CLI, ChatGPT login, API keys or `setup`.
+To enable the Codex plugin and execute tasks, you additionally need a working
+Codex CLI with plugin support; Plus execution needs ChatGPT sign-in. Follow the
+[official Codex CLI installation and sign-in guide](https://developers.openai.com/codex/cli#getting-started)
+if needed. Layman does not install or upgrade Codex for you. An installed desktop
+app alone is not proof that Layman can find a compatible CLI.
+
 First download the project and enter its root directory. If you already have a
 checkout, open a terminal in that directory instead; do not clone inside it:
 
@@ -167,8 +174,6 @@ python -m venv .venv
 .\.venv\Scripts\python -m pip install --require-hashes -r .\services\layman-router\requirements.lock
 .\.venv\Scripts\python -m pip install --no-deps .\services\layman-router
 .\.venv\Scripts\python -m pip check
-.\.venv\Scripts\layman setup --mode auto
-.\.venv\Scripts\layman codex-plus status
 .\.venv\Scripts\layman plan
 ```
 
@@ -179,8 +184,6 @@ python3 -m venv .venv
 .venv/bin/python -m pip install --require-hashes -r services/layman-router/requirements.lock
 .venv/bin/python -m pip install --no-deps services/layman-router
 .venv/bin/python -m pip check
-.venv/bin/layman setup --mode auto
-.venv/bin/layman codex-plus status
 .venv/bin/layman plan
 ```
 
@@ -188,9 +191,28 @@ Keep using the full `.venv` executable paths shown above after opening a new
 terminal in this checkout. A source install does not put `layman` on the global
 PATH; bare `layman` examples elsewhere assume a PATH-enabled installation. No
 activation script or shell execution-policy change is required. `plan` reads a
-task you type and does not launch a model. `codex-plus status` checks saved login,
-not actual model access; sign into Codex if it reports missing ChatGPT credentials.
-Restart Codex and open a new task after setup to load the installed plugin.
+task you type and does not launch a model. Stop here if you only want offline
+planning. To enable plugin/execution, first check CLI discovery and saved login,
+then run setup:
+
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\layman codex-plus status
+.\.venv\Scripts\layman setup --mode auto
+```
+
+```bash
+# macOS/Linux
+.venv/bin/layman codex-plus status
+.venv/bin/layman setup --mode auto
+```
+
+`codex-plus status` checks saved login, not actual model access or plugin-command
+compatibility. If the CLI is missing or cannot start, resolve that before setup;
+if ChatGPT credentials are missing, sign into Codex before Plus execution. Setup
+installs the plugin; restart Codex and open a new task afterward. Auto mode may
+choose API routing when an API key is present; use `--mode plus` instead when you
+specifically want ChatGPT-login execution without API routing.
 
 Setup pins the installed plugin's MCP launcher to the Python environment or
 standalone executable that ran setup, rather than relying on the desktop app's

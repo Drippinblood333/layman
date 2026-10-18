@@ -4,6 +4,13 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 offline-first source onboarding: documentation now lets newcomers try
+planning before setup, explicitly identifies the Codex CLI/plugin and Plus-login
+prerequisites, and explains auto/API selection. Actual CLI plan passed with Codex
+discovery/plugin/execution calls forbidden; 22 existing CLI tests passed. This is
+a documentation-only correction, not a fresh-machine install or token-saving
+claim. [Evidence](OFFLINE_FIRST_ONBOARDING_2026-10-18.md).
+
 2026-10-18 release-intent fix: six reproduced false-release cases now avoid the
 full release workflow; four genuine release/check controls still select it.
 Future-approval boilerplate is filtered only for workflow selection and `ship`

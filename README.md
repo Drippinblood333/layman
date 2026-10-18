@@ -43,7 +43,9 @@ A ChatGPT subscription does not include API billing. Layman never retries a Plus
 No public release exists yet. Use [source installation](docs/INSTALL.md#source-installation)
 for now. It requires Git and Python 3.11+; the guide includes both Windows and
 macOS/Linux commands, without installing development tools or requiring virtual
-environment activation. After source installation, use the documented full
+environment activation. You can try offline planning before setup, without Codex
+or credentials. Plugin setup additionally requires a working Codex CLI; Plus task
+execution needs ChatGPT sign-in. After source installation, use the documented full
 virtual-environment command paths: the shorter `layman` examples below require
 an executable already available on PATH.
 

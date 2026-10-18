@@ -35,6 +35,8 @@ ChatGPT 订阅不等于 API 额度。Plus 任务失败时，Layman 不会自动�
 目前尚无公开发布包，请先按[源码安装](docs/INSTALL.md#source-installation)操作。
 普通使用只需运行依赖，不必安装测试、审计和打包工具；一键独立安装要等验证后的发布包上线。
 源码安装需要 Git 和 Python 3.11+，文档已分别列出 Windows 与 macOS/Linux 的完整命令。
+可以先离线体验 `plan`，不需要 Codex、登录或执行 `setup`。启用插件还需要可用的
+Codex CLI，使用 Plus 执行任务还需要 ChatGPT 登录；Layman 不会代装或升级 Codex。
 源码版请使用文档中的虚拟环境完整命令路径，无需激活环境；下方简写 `layman` 的示例仅适用于命令已加入 PATH 的安装方式。
 
 独立 CLI/MCP 执行若只收到“继续”，无法确定上次目标，会先请你补充原始任务、
