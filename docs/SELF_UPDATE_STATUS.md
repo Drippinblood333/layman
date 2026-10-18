@@ -4,6 +4,18 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 hosted startup check exposed a pre-existing UTF-8 stdin defect:
+CI 39123806291 on `5dc6dd4` failed Windows tests (590 passed, one new Chinese
+offline-plan subprocess test failed); the other eight completed jobs passed.
+Windows input had been decoded using the text stream's locale, corrupting UTF-8
+before strict output encoding. New piped-byte/malformed-input regressions and a
+forced cp1252 subprocess reproduced three failures locally. CLI piped input now
+strictly decodes its binary buffer as UTF-8; terminal/clipboard paths and
+text-only embedding/test streams remain unchanged. Malformed input stops before
+planning. CLI/task-plan/MCP: 57 passed; Ruff/Bandit/whitespace passed. Original CI
+failure remains recorded; a corrected-source hosted gate is required before main.
+No model call, dependency change, installation replacement or release.
+
 2026-10-18 lean CLI startup: Uvicorn is imported only for `serve`/`demo`, not every
 offline plan/help startup. A first-failing fresh-process import blocker now lets
 Chinese read-only `plan --brief` succeed without loading the API server. Two

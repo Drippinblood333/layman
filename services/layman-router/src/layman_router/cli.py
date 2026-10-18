@@ -124,7 +124,10 @@ def _input_task(*, clipboard: bool = False) -> str:
             print("Describe one task, then press Enter / 输入一行需求后按回车：", file=sys.stderr, flush=True)
             task = sys.stdin.readline().rstrip("\r\n").lstrip("\ufeff")
         else:
-            task = sys.stdin.read().lstrip("\ufeff")
+            binary_input = getattr(sys.stdin, "buffer", None)
+            task = (
+                binary_input.read().decode("utf-8") if binary_input is not None else sys.stdin.read()
+            ).lstrip("\ufeff")
     if not task.strip():
         raise RuntimeError("Task input must not be empty")
     return task

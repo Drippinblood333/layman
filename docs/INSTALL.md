@@ -202,11 +202,15 @@ Keep using the full `.venv` executable paths shown above after opening a new
 terminal in this checkout. A source install does not put `layman` on the global
 PATH; bare `layman` examples elsewhere assume a PATH-enabled installation. No
 activation script or shell execution-policy change is required. `plan` reads a
-task you type and does not launch a model. Stop here if you only want offline
-planning. `--brief` keeps clarification questions, permissions, budgets, next
+task you type and does not launch a model. Piped task input must be UTF-8 regardless of the terminal's text
+encoding; invalid UTF-8 is rejected before planning or execution. Terminal
+one-line entry and `--clipboard` retain their existing Unicode input paths. Use
+`--clipboard` if your shell would encode a text pipeline differently.
+`--brief` keeps clarification questions, permissions, budgets, next
 steps, success criteria and stop conditions but omits internal route diagnostics.
 It does not execute, rewrite the task or certify readiness. Omit the flag for the
-unchanged full JSON output used by integrations. To enable plugin/execution, first check CLI discovery and saved login,
+unchanged full JSON output used by integrations. Stop here if you only want offline
+planning. To enable plugin/execution, first check CLI discovery and saved login,
 then run setup:
 
 ```powershell

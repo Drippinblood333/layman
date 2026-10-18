@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
-from io import StringIO
+from io import BytesIO, StringIO, TextIOWrapper
 from types import SimpleNamespace
 
 import pytest
@@ -13,6 +14,21 @@ from layman_router import cli
 def test_clipboard_input_preserves_unicode(monkeypatch):
     monkeypatch.setattr(cli, "_clipboard_task", lambda: "增加一个设置页面")
     assert cli._input_task(clipboard=True) == "增加一个设置页面"
+
+
+def test_piped_task_reads_utf8_bytes_not_locale_text(monkeypatch):
+    task = "只读分析 README.md，不要修改文件。"
+    stream = TextIOWrapper(BytesIO(task.encode("utf-8")), encoding="cp1252", errors="surrogateescape")
+    monkeypatch.setattr(cli.sys, "stdin", stream)
+    assert cli._input_task() == task
+
+
+def test_invalid_piped_utf8_is_rejected_before_planning(monkeypatch, capsys):
+    stream = TextIOWrapper(BytesIO(b"\xff"), encoding="cp1252")
+    monkeypatch.setattr(cli.sys, "stdin", stream)
+    monkeypatch.setattr(cli, "create_task_plan", lambda *a: pytest.fail("Invalid input must stop before planning"))
+    assert cli.main(["plan"]) == 1
+    assert "utf-8" in capsys.readouterr().err
 
 
 def test_public_cli_exposes_beginner_entry_points():
@@ -209,6 +225,7 @@ def test_offline_plan_does_not_import_api_server(tmp_path):
         [sys.executable, "-c", code], cwd=tmp_path,
         input="只读分析 README.md，不要修改文件。", capture_output=True,
         encoding="utf-8", timeout=20, check=False,
+        env={**os.environ, "PYTHONUTF8": "0", "PYTHONIOENCODING": "cp1252:surrogateescape"},
     )
     assert result.returncode == 0, result.stderr
     assert "No execution started" in result.stdout
