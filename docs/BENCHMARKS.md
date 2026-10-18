@@ -172,6 +172,13 @@ Every record also carries a UTC timestamp and an experiment fingerprint over the
 
 Layman may claim Token savings only when all published gates pass: at least 15% paired median total-token reduction, positive bootstrap lower bound, no quality regression, safe high-risk routing, at least 20% output-token reduction, and no increase in median files read.
 
+The two full-corpus gates check the exact 30 declared case IDs, not only a count
+of 30 completed/usage-eligible pairs. Unknown or substituted IDs cannot close the
+gate even when other synthetic metrics look favorable. Passing analyzer flags
+alone is not provenance attestation, independent human semantic review or evidence
+that this public calibration corpus represents real users; the fresh-holdout and
+quality-review boundaries above still apply.
+
 The 2026-07-16 accepted run completed all 30 pairs. Layman passed 30/30 hidden validations versus Direct's 29/30, but used 19.54% more total tokens at the paired median (95% interval: 3.24% to 26.75% more), produced 47.00% more output tokens and read a median of 8 files versus 5. The savings gate therefore failed. See the [full negative-result report](TOKEN_OPTIMIZATION_2026-07-16.md).
 
 The leaner policy was tried in the [2026-10-09 bounded subscription pilot](TOKEN_PILOT_2026-10-09.md): one Layman execution passed, but the direct baseline failed immediately with incomplete usage. Two of the twelve authorized attempts were used. There are no usable new pairs and no new savings claim; the negative 2026-07-16 result remains the latest complete paired comparison.

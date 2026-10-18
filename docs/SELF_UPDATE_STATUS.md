@@ -4,6 +4,20 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 token-evidence gate fix (evaluation-only): analysis previously accepted
+any 30 paired case labels for its full-corpus gates. A synthetic journal replacing
+one declared case with an unknown ID reproduced the false pass; exact-corpus
+positive control passed. Gates now require exact declared case identity as well
+as counts. Benchmark suite: 63 passed; Ruff/whitespace passed. Reanalysis of the
+immutable matched-runtime journal still reports three quality-eligible pairs,
+median reduction -26.766%, claim_token_savings=false; no history was rewritten.
+Following [official task-specific evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices#how-to-read-evals),
+this repairs coverage evidence, not model quality or savings. Unit-test favorable
+metrics are synthetic, not a new model trial. Ordinary subscription preflight
+reported 39% five-hour / 19% weekly used, but zero new model executions, paid API
+or reset credits were used. Evaluation/docs-only change committed locally; no
+platform rebuild is warranted until the next source batch. Overall goal active.
+
 2026-10-18 Git evidence correction: unsuccessful branch/status commands now yield
 `null` for only their failed field rather than accepting failed stdout or implying
 a clean workspace. Three mixed-failure regressions failed first; after the fix,

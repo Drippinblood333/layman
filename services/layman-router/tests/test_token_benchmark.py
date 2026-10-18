@@ -309,6 +309,29 @@ def test_analysis_excludes_quality_failures_from_token_savings(tmp_path, failed_
     assert result["layman_success"] == (failed_arm != "layman")
 
 
+@pytest.mark.parametrize("replace_case", [False, True])
+def test_full_corpus_gate_checks_case_identity_not_only_pair_count(tmp_path, replace_case):
+    rows = []
+    for index, case in enumerate(benchmark.CASES):
+        case_id = "not-in-the-corpus" if replace_case and index == 0 else case.id
+        for arm, total, output in (("direct", 1000, 100), ("layman", 500, 50)):
+            rows.append({
+                "case_id": case_id, "arm": arm, "execution_status": "completed",
+                "validation": {"passed": True}, "usage": {"output_tokens": output},
+                "total_tokens": total, "usage_incomplete": False, "fallback_used": False,
+                "schema_version": benchmark.BENCHMARK_SCHEMA_VERSION,
+                "usage_protocol_sha256": "synthetic-test-protocol",
+                "route_tier": "deep", "unique_files_read": 1,
+            })
+    output_path = tmp_path / "results.jsonl"
+    output_path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+    result = benchmark.analyze(output_path)
+    assert result["pairs"] == 30
+    assert result["gates"]["all_30_pairs_complete"] is (not replace_case)
+    assert result["gates"]["all_30_pairs_usage_eligible"] is (not replace_case)
+    assert result["claim_token_savings"] is (not replace_case)
+
+
 def test_analysis_excludes_incomplete_usage_not_as_free_savings(tmp_path):
     output = tmp_path / "results.jsonl"
     rows = [

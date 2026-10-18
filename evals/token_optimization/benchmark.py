@@ -448,6 +448,8 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     for record in records:
         pairs.setdefault(record["case_id"], {})[record["arm"]] = record
     complete = [arms for arms in pairs.values() if {"direct", "layman"}.issubset(arms)]
+    expected_cases = {case.id for case in CASES}
+    full_corpus = len(expected_cases) == 30 and set(pairs) == expected_cases
     usage_eligible = [arms for arms in complete if all(
         arm.get("execution_status") == "completed" and not arm.get("usage_incomplete", False)
         and not arm.get("fallback_used", False) and arm.get("total_tokens", 0) > 0
@@ -488,8 +490,8 @@ def analyze(output: Path, seed: int = 20260716) -> dict[str, Any]:
     direct_files = statistics.median(arms["direct"].get("unique_files_read", 0) for arms in complete) if complete else None
     layman_files = statistics.median(arms["layman"].get("unique_files_read", 0) for arms in complete) if complete else None
     gates = {
-        "all_30_pairs_complete": len(complete) == 30,
-        "all_30_pairs_usage_eligible": len(usage_eligible) == 30,
+        "all_30_pairs_complete": full_corpus and len(complete) == 30,
+        "all_30_pairs_usage_eligible": full_corpus and len(usage_eligible) == 30,
         "trusted_usage_protocol": bool(complete) and all(
             record.get("schema_version") == BENCHMARK_SCHEMA_VERSION
             and bool(record.get("usage_protocol_sha256"))
