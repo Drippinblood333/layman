@@ -41,10 +41,10 @@ LOCK_NAMES = {
 }
 
 
-def _relative_markers(root: Path, names: set[str], *, directories: bool | None = None) -> list[str]:
+def _relative_markers(root: Path, names: set[str], *, parents: list[Path], directories: bool | None = None) -> list[str]:
     matches: set[Path] = set()
     for name in names:
-        for candidate in (root / name, *root.glob(f"*/{name}"), *root.glob(f"*/*/{name}")):
+        for candidate in (parent / name for parent in parents):
             if not candidate.exists():
                 continue
             if directories is True and not candidate.is_dir():
@@ -93,10 +93,21 @@ def inspect_project(workspace: str | Path) -> dict[str, Any]:
         raise FileNotFoundError(f"Workspace does not exist: {root}")
 
     visible = [item for item in root.iterdir() if item.name not in IGNORED_TOP_LEVEL]
-    manifests = _relative_markers(root, MANIFEST_NAMES, directories=False)
-    sources = _relative_markers(root, SOURCE_NAMES, directories=True)
-    tests = _relative_markers(root, TEST_NAMES, directories=True)
-    locks = _relative_markers(root, LOCK_NAMES, directories=False)
+    # Enumerate candidate parents once, pruning ignored roots before traversal.
+    # Preserve the original root / */ / */*/ marker depth, not a recursive walk.
+    parents = [root]
+    for item in visible:
+        if item.is_dir():
+            parents.append(item)
+            try:
+                parents.extend(child for child in item.iterdir() if child.is_dir())
+            except OSError:
+                # Path.glob previously skipped unreadable nested directories.
+                continue
+    manifests = _relative_markers(root, MANIFEST_NAMES, parents=parents, directories=False)
+    sources = _relative_markers(root, SOURCE_NAMES, parents=parents, directories=True)
+    tests = _relative_markers(root, TEST_NAMES, parents=parents, directories=True)
+    locks = _relative_markers(root, LOCK_NAMES, parents=parents, directories=False)
     readme = any((root / name).is_file() for name in ("README.md", "README.rst", "README.txt"))
     license_file = any((root / name).is_file() for name in ("LICENSE", "LICENSE.md", "COPYING"))
     changelog = any((root / name).is_file() for name in ("CHANGELOG.md", "CHANGES.md", "HISTORY.md"))

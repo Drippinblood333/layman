@@ -4,6 +4,14 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 project scan pruning: a first-failing regression showed ignored
+top-level dependency directories were traversed before result filtering. Parent
+directories are now enumerated once after pruning, preserving original marker
+depth and evidence. Same-fixture old/new results equal; directory enumerations
+163→4, ignored-root enumerations 27→0. Project-status/task-plan/CLI/MCP: 57 passed;
+Ruff/Bandit passed. [Evidence and limits](PROJECT_SCAN_PRUNING_2026-10-18.md).
+These are filesystem counts, not token savings. Hosted gate pending.
+
 2026-10-18 downloaded Windows artifact 12133912340 from successful exact-source
 CI 39120916701 passed actual frozen-binary offline checks in a Chinese/spaced,
 isolated profile with restricted PATH: brief help, UTF-8 read-only plan, all
