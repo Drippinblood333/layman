@@ -4,6 +4,16 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 current-default diagnostic closed at 1/2 starts: Direct `bugfix-04`
+passed automated function/scope checks with complete 99,754 total tokens; no
+fallback. Post-call config hash differed from freeze, so the Layman arm was never
+started and the remaining slot was closed. Zero valid pairs, no savings claim.
+Cause unknown (baseline absolute config identity was not recorded); user config
+was not restored/overwritten. Closed-journal replay guard was verified before
+Codex resolution. [Protocol, metrics and limits](DEFAULT_ROUTE_DIAGNOSTIC_2026-10-18.md).
+No paid API/reset/release/installation replacement. Next: zero-call config-source
+diagnosis, not more model trials. Exact main CI 39122492969 is now terminal success.
+
 2026-10-18 token-evidence gate fix (evaluation-only): analysis previously accepted
 any 30 paired case labels for its full-corpus gates. A synthetic journal replacing
 one declared case with an unknown ID reproduced the false pass; exact-corpus
