@@ -36,6 +36,7 @@ check, but its push returned a ref-lock mismatch saying the remote already held
 the intended SHA. `git ls-remote` independently confirmed the target; do not infer
 which actor updated the ref or force-push over it. Main's automatically started
 [run 39120093750](https://github.com/Drippinblood333/layman/actions/runs/39120093750)
-was observed in progress, not yet passed. No extra workflow was dispatched.
+subsequently completed successfully with all ten validation jobs passed on the
+same SHA, without a rerun. No extra workflow was dispatched.
 Remaining product gates, including broader
 same-quality token comparisons and public installation/release checks, stay open.

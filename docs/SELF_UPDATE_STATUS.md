@@ -23,7 +23,8 @@ all ten jobs passing, without a rerun. Ruff,
 Bandit, secret scan and 16 adjacent evaluation-helper tests passed locally.
 Remote main is independently verified at `841eaa5`; the push attempt reported that
 the ref already held this SHA (no force push). Automatically triggered main CI
-39120093750 was observed in progress, not passed. This is the completed bounded
+39120093750 subsequently completed successfully with all ten validation jobs
+passing on the same exact SHA, without a rerun. This is the completed bounded
 workflow-fix milestone, not completion of the broader product goal.
 
 2026-10-18 executable coding-log component pilot closed its two-start ceiling:
