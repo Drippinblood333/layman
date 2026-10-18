@@ -23,6 +23,8 @@ Layman composes only the modules needed for the task: context selection, workflo
 
 An opt-in, reversible repeated-log encoder is available for automatic API tool outputs and as `layman compact-output`. It follows RTK's repeated-lines-with-counts strategy without vendoring its code. [Offline measurements](docs/BENCHMARKS.md#lossless-repeated-tool-output-offline-only) establish exact reconstruction and smaller synthetic log bytes, not total task-token savings. It does not automatically intercept Plus shell tools.
 
+Experimental: exact text restoration does not guarantee equally correct model answers. In a [paired synthetic log-extraction pilot](docs/LOSSLESS_LOG_PILOT_V2_2026-10-18.md), raw input passed the answer gate and encoded input failed it. Lower usage therefore did not qualify as verified savings. Leave encoding off unless your own task-quality checks pass.
+
 | Capability | ChatGPT login | OpenAI API key |
 |---|---:|---:|
 | Understand project progress | Yes | Yes |

@@ -61,6 +61,8 @@ API clients may explicitly set `metadata.layman_tool_output_mode="lossless_lines
 
 This feature does not automatically intercept Plus/Codex shell tools or shrink unrelated task history. Fresh paired end-to-end execution must measure whether tool-output reduction outweighs encoding overhead, re-reads and quality effects before publishing any total-token claim.
 
+The [v2 synthetic CLI log-extraction pilot](LOSSLESS_LOG_PILOT_V2_2026-10-18.md) completed its separate two-invocation ceiling: raw 37,301 total tokens / strict answer PASS; encoded 21,345 / strict answer FAIL. Both had complete usage, zero tools and no cached tokens. The lower encoded usage is **not an accepted same-quality saving**. Per-field failure details were not retained, so no specific model misreading is established. This is neither an API transport test nor a coding-quality benchmark; encoding remains experimental and opt-in.
+
 ## Static routing suite
 
 `evals/router-v2/cases.jsonl` contains 300 varied cases across summary, rewrite, code explanation, debugging, architecture and extraction. Each category has 50 cases covering Chinese and English, long context, one versus multiple tools, previous-response state, budget/quality metadata, high-risk content and conflicting route overrides.

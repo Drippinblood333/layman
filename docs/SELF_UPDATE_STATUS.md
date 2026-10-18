@@ -1,8 +1,24 @@
 # Project update status
 
-Updated: 2026-10-16
+Updated: 2026-10-18
 
 ## Verified checkpoint
+
+2026-10-18 lossless-log v2 pilot evidence closed: corrected settings passed native
+offline rendering before two separately reserved subscription invocations on
+source 1c7e6084e214239bb9b4a97ecb20e200016fabe7. Same Sol/medium, instruction,
+schema, fixture, read-only workspace and exact six-field gate: raw 37,301 tokens /
+PASS, encoded 21,345 / FAIL; both complete usage, zero tool/file-reference events,
+zero cached tokens and unchanged global config. The 42.78% lower encoded usage is
+not accepted as savings because quality failed. No answer/per-field diagnostic
+was retained, so do not attribute a specific misreading. Two reservations/two
+results, no replay, fallback, paid API or reset credit; earlier failed v1 untouched.
+[Report](LOSSLESS_LOG_PILOT_V2_2026-10-18.md) records boundaries. Both READMEs now
+distinguish lossless text from model-answer quality; existing opt-in behavior stays
+unchanged. Main CI [38876769558](https://github.com/Drippinblood333/layman/actions/runs/38876769558)
+is terminal SUCCESS on exact eeea9ca2358d04a947da1773e6f5ead6b51cc67e, superseding
+the queued observation below. Documentation-only batch: no duplicate build, source
+behavior change, installed replacement, tag or formal release. Full goal active.
 
 2026-10-16 large-stdin hosted gate: [CI 38876269707](https://github.com/Drippinblood333/layman/actions/runs/38876269707)
 completed SUCCESS without retries on exact eeea9ca2358d04a947da1773e6f5ead6b51cc67e.
