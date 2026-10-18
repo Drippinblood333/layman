@@ -38,6 +38,6 @@ After fresh fetch/ancestry validation, remote main was fast-forwarded from
 `f11e326` to this exact source SHA and independently verified with `ls-remote`.
 Previous main CI 39121223805 was terminal success; the next automatic main run
 is separate: [CI 39122014913](https://github.com/Drippinblood333/layman/actions/runs/39122014913)
-was observed queued on this SHA, not green. No duplicate workflow was dispatched.
+subsequently completed successfully on this SHA. No duplicate workflow was dispatched.
 Release secret and whitespace checks also passed locally. This closes the bounded
 scan-pruning change, not the overall same-quality token-efficiency goal.

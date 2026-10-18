@@ -13,9 +13,12 @@ Successful counterpart evidence remains intact; raw diagnostics are not included
 `repository=true` still means a `.git` marker was found, not verified integrity.
 Ruff/Bandit passed after correcting test import spacing; no model call, dependency
 or permission change. Source `7ee4d7cb3ded65f253e57718c957f971ce6ec2e6` was
-pushed to `codex/verify-git-evidence`; exact CI 39122205607 was observed queued,
-not passed. Main remains at `4b58b47`, whose CI 39122014913 is still in progress.
-No duplicate workflow, release or installed replacement was requested.
+pushed to `codex/verify-git-evidence`; exact CI 39122205607 completed successfully
+with all ten validation jobs passed, without a rerun. Fresh fetch/ancestry checks
+preceded fast-forwarding main to this exact SHA; `ls-remote` confirmed the ref.
+Prior main CI 39122014913 also completed successfully. The new main push's
+automatic CI 39122492969 is in progress on this SHA, not green. No extra workflow, release or
+installed replacement was requested; the full product goal remains active.
 
 2026-10-18 project scan pruning: a first-failing regression showed ignored
 top-level dependency directories were traversed before result filtering. Parent
@@ -27,7 +30,8 @@ These are filesystem counts, not token savings. Source `4b58b47` is on
 `codex/verify-project-pruning`; exact CI 39121698984 completed successfully with
 all ten validation jobs passed, without a rerun. After fetch/ancestry validation,
 main was fast-forwarded to the same SHA and independently checked. The new main
-CI 39122014913 is queued, not green; previous main CI 39121223805 is terminal success.
+CI 39122014913 subsequently completed successfully; previous main CI 39121223805
+is also terminal success.
 
 2026-10-18 downloaded Windows artifact 12133912340 from successful exact-source
 CI 39120916701 passed actual frozen-binary offline checks in a Chinese/spaced,
