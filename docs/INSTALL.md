@@ -157,6 +157,8 @@ dependencies, not the test, audit or packaging tools. This is the currently
 available install path, not the unavailable release installer above.
 
 Offline planning works without Codex CLI, ChatGPT login, API keys or `setup`.
+The offline CLI does not preload the API server; `serve` and `demo` load it when
+needed. This does not change the locked dependency set or remove API support.
 To enable the Codex plugin and execute tasks, you additionally need a working
 Codex CLI with plugin support; Plus execution needs ChatGPT sign-in. Follow the
 [official Codex CLI installation and sign-in guide](https://developers.openai.com/codex/cli#getting-started)

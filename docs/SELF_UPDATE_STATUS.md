@@ -4,6 +4,17 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 lean CLI startup: Uvicorn is imported only for `serve`/`demo`, not every
+offline plan/help startup. A first-failing fresh-process import blocker now lets
+Chinese read-only `plan --brief` succeed without loading the API server. Two
+delegation controls preserve both server entrypoints' app/factory/host/port.
+CLI/task-plan/MCP: 55 passed; Ruff/Bandit/secret scan/whitespace passed. Five fresh
+Python processes before/after on this host measured 387→291 loaded modules,
+19→0 Uvicorn modules, import median 298.843→221.900 ms. Fixed-order local import
+timings are not full CLI latency, all-platform speed, binary-size or token savings.
+Runtime dependencies and API capability are unchanged. No model call or installed
+replacement; hosted validation of this source batch remains required.
+
 2026-10-18 zero-call config follow-up: two bounded nearby backup candidates did
 not match the old hash. Isolated synthetic initialize/config-read returned the
 expected instruction-presence result without changing its config or the real

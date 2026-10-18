@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from io import StringIO
+from types import SimpleNamespace
 
 import pytest
 from layman_router import cli
@@ -189,3 +192,46 @@ def test_plan_default_output_remains_json(monkeypatch, tmp_path, capsys):
     result = json.loads(capsys.readouterr().out)
     assert "routing_decision" in result["route"]
     assert result["stores_task_or_code"] is False
+
+
+def test_offline_plan_does_not_import_api_server(tmp_path):
+    code = (
+        "import sys\n"
+        "class BlockServer:\n"
+        " def find_spec(self, fullname, path=None, target=None):\n"
+        "  if fullname == 'uvicorn' or fullname.startswith('uvicorn.'):\n"
+        "   raise ImportError('Offline plan imported the API server')\n"
+        "sys.meta_path.insert(0, BlockServer())\n"
+        "from layman_router.cli import main\n"
+        "raise SystemExit(main(['plan', '--brief']))\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code], cwd=tmp_path,
+        input="只读分析 README.md，不要修改文件。", capture_output=True,
+        encoding="utf-8", timeout=20, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "No execution started" in result.stdout
+    assert "read-only" in result.stdout
+
+
+@pytest.mark.parametrize("command,port", [(["serve"], 8765), (["demo", "--port", "8765"], 8765)])
+def test_server_commands_still_load_and_delegate_to_uvicorn(monkeypatch, tmp_path, command, port):
+    calls = []
+    server = SimpleNamespace(run=lambda *a, **k: calls.append((a, k)))
+    monkeypatch.setitem(sys.modules, "uvicorn", server)
+    monkeypatch.setattr(cli, "uvicorn", server, raising=False)
+    monkeypatch.setattr(cli, "load_config", lambda: SimpleNamespace(
+        listen_host="127.0.0.1", listen_port=port,
+        admin_token_env="LAYMAN_TEST_DEMO_TOKEN", database_path=tmp_path / "demo.sqlite3",
+    ))
+    monkeypatch.setitem(sys.modules, "layman_router.demo", SimpleNamespace(seed_demo=lambda *a: None))
+    monkeypatch.setitem(sys.modules, "layman_router.telemetry", SimpleNamespace(
+        UsageStore=lambda *a: SimpleNamespace(initialize=lambda: None),
+    ))
+    for name in ("LAYMAN_ROUTER_DEMO", "LAYMAN_ROUTER_PORT", "LAYMAN_ROUTER_DATABASE_PATH", "LAYMAN_TEST_DEMO_TOKEN"):
+        monkeypatch.setenv(name, "synthetic-before")
+    assert cli.main(command) == 0
+    assert calls == [(("layman_router.app:create_app",), {
+        "factory": True, "host": "127.0.0.1", "port": port,
+    })]

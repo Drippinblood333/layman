@@ -11,8 +11,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-import uvicorn
-
 from . import __version__
 from .codex_config import disable_codex, enable_codex, list_backups, restore_backup
 from .config import load_config
@@ -320,6 +318,8 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(stop_router(), indent=2, ensure_ascii=False))
             return 0
         if args.command == "serve":
+            import uvicorn
+
             config = load_config()
             uvicorn.run("layman_router.app:create_app", factory=True, host=config.listen_host, port=config.listen_port)
             return 0
@@ -419,6 +419,8 @@ def main(argv: list[str] | None = None) -> int:
             print("Set this value as LAYMAN_ROUTER_ADMIN_TOKEN in the router process.", file=sys.stderr)
             return 0
         if args.command == "demo":
+            import uvicorn
+
             from .demo import seed_demo
             from .telemetry import UsageStore
 
