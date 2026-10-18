@@ -132,6 +132,29 @@ def _input_task(*, clipboard: bool = False) -> str:
     return task
 
 
+def _brief_plan(plan: dict) -> str:
+    route = plan["route"]
+    lines = [
+        "Offline plan. No execution started; readiness is not verified.",
+        f"Stage: {plan['project_stage']} | Risk: {plan['risk']} | Mode: {plan['execution']}",
+        f"Permissions: {route['sandbox']}",
+        (
+            f"File budget: {route['initial_file_budget']} initially, {route['expanded_file_budget']} expanded; "
+            f"tool-call budget: {route['tool_call_budget']}"
+        ),
+    ]
+    for title, items in (
+        ("Clarify", plan["prompt_guidance"]["questions"]),
+        ("Next", plan["next_steps"]),
+        ("Success criteria", plan["acceptance_criteria"]),
+        ("Stop if", plan["stop_conditions"]),
+    ):
+        if items:
+            lines.append(f"{title}:")
+            lines.extend(f"- {item}" for item in items)
+    return "\n".join(lines)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="layman")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
@@ -151,6 +174,7 @@ def build_parser() -> argparse.ArgumentParser:
     plan = commands.add_parser("plan", help="Plan one stdin task without executing it or storing its text")
     plan.add_argument("--cwd", type=Path, default=Path.cwd())
     plan.add_argument("--clipboard", action="store_true", help="Read Unicode task text directly from the clipboard")
+    plan.add_argument("--brief", action="store_true", help="Show actionable guidance instead of full JSON diagnostics")
     run = commands.add_parser("run", help="Automatically route and execute one stdin task through ChatGPT login")
     run.add_argument("--cwd", type=Path, default=Path.cwd())
     run.add_argument("--codex-path")
@@ -331,7 +355,8 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(inspect_project(args.cwd), indent=2, ensure_ascii=False))
             return 0
         if args.command == "plan":
-            print(json.dumps(create_task_plan(_input_task(clipboard=args.clipboard), args.cwd), indent=2, ensure_ascii=False))
+            plan = create_task_plan(_input_task(clipboard=args.clipboard), args.cwd)
+            print(_brief_plan(plan) if args.brief else json.dumps(plan, indent=2, ensure_ascii=False))
             return 0
         if args.command == "run":
             result = run_plus_task(

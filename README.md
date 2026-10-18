@@ -67,10 +67,14 @@ The equivalent CLI accepts the clipboard in these examples, or standard input wh
 
 ```powershell
 layman status
-layman plan --clipboard
+layman plan --brief --clipboard
 layman run --dry-run --clipboard
 layman run --clipboard
 ```
+
+`plan --brief` shows clarification, permissions, budgets, next steps and acceptance/
+stop conditions without internal routing diagnostics. It does not execute a task
+or verify readiness. Omit `--brief` for the unchanged full JSON interface.
 
 An independent CLI/MCP task containing only "continue" or "继续" does not identify
 the previous goal. Layman asks for the original task, remaining outcome and latest

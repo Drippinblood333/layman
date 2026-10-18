@@ -148,3 +148,44 @@ def test_status_keeps_explicit_or_non_plus_service_probe(monkeypatch, tmp_path, 
     assert requests == ["/healthz"]
     if not service_only:
         assert result["configured_mode"] == ("api" if mode == "api" else "unknown")
+
+
+@pytest.mark.parametrize("task", [
+    "Fix src/login.py null handling; preserve the API",
+    "帮我优化整个项目",
+    "只读分析 README.md，不要修改文件。",
+    "请删除生产支付数据库并迁移权限",
+])
+def test_brief_plan_retains_actionable_guidance_without_execution(monkeypatch, tmp_path, capsys, task):
+    from layman_router.task_plan import create_task_plan
+
+    plan = create_task_plan(task, tmp_path)
+    original = json.dumps(plan, ensure_ascii=False)
+    monkeypatch.setattr(cli, "_input_task", lambda **kwargs: task)
+    monkeypatch.setattr(cli, "create_task_plan", lambda *args: plan)
+    monkeypatch.setattr(cli, "run_plus_task", lambda *args, **kwargs: pytest.fail("Plan must not execute"))
+    assert cli.main(["plan", "--brief", "--cwd", str(tmp_path)]) == 0
+    output = capsys.readouterr().out
+    assert "No execution started" in output
+    assert plan["route"]["sandbox"] in output
+    assert plan["execution"] in output
+    assert plan["risk"] in output
+    for section in ("next_steps", "acceptance_criteria", "stop_conditions"):
+        assert all(item in output for item in plan[section])
+    assert all(question in output for question in plan["prompt_guidance"]["questions"])
+    assert "router_compute_ms" not in output
+    assert "routing_decision" not in output
+    assert task not in output
+    assert json.dumps(plan, ensure_ascii=False) == original
+    assert f"{plan['route']['initial_file_budget']} initially" in output
+    assert f"{plan['route']['expanded_file_budget']} expanded" in output
+    assert f"tool-call budget: {plan['route']['tool_call_budget']}" in output
+
+
+def test_plan_default_output_remains_json(monkeypatch, tmp_path, capsys):
+    task = "Fix src/login.py null handling"
+    monkeypatch.setattr(cli, "_input_task", lambda **kwargs: task)
+    assert cli.main(["plan", "--cwd", str(tmp_path)]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert "routing_decision" in result["route"]
+    assert result["stores_task_or_code"] is False

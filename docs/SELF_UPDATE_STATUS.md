@@ -4,6 +4,14 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 optional brief-plan preview: `plan --brief` preserves all actionable
+questions/permissions/budgets/next steps/acceptance/stops while omitting internal
+route diagnostics. Default JSON/MCP and execution behavior remain unchanged.
+Four first-failing cases plus JSON control now pass; CLI/task-plan/MCP: 52 passed.
+Four measured examples fell from 82–85 display lines to 14–17, not measured model
+token savings or proof of usability. [Evidence](BRIEF_PLAN_2026-10-18.md). Hosted
+verification pending; no model call or installation replacement.
+
 2026-10-18 missing-CLI setup fix: default plugin setup now rejects missing/unusable
 CLI discovery before changing Layman's install state. Two first-failing cases
 cover new and existing homes; a CLI-present/login-absent control preserves plugin

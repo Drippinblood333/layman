@@ -59,10 +59,13 @@ Use $layman-auto to 完成下一项任务并汇报验证证据。
 
 ```powershell
 layman status
-layman plan --clipboard
+layman plan --brief --clipboard
 layman run --dry-run --clipboard
 layman run --clipboard
 ```
+
+`plan --brief` 只展示澄清问题、权限、预算、下一步、验收与停止条件，隐藏内部路由诊断。
+它不会执行任务，也不代表已验证可执行；去掉 `--brief` 仍输出完整 JSON。
 
 安装与 API 配置见[安装文档](docs/INSTALL.md)。API 用户修改 Codex 配置前会看到差异预览和备份；`layman uninstall` 会先移除 Layman 插件与本地市场，再恢复受管配置，并默认保留本地数据与恢复备份。只有 Codex 引用已安全移除、目录带有效 Layman 所有权标记、该目录确由 Layman 创建且内容全部属于受管清单时，`--purge-data` 才允许删除。
 

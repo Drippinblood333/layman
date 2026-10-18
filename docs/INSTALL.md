@@ -179,7 +179,7 @@ python -m venv .venv
 .\.venv\Scripts\python -m pip install --require-hashes -r .\services\layman-router\requirements.lock
 .\.venv\Scripts\python -m pip install --no-deps .\services\layman-router
 .\.venv\Scripts\python -m pip check
-.\.venv\Scripts\layman plan
+.\.venv\Scripts\layman plan --brief
 ```
 
 macOS/Linux (run from the same project root):
@@ -189,7 +189,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install --require-hashes -r services/layman-router/requirements.lock
 .venv/bin/python -m pip install --no-deps services/layman-router
 .venv/bin/python -m pip check
-.venv/bin/layman plan
+.venv/bin/layman plan --brief
 ```
 
 Keep using the full `.venv` executable paths shown above after opening a new
@@ -197,7 +197,10 @@ terminal in this checkout. A source install does not put `layman` on the global
 PATH; bare `layman` examples elsewhere assume a PATH-enabled installation. No
 activation script or shell execution-policy change is required. `plan` reads a
 task you type and does not launch a model. Stop here if you only want offline
-planning. To enable plugin/execution, first check CLI discovery and saved login,
+planning. `--brief` keeps clarification questions, permissions, budgets, next
+steps, success criteria and stop conditions but omits internal route diagnostics.
+It does not execute, rewrite the task or certify readiness. Omit the flag for the
+unchanged full JSON output used by integrations. To enable plugin/execution, first check CLI discovery and saved login,
 then run setup:
 
 ```powershell
