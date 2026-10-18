@@ -94,6 +94,10 @@ implementation or publishing. This takes precedence over project-stage release
 steps; clarification questions, when present, still come first. It reuses the
 selected permission result, not a new claim to understand every prompt.
 
+Project status treats failed Git branch/status reads as unknown (`null`), not as
+proof of a clean checkout. Each successful field remains available independently;
+the `repository` flag indicates a `.git` marker, not a repository integrity check.
+
 Release-candidate planning ignores recognized future-approval boilerplate such as
 "公开发布时，我会批准" or "When we publish, I will approve" when selecting the
 current workflow. English `ship` must be a whole word, not part of `ownership` or

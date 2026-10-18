@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from pathlib import Path
 
+import pytest
 from layman_router.project_status import inspect_project
 
 
@@ -50,6 +52,22 @@ def test_release_files_make_candidate_but_never_prove_ready(tmp_path: Path):
     assert result["stage"] == "release_candidate"
     assert result["release_ready"] is False
     assert "cannot prove" in result["release_ready_reason"]
+
+
+@pytest.mark.parametrize("branch_exit,status_exit", [(0, 128), (128, 0), (128, 128)])
+def test_failed_git_commands_report_unknown_not_success(monkeypatch, tmp_path, branch_exit, status_exit):
+    (tmp_path / ".git").mkdir()
+    responses = iter([
+        subprocess.CompletedProcess([], branch_exit, "main\n", "private-error"),
+        subprocess.CompletedProcess([], status_exit, " M private-file\n", "private-error"),
+    ])
+    monkeypatch.setattr("layman_router.project_status.subprocess.run", lambda *a, **k: next(responses))
+    result = inspect_project(tmp_path)["git"]
+    assert result["branch"] == ("main" if branch_exit == 0 else None)
+    assert result["changed_files"] == (1 if status_exit == 0 else None)
+    assert "private" not in str(result)
+
+
 def test_ignored_top_level_directories_are_not_traversed(monkeypatch, tmp_path):
     ignored = tmp_path / "node_modules"
     (ignored / "dependency").mkdir(parents=True)

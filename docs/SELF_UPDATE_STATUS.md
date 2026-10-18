@@ -4,6 +4,16 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 Git evidence correction: unsuccessful branch/status commands now yield
+`null` for only their failed field rather than accepting failed stdout or implying
+a clean workspace. Three mixed-failure regressions failed first; after the fix,
+project-status/task-plan/CLI/MCP suites: 60 passed. An actual Git check against an
+isolated invalid `.git` marker reported changed_files=0 before, null after.
+Successful counterpart evidence remains intact; raw diagnostics are not included.
+`repository=true` still means a `.git` marker was found, not verified integrity.
+Ruff/Bandit passed after correcting test import spacing; no model call, dependency
+or permission change. Hosted verification of the forthcoming commit remains open.
+
 2026-10-18 project scan pruning: a first-failing regression showed ignored
 top-level dependency directories were traversed before result filtering. Parent
 directories are now enumerated once after pruning, preserving original marker

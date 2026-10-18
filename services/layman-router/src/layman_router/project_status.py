@@ -80,8 +80,11 @@ def _git_summary(root: Path) -> dict[str, Any]:
         return {"repository": True, "branch": None, "changed_files": None}
     return {
         "repository": True,
-        "branch": branch.stdout.strip() or None,
-        "changed_files": len([line for line in status.stdout.splitlines() if line.strip()]),
+        "branch": (branch.stdout.strip() or None) if branch.returncode == 0 else None,
+        "changed_files": (
+            len([line for line in status.stdout.splitlines() if line.strip()])
+            if status.returncode == 0 else None
+        ),
     }
 
 
