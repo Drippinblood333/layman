@@ -4,6 +4,18 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 latest frozen Windows plugin chain passed in a fresh isolated,
+unsigned-in Chinese/spaced profile: actual setup with pinned private alpha.20
+native CLI, exact frozen MCP launcher/cache match, initialize/three tools/Chinese
+read-only plan, direct brief plan, and actual guarded uninstall/purge of only the
+test-created owned home. No global Layman/Python on child PATH or copied auth;
+real config hash unchanged after both phases, zero model task starts. Artifact
+12135382197/source `5495718`, exe 17,275,011 bytes and linked metadata verified.
+[Evidence and limits](WINDOWS_BRIEF_ARTIFACT_2026-10-18.md#follow-up-actual-frozen-plugin-setup-and-uninstall).
+Main CI 39124387511 is now terminal success. No user install replacement, public
+release or all-CLI/desktop-UI/clean-OS/token claim. Download/report evidence remains;
+only temporary owned test data was removed. Overall goal active.
+
 2026-10-18 hosted startup check exposed a pre-existing UTF-8 stdin defect:
 CI 39123806291 on `5dc6dd4` failed Windows tests (590 passed, one new Chinese
 offline-plan subprocess test failed); the other eight completed jobs passed.
@@ -19,7 +31,7 @@ completed successfully with all ten validation jobs passed. This includes the
 Windows test that failed on the earlier source; the old failure remains intact.
 After fresh fetch/ancestry checks, main was fast-forwarded from `7ee4d7c` to this
 exact verified SHA and confirmed with `ls-remote`. Newly triggered main CI
-39124387511 is in progress on this SHA, not green. This also carries the validated corpus/config
+39124387511 subsequently completed successfully on this SHA. This also carries the validated corpus/config
 provenance improvements; no evaluation task was relaunched or allowance reopened.
 No model call, dependency change, installation replacement or release.
 

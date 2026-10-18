@@ -52,3 +52,40 @@ download installer and update/uninstall are outside this bounded batch. Current
 binary size is measured, not a claim of size reduction. CLI-output bytes do not
 prove model-token/fee savings or same-quality coding improvements. Main's separate
 automatic CI 39121223805 was still in progress when checked, not assumed green.
+
+## Follow-up: actual frozen plugin setup and uninstall
+
+Latest artifact **12135382197**, successful CI **39124123773**, source
+`5495718bfdfca51d7f2a9c701bc5ec915460b199`, was downloaded separately. Its frozen
+executable is **17,275,011 bytes**, SHA-256
+`133569a662d4980fc83550059d1749cd82081a91e40026d28d597cb1284d29d7`.
+Executable and all three linked metadata hashes matched `BUILD.json`; no binary
+size reduction is claimed. Main's separate CI **39124387511** is now terminal success.
+
+Actual `setup --mode plus` succeeded in a new Chinese/spaced, unsigned-in test
+profile with explicit isolated Layman/Codex homes and no global Layman/Python on
+child PATH. The pinned private **0.162.0-alpha.20** Codex CLI performed the native
+marketplace/plugin registration. No user auth file was copied. The installed MCP
+launcher pointed to this exact frozen executable with `mcp-server`, not a Python
+module command; native cached launcher matched it exactly.
+
+Starting that cached command actually initialized MCP, listed all three tools and
+returned a Chinese read-only plan. Direct frozen `plan --brief` with Chinese UTF-8
+stdin also passed. Non-UTF-8 Python environment overrides were supplied, but the
+binary's internal encoding was not independently introspected; source regressions
+and hosted Windows tests separately cover forced legacy text decoding.
+
+Then actual `uninstall --purge-data` exited zero and removed only the test-created
+owned Layman home, after checking its resolved target stayed under this batch's
+isolated profile and its ownership marker. Native isolated caches/backups may
+remain; downloaded files and fixed reports were retained. Real user config hash
+was unchanged after setup/MCP and after uninstall; the downloaded executable hash
+also stayed unchanged. No current user installation was replaced or model task
+started. Private controllers/results: ignored `build/ci-5495718/`.
+
+The [official marketplace registration guide](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli)
+was searched/fetched before commands. This verifies the tested pinned CLI, not
+all current/future plugin command versions; current documentation recommends the
+desktop app for local plugin installation/testing. No desktop UI restart/load,
+clean-OS installation, public download installer, live auth/execution or non-Windows
+claim follows from this bounded native-CLI/frozen-package acceptance.
