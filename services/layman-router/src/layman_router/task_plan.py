@@ -37,13 +37,37 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
         modules.append("verification")
 
     plan_first = guidance["needs_clarification"] or features.risk == "high" or workflow in {"idea-to-smallest-usable-version", "read-only-risk-review"}
+    read_only = route["sandbox"] == "read-only"
     acceptance = [
         "The requested user-visible outcome is present.",
         "The smallest relevant automated or manual verification succeeds.",
         "No unrelated files or behaviors are changed.",
     ]
+    if read_only:
+        acceptance = [
+            "The requested findings are supported by read-only evidence.",
+            "No files or behaviors are changed.",
+        ]
     if features.risk == "high":
         acceptance.append("Implementation starts only after the read-only risk review is accepted.")
+
+    if guidance["needs_clarification"]:
+        next_steps = [
+            "Answer the clarification questions, then resubmit the original request with those details; no execution has started.",
+        ]
+    elif read_only:
+        next_steps = [
+            "Perform only the requested read-only work. Do not modify files.",
+            "Report evidence and limits; do not implement changes or publish.",
+        ]
+    elif workflow == "release-gate":
+        next_steps = project["next_steps"]
+    else:
+        next_steps = [
+            "Inspect only the code and context needed for the requested task.",
+            "Review the scoped plan before implementation." if plan_first else "Make the smallest complete change for the requested outcome.",
+            "Run verification proportionate to this change and report any remaining risk.",
+        ]
 
     return {
         "workspace": str(root),
@@ -62,13 +86,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
             "The task requires an unrelated broad refactor or destructive operation.",
             "Verification contradicts the claimed outcome.",
         ],
-        "next_steps": [
-            "Answer the clarification questions, then resubmit the original request with those details; no execution has started.",
-        ] if guidance["needs_clarification"] else project["next_steps"] if workflow == "release-gate" else [
-            "Inspect only the code and context needed for the requested task.",
-            "Review the scoped plan before implementation." if plan_first else "Make the smallest complete change for the requested outcome.",
-            "Run verification proportionate to this change and report any remaining risk.",
-        ],
+        "next_steps": next_steps,
         "task_chars": len(task),
         "stores_task_or_code": False,
     }

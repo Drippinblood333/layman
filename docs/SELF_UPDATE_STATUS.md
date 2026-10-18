@@ -4,6 +4,17 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 read-only plan wording repair: three Chinese/English/release-check
+regressions showed next steps could recommend implementation or inherited full
+release execution even though the selected sandbox was read-only. Next steps and
+acceptance now use that existing permission decision, with clarification still
+first; writable release/implementation behavior, route fields and original task
+remain unchanged. The readonly path has two concise action items rather than the
+generic three; no measured token benefit is claimed. All 37 task-plan/CLI/MCP
+tests passed after the three initial failures; Ruff/Bandit/diff checks passed.
+No new model calls, dependencies, permission changes or installed updates.
+Hosted verification pending; full goal active.
+
 2026-10-18 source-plugin corrected gate passed: [CI 39115763667](https://github.com/Drippinblood333/layman/actions/runs/39115763667)
 completed SUCCESS on exact 408b157aa66e23443b42d711afb04d9bb84a643f. All ten
 validation jobs passed, publish skipped. The prior failed original remains below;

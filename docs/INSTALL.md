@@ -88,6 +88,12 @@ In CLI/MCP `plan` results, read clarification from the top-level `prompt_guidanc
 It is not duplicated under `route`. Standalone `run --dry-run` previews still
 include their own `prompt_guidance`; their execution-blocking behavior is unchanged.
 
+When the selected route is read-only, plan next steps and acceptance criteria also
+stay read-only: report the requested evidence and limits, without recommending
+implementation or publishing. This takes precedence over project-stage release
+steps; clarification questions, when present, still come first. It reuses the
+selected permission result, not a new claim to understand every prompt.
+
 Use `$layman-auto` in a new task to route the original request through the bundled local MCP tool. The tool verifies ChatGPT login, removes API-key environment variables, and starts an ephemeral Codex run. Terminal users can copy a task to the clipboard and pipe standard input without placing the task text in command history:
 
 ```powershell

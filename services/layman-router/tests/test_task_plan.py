@@ -29,6 +29,23 @@ def test_high_risk_plan_cannot_drop_safety_or_deep_route(tmp_path: Path):
     assert "safety" in result["selected_modules"]
 
 
+@pytest.mark.parametrize("task", [
+    "只读分析 README.md，不要修改文件。",
+    "Read-only review of README.md; do not modify files.",
+    "只读检查发布条件，不要修改文件。",
+])
+def test_read_only_plan_does_not_recommend_implementation_or_release_execution(monkeypatch, tmp_path, task):
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+        "stage": "release_candidate", "next_steps": ["Run the full release gate"],
+    })
+    result = create_task_plan(task, tmp_path)
+    assert result["route"]["sandbox"] == "read-only"
+    assert any("Do not modify files" in step for step in result["next_steps"])
+    assert all("Make the smallest complete change" not in step for step in result["next_steps"])
+    assert "Run the full release gate" not in result["next_steps"]
+    assert "No files or behaviors are changed." in result["acceptance_criteria"]
+
+
 def test_non_release_task_does_not_inherit_release_checks(monkeypatch, tmp_path: Path):
     monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
         "stage": "release_candidate", "next_steps": ["Run the full release gate"],
