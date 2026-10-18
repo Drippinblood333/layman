@@ -10,7 +10,9 @@ directories are now enumerated once after pruning, preserving original marker
 depth and evidence. Same-fixture old/new results equal; directory enumerations
 163→4, ignored-root enumerations 27→0. Project-status/task-plan/CLI/MCP: 57 passed;
 Ruff/Bandit passed. [Evidence and limits](PROJECT_SCAN_PRUNING_2026-10-18.md).
-These are filesystem counts, not token savings. Hosted gate pending.
+These are filesystem counts, not token savings. Source `4b58b47` is on
+`codex/verify-project-pruning`; exact CI 39121698984 is queued, not passed.
+Main remains at `f11e326`, whose separate CI 39121223805 is now terminal success.
 
 2026-10-18 downloaded Windows artifact 12133912340 from successful exact-source
 CI 39120916701 passed actual frozen-binary offline checks in a Chinese/spaced,
@@ -30,7 +32,7 @@ token savings or proof of usability. [Evidence](BRIEF_PLAN_2026-10-18.md). Hoste
 verification of source `f11e326` completed successfully as exact CI 39120916701
 with all ten validation jobs passed, without a rerun. Remote main is independently
 verified at the same SHA after its push reported that the ref already held the
-desired commit; no force push. Main CI 39121223805 is in progress, not green.
+desired commit; no force push. Main CI 39121223805 subsequently completed successfully.
 No model call or installation replacement. Prior main CI 39120729639 succeeded.
 
 2026-10-18 missing-CLI setup fix: default plugin setup now rejects missing/unusable

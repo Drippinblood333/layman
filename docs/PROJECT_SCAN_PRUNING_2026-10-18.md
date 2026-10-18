@@ -31,4 +31,8 @@ metadata work. Nested ignored names retain the previous top-level-only rule.
 
 Private controller/result are in ignored `build/scan-pruning-2026-10-18/`.
 No model calls, dependency additions, user-install replacement or formal release.
-Hosted validation of the forthcoming source commit remains open.
+Source `4b58b47d29c53d1a8887c10e2bea92f18e88997f` was pushed to
+`codex/verify-project-pruning`; exact [CI 39121698984](https://github.com/Drippinblood333/layman/actions/runs/39121698984)
+was observed queued, not passed. Main remains at verified `f11e326`; its separate
+automatic CI 39121223805 was verified terminal success. No duplicate build run
+was dispatched. Release secret and whitespace checks also passed locally.

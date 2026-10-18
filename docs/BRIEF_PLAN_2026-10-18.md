@@ -43,6 +43,6 @@ After fetch/ancestry validation, the main push reported a ref-lock mismatch sayi
 main already held the desired `f11e326` SHA; `git ls-remote` independently confirmed
 that exact ref. No force push or assumption about the ref updater was needed.
 Main's automatic [CI 39121223805](https://github.com/Drippinblood333/layman/actions/runs/39121223805)
-was observed in progress on the same SHA, not claimed successful. No extra run,
+subsequently completed successfully on the same SHA. No extra run,
 tag or formal release was dispatched. This closes the bounded brief-preview
 feature, not the larger same-quality token-efficiency goal.
