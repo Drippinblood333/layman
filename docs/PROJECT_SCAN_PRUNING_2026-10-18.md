@@ -33,6 +33,11 @@ Private controller/result are in ignored `build/scan-pruning-2026-10-18/`.
 No model calls, dependency additions, user-install replacement or formal release.
 Source `4b58b47d29c53d1a8887c10e2bea92f18e88997f` was pushed to
 `codex/verify-project-pruning`; exact [CI 39121698984](https://github.com/Drippinblood333/layman/actions/runs/39121698984)
-was observed queued, not passed. Main remains at verified `f11e326`; its separate
-automatic CI 39121223805 was verified terminal success. No duplicate build run
-was dispatched. Release secret and whitespace checks also passed locally.
+completed successfully with all ten validation jobs passed, without a rerun.
+After fresh fetch/ancestry validation, remote main was fast-forwarded from
+`f11e326` to this exact source SHA and independently verified with `ls-remote`.
+Previous main CI 39121223805 was terminal success; the next automatic main run
+is separate: [CI 39122014913](https://github.com/Drippinblood333/layman/actions/runs/39122014913)
+was observed queued on this SHA, not green. No duplicate workflow was dispatched.
+Release secret and whitespace checks also passed locally. This closes the bounded
+scan-pruning change, not the overall same-quality token-efficiency goal.

@@ -11,8 +11,10 @@ depth and evidence. Same-fixture old/new results equal; directory enumerations
 163→4, ignored-root enumerations 27→0. Project-status/task-plan/CLI/MCP: 57 passed;
 Ruff/Bandit passed. [Evidence and limits](PROJECT_SCAN_PRUNING_2026-10-18.md).
 These are filesystem counts, not token savings. Source `4b58b47` is on
-`codex/verify-project-pruning`; exact CI 39121698984 is queued, not passed.
-Main remains at `f11e326`, whose separate CI 39121223805 is now terminal success.
+`codex/verify-project-pruning`; exact CI 39121698984 completed successfully with
+all ten validation jobs passed, without a rerun. After fetch/ancestry validation,
+main was fast-forwarded to the same SHA and independently checked. The new main
+CI 39122014913 is queued, not green; previous main CI 39121223805 is terminal success.
 
 2026-10-18 downloaded Windows artifact 12133912340 from successful exact-source
 CI 39120916701 passed actual frozen-binary offline checks in a Chinese/spaced,
