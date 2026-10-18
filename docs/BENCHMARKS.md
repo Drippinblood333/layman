@@ -67,6 +67,8 @@ The [separate v3 diagnostic](LOSSLESS_LOG_DIAGNOSTIC_V3_2026-10-18.md) reused th
 
 Future synthetic tasks have a public [line-content contract](../evals/token_optimization/log_contract.py): exclude only CRLF/LF/CR terminators, preserve all other spaces/tabs. Independent offline reference checks cover three new fixtures and reject trimming or retained terminators. These are public validation cases, not holdouts, model-quality results or retroactive changes to v1-v3 scoring.
 
+A [separate independent two-task feasibility pilot](INDEPENDENT_LOG_CONTRACT_PILOT_2026-10-18.md) then completed its frozen four-invocation cap: both raw/encoded pairs passed all six exact fields, with summed native totals 51,326 versus 42,854 (16.51% lower). This observed reduction applies only to those clarified synthetic extraction tasks. Cache was unequal, one encoded arm was slower, and earlier failures remain; it is not general coding, billing, transport or release-grade evidence. Defaults stay unchanged.
+
 ## Static routing suite
 
 `evals/router-v2/cases.jsonl` contains 300 varied cases across summary, rewrite, code explanation, debugging, architecture and extraction. Each category has 50 cases covering Chinese and English, long context, one versus multiple tools, previous-response state, budget/quality metadata, high-risk content and conflicting route overrides.

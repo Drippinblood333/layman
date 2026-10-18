@@ -4,6 +4,18 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 independent clarified-log pilot completed: a later native quota read
+succeeded at 56%/9% used without changing auth/proxy settings; initial failure cause
+unknown. Frozen protocol then used exactly four reserved subscription invocations,
+all strict six-field gates passed on two new tasks, with complete usage, zero
+tools/files/compactions and unchanged config. Raw/encoded totals 51,326/42,854:
+16.51% lower only for these synthetic extraction tasks. Caches were unequal;
+one encoded arm slower. No general coding, fee or release claim; prior failures
+retained, defaults unchanged. [Report](INDEPENDENT_LOG_CONTRACT_PILOT_2026-10-18.md)
+records per-arm metrics, source/runtime/protocol hashes, counterbalanced order,
+quota recovery and scope limits. No paid API, reset, replay, user install replacement
+or publication. Full goal active; broader development-quality evidence still open.
+
 2026-10-18 independent clarified-contract pilot prepared, NOT launched: two new
 private synthetic cases (LF archive log and Unicode/CRLF whitespace-edge log)
 passed independent reference answers, exact codec round trip and negative field/

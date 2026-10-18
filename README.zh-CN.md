@@ -83,7 +83,7 @@ layman run --clipboard
 
 本地也可把 UTF-8 日志通过标准输入交给 `layman compact-output`，用 `layman compact-output --restore` 还原。命令不执行输入、不调用模型，也不存储日志。不要把过滤器的退出码当作上游测试成功；管道必须另外保留原命令的退出状态。
 
-当前仅证明合成重复日志能变小且完全还原，尚未证明完整任务总 token 或费用下降。详见[输出压缩测量](docs/BENCHMARKS.md#lossless-repeated-tool-output-offline-only)。
+在明确行边界的新规范下，[两项独立合成日志提取对照](docs/INDEPENDENT_LOG_CONTRACT_PILOT_2026-10-18.md)已通过同一逐字段检查，出现有限的总 token 下降；这不代表一般开发任务或费用收益。旧失败记录仍保留，默认不开启。详见[全部测量](docs/BENCHMARKS.md#lossless-repeated-tool-output-offline-only)。
 
 “无损”仅指文本可完整还原，不保证模型答案质量不变。在一次[合成日志提取对照](docs/LOSSLESS_LOG_PILOT_V2_2026-10-18.md)中，原文通过答案检查，压缩版未通过，因此即使用量更低，也不算已验证的节省。没有通过自己任务的质量检查前，请保持关闭。
 

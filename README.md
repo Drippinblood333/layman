@@ -25,6 +25,8 @@ An opt-in, reversible repeated-log encoder is available for automatic API tool o
 
 Experimental: exact text restoration does not guarantee equally correct model answers. In a [paired synthetic log-extraction pilot](docs/LOSSLESS_LOG_PILOT_V2_2026-10-18.md), raw input passed the answer gate and encoded input failed it. Lower usage therefore did not qualify as verified savings. Leave encoding off unless your own task-quality checks pass.
 
+A [separate clarified-contract pilot](docs/INDEPENDENT_LOG_CONTRACT_PILOT_2026-10-18.md) has two passing synthetic extraction pairs with lower total tokens. This limited result does not establish general coding or invoice savings, or erase earlier failures.
+
 | Capability | ChatGPT login | OpenAI API key |
 |---|---:|---:|
 | Understand project progress | Yes | Yes |
