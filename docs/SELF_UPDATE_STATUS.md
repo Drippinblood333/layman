@@ -4,6 +4,21 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 independent clarified-contract pilot prepared, NOT launched: two new
+private synthetic cases (LF archive log and Unicode/CRLF whitespace-edge log)
+passed independent reference answers, exact codec round trip and negative field/
+terminator checks. Raw/encoded UTF-8 bytes 10,699/309 and 22,051/335 are offline
+sizes, not token results. Protocol freezes four maximum CLI invocations in
+raw/encoded then encoded/raw order; zero reservations/model calls so far.
+App quota read failed twice; documented native account/rateLimits/read also
+returned an RPC error, both percentages null. Null was not treated as zero or
+available allowance. CLI starts and detects saved ChatGPT credentials, which does
+not establish live access/quota or diagnose the RPC failure. Fresh quota preflight
+is required before execution; no reset, paid API, fallback or install change.
+Frozen hashes/protocol/reference evidence: ignored
+build/independent-log-contract-pilot-2026-10-18/prepared-manifest.json. Scope-limited
+preparation Ruff/diff checks passed. Full goal active, no savings claimed.
+
 2026-10-18 offline line-contract clarification: old "complete checkpoint line"
 did not explicitly state terminator boundaries. Added a new evaluation-only task
 definition that excludes CRLF/LF/CR but preserves all other spaces/tabs. Three
