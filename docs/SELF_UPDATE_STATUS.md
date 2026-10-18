@@ -4,6 +4,18 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 v3 codec diagnosis closed its separate two-invocation ceiling: exact
+prior task/fixture/schema/quality rule, new value-free diagnostics. Raw 37,397
+tokens passed all six fields; encoded 21,513 parsed/matched schema but marker
+equality failed, other five matched. No answer retained, so line-ending/whitespace
+versus other-content cause is unknown. High caches reported separately; this is
+not an accepted same-quality saving or independent holdout. No replay/default
+change/normalization. Ten offline diagnostics tests and Ruff/evidence/diff checks
+passed; helper lives only in evals, not runtime. [Report](LOSSLESS_LOG_DIAGNOSTIC_V3_2026-10-18.md).
+Prior main CI 39116653902 is now terminal SUCCESS on exact
+13866b9e2ce50d4067cfabb73f1f74e157729407. No paid API, reset, installation
+replacement or release. Eval/docs-only changes held locally; full goal active.
+
 2026-10-18 read-only plan hosted gate: [CI 39116330971](https://github.com/Drippinblood333/layman/actions/runs/39116330971)
 completed SUCCESS without retries on exact 13866b9e2ce50d4067cfabb73f1f74e157729407.
 All ten validation jobs passed, publish skipped. Checked main ancestry and
