@@ -4,6 +4,15 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 downloaded Windows artifact 12133912340 from successful exact-source
+CI 39120916701 passed actual frozen-binary offline checks in a Chinese/spaced,
+isolated profile with restricted PATH: brief help, UTF-8 read-only plan, all
+actionable guidance retained, vague-task clarification, no state from planning,
+and missing-CLI setup failure without state/config writes. Executable 17,273,565
+bytes (about 16.5 MiB), SHA-256 and three metadata links verified; real user config
+hash unchanged. [Evidence and limits](WINDOWS_BRIEF_ARTIFACT_2026-10-18.md).
+No model call or installed replacement; not clean-OS/installer/token proof.
+
 2026-10-18 optional brief-plan preview: `plan --brief` preserves all actionable
 questions/permissions/budgets/next steps/acceptance/stops while omitting internal
 route diagnostics. Default JSON/MCP and execution behavior remain unchanged.
