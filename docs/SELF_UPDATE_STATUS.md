@@ -11,9 +11,13 @@ no longer matches inside `ownership`/`membership`. Original tasks and permission
 remain unchanged. Scoped task-plan/CLI/MCP tests: 47 passed; hosted verification
 pending. [Evidence and limits](RELEASE_INTENT_FILTER_2026-10-18.md). No new model
 call or token-saving claim; broader goal remains active. Source `841eaa5` is on
-`codex/verify-release-intent`; exact CI 39119758929 was observed queued. Ruff,
+`codex/verify-release-intent`; exact CI 39119758929 completed successfully with
+all ten jobs passing, without a rerun. Ruff,
 Bandit, secret scan and 16 adjacent evaluation-helper tests passed locally.
-Main remains at `13866b9` pending terminal hosted verification.
+Remote main is independently verified at `841eaa5`; the push attempt reported that
+the ref already held this SHA (no force push). Automatically triggered main CI
+39120093750 was observed in progress, not passed. This is the completed bounded
+workflow-fix milestone, not completion of the broader product goal.
 
 2026-10-18 executable coding-log component pilot closed its two-start ceiling:
 same capped-backoff task, identical starting files/driver/codec/instructions,

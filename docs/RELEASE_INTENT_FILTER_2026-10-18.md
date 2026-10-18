@@ -29,6 +29,13 @@ changed. No general natural-language intent or negation understanding is claimed
 
 Source commit `841eaa517c2c86ce47ab1af003a83c4c50e0aaa0` is pushed to
 `codex/verify-release-intent`. Exact [CI run 39119758929](https://github.com/Drippinblood333/layman/actions/runs/39119758929)
-was observed queued, not passed. Main has not been advanced to this commit.
-Earlier green CI cannot certify this change. Remaining product gates, including broader
+completed successfully: all ten validation jobs passed without a rerun.
+Remote `main` was then verified at the same exact SHA. The synchronization sequence
+first hit a fetch TLS failure; a retry fetched successfully and passed the ancestry
+check, but its push returned a ref-lock mismatch saying the remote already held
+the intended SHA. `git ls-remote` independently confirmed the target; do not infer
+which actor updated the ref or force-push over it. Main's automatically started
+[run 39120093750](https://github.com/Drippinblood333/layman/actions/runs/39120093750)
+was observed in progress, not yet passed. No extra workflow was dispatched.
+Remaining product gates, including broader
 same-quality token comparisons and public installation/release checks, stay open.
