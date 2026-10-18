@@ -14,8 +14,13 @@ strictly decodes its binary buffer as UTF-8; terminal/clipboard paths and
 text-only embedding/test streams remain unchanged. Malformed input stops before
 planning. CLI/task-plan/MCP: 57 passed; Ruff/Bandit/whitespace passed. Original CI
 failure remains recorded. Corrected source `5495718bfdfca51d7f2a9c701bc5ec915460b199`
-is pushed to `codex/verify-lazy-api-load`; exact new CI 39124123773 was observed
-queued, not passed. Main remains at `7ee4d7c` until this corrected-source gate passes.
+is pushed to `codex/verify-lazy-api-load`; exact corrected-source CI 39124123773
+completed successfully with all ten validation jobs passed. This includes the
+Windows test that failed on the earlier source; the old failure remains intact.
+After fresh fetch/ancestry checks, main was fast-forwarded from `7ee4d7c` to this
+exact verified SHA and confirmed with `ls-remote`. Newly triggered main CI
+39124387511 is in progress on this SHA, not green. This also carries the validated corpus/config
+provenance improvements; no evaluation task was relaunched or allowance reopened.
 No model call, dependency change, installation replacement or release.
 
 2026-10-18 lean CLI startup: Uvicorn is imported only for `serve`/`demo`, not every
