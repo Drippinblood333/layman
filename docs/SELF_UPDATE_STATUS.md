@@ -4,6 +4,21 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 executable coding-log component pilot closed its two-start ceiling:
+same capped-backoff task, identical starting files/driver/codec/instructions,
+matched Sol/medium/private runtime and 2000-token output limit. Original failed
+offline and reference passed 52 cases; driver modes restored exactly and retained
+nonzero failure exit. Both model repairs then passed signature/52-case/no-stdout,
+only-target scope and observed intended-mode failure/pass coverage, complete
+usage, zero compactions/observed forbidden MCP-collaboration and unchanged config.
+Totals 172,897/114,338 (33.87% lower) are one-fixture observations only: raw ran an
+extra successful check and used six tools versus four, caches differed, so no
+codec-only causal or broad developer/fee claim. [Report](CODING_LOG_COMPONENT_PILOT_2026-10-18.md)
+lists all metrics, source/protocol hashes and numeric-scope limits. No replay,
+fallback, paid API, reset, product-default change, installed replacement or release.
+Controller/artifacts remain private; docs-only evidence committed locally.
+Overall goal active; broader validation remains open.
+
 2026-10-18 independent clarified-log pilot completed: a later native quota read
 succeeded at 56%/9% used without changing auth/proxy settings; initial failure cause
 unknown. Frozen protocol then used exactly four reserved subscription invocations,

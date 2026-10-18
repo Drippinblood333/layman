@@ -69,6 +69,8 @@ Future synthetic tasks have a public [line-content contract](../evals/token_opti
 
 A [separate independent two-task feasibility pilot](INDEPENDENT_LOG_CONTRACT_PILOT_2026-10-18.md) then completed its frozen four-invocation cap: both raw/encoded pairs passed all six exact fields, with summed native totals 51,326 versus 42,854 (16.51% lower). This observed reduction applies only to those clarified synthetic extraction tasks. Cache was unequal, one encoded arm was slower, and earlier failures remain; it is not general coding, billing, transport or release-grade evidence. Defaults stay unchanged.
 
+An [executable coding-component pilot](CODING_LOG_COMPONENT_PILOT_2026-10-18.md) completed two reserved starts: both repairs passed the same signature/52-case/no-stdout and scope/driver-coverage gates. Totals were 172,897 raw versus 114,338 encoded (33.87% lower) for that one fixture. Raw repeated a successful check and used six tool events versus four; cache also differed. The whole difference cannot be attributed solely to encoding, and this is neither broad production evidence nor automatic Plus interception. Do not pool percentages across these protocols.
+
 ## Static routing suite
 
 `evals/router-v2/cases.jsonl` contains 300 varied cases across summary, rewrite, code explanation, debugging, architecture and extraction. Each category has 50 cases covering Chinese and English, long context, one versus multiple tools, previous-response state, budget/quality metadata, high-risk content and conflicting route overrides.
