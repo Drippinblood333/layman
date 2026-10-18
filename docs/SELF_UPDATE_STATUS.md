@@ -13,7 +13,9 @@ forced cp1252 subprocess reproduced three failures locally. CLI piped input now
 strictly decodes its binary buffer as UTF-8; terminal/clipboard paths and
 text-only embedding/test streams remain unchanged. Malformed input stops before
 planning. CLI/task-plan/MCP: 57 passed; Ruff/Bandit/whitespace passed. Original CI
-failure remains recorded; a corrected-source hosted gate is required before main.
+failure remains recorded. Corrected source `5495718bfdfca51d7f2a9c701bc5ec915460b199`
+is pushed to `codex/verify-lazy-api-load`; exact new CI 39124123773 was observed
+queued, not passed. Main remains at `7ee4d7c` until this corrected-source gate passes.
 No model call, dependency change, installation replacement or release.
 
 2026-10-18 lean CLI startup: Uvicorn is imported only for `serve`/`demo`, not every
@@ -26,7 +28,7 @@ Python processes before/after on this host measured 387→291 loaded modules,
 timings are not full CLI latency, all-platform speed, binary-size or token savings.
 Runtime dependencies and API capability are unchanged. No model call or installed
 replacement. Source `5dc6dd484a9679e5095fa50151c6e0737d640394` is pushed to
-`codex/verify-lazy-api-load`; exact CI 39123806291 is in progress, not green.
+`codex/verify-lazy-api-load`; exact CI 39123806291 failed Windows as recorded above.
 This source batch also carries the earlier locally validated corpus/config
 provenance fixes and docs. Main remains at `7ee4d7c` pending this hosted gate.
 
