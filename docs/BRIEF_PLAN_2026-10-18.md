@@ -34,4 +34,8 @@ print newline; route timing/path bytes can vary):
 These are observed display bytes/lines, not token counts, API charges, task-quality
 or usability-study results. The full JSON remains available when routing details
 are needed. No native model invocation or user-install replacement occurred.
-Hosted validation of the exact forthcoming source commit remains required.
+Release secret/whitespace checks also passed. Source commit
+`f11e326f96bb5f6b438ca9c68103e2c30cca6676` is pushed to
+`codex/verify-brief-plan`; exact [CI run 39120916701](https://github.com/Drippinblood333/layman/actions/runs/39120916701)
+was observed queued, not passed. Main remains at `78fdaff`; its automatic CI
+39120729639 was still in progress when checked. No duplicate run was dispatched.

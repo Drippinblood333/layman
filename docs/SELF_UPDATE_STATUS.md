@@ -10,7 +10,9 @@ route diagnostics. Default JSON/MCP and execution behavior remain unchanged.
 Four first-failing cases plus JSON control now pass; CLI/task-plan/MCP: 52 passed.
 Four measured examples fell from 82–85 display lines to 14–17, not measured model
 token savings or proof of usability. [Evidence](BRIEF_PLAN_2026-10-18.md). Hosted
-verification pending; no model call or installation replacement.
+verification of source `f11e326` is queued as exact CI 39120916701 on
+`codex/verify-brief-plan`; main remains at `78fdaff`. No model call or installation
+replacement. Main's prior automatic CI 39120729639 remains in progress.
 
 2026-10-18 missing-CLI setup fix: default plugin setup now rejects missing/unusable
 CLI discovery before changing Layman's install state. Two first-failing cases
