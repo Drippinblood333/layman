@@ -5,6 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
 from layman_router.cli import build_parser, main
 from layman_router.lifecycle import (
     _is_running,
@@ -155,19 +156,26 @@ def test_remove_codex_plugin_removes_plugin_before_marketplace(monkeypatch):
     assert result["removed"] is True
 
 
-def test_install_codex_plugin_creates_configured_codex_home(monkeypatch, tmp_path: Path):
+@pytest.mark.parametrize("frozen", [False, True])
+def test_install_codex_plugin_creates_configured_codex_home(monkeypatch, tmp_path: Path, frozen):
     bundle = tmp_path / "bundle"
     manifest = bundle / ".agents" / "plugins" / "marketplace.json"
     plugin = bundle / "plugins" / "layman"
     manifest.parent.mkdir(parents=True)
     plugin.mkdir(parents=True)
     manifest.write_text("{}", encoding="utf-8")
-    (plugin / ".mcp.json").write_text("{}", encoding="utf-8")
+    original_mcp = {"mcpServers": {"layman": {
+        "command": "layman", "args": ["mcp-server"], "env": {"EXAMPLE": "keep"},
+    }}}
+    (plugin / ".mcp.json").write_text(json.dumps(original_mcp), encoding="utf-8")
     codex_home = tmp_path / "new-codex-home"
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
     monkeypatch.setenv("LAYMAN_HOME", str(tmp_path / "layman-home"))
     monkeypatch.setattr("layman_router.lifecycle._bundle_root", lambda: bundle)
     monkeypatch.setattr("layman_router.lifecycle.find_codex", lambda: "codex.exe")
+    executable = str(tmp_path / "中文 path with spaces" / ("layman.exe" if frozen else "python.exe"))
+    monkeypatch.setattr("layman_router.lifecycle.sys.executable", executable)
+    monkeypatch.setattr("layman_router.lifecycle.sys.frozen", frozen, raising=False)
     monkeypatch.setattr(
         "layman_router.lifecycle.subprocess.run",
         lambda command, **kwargs: subprocess.CompletedProcess(command, 0, stdout="{}", stderr=""),
@@ -175,6 +183,12 @@ def test_install_codex_plugin_creates_configured_codex_home(monkeypatch, tmp_pat
 
     assert install_codex_plugin()["installed"] is True
     assert codex_home.is_dir()
+    durable = json.loads((tmp_path / "layman-home/marketplace/plugins/layman/.mcp.json").read_text())
+    server = durable["mcpServers"]["layman"]
+    assert server["command"] == executable
+    assert server["args"] == (["mcp-server"] if frozen else ["-m", "layman_router.cli", "mcp-server"])
+    assert server["env"] == {"EXAMPLE": "keep"}
+    assert json.loads((plugin / ".mcp.json").read_text()) == original_mcp
 
 
 def test_mode_detection_creates_configured_codex_home(monkeypatch, tmp_path: Path):

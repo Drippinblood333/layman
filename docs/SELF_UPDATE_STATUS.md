@@ -4,6 +4,21 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 source install/plugin entry repair: a fresh Python 3.14.3 venv in a
+Unicode/space path installed hashed runtime + source --no-deps, pip check passed,
+26 distributions with checked dev stacks absent, isolated setup/plan/read-only
+dry-run passed. But its plugin still used bare layman and depended on desktop
+PATH. Two launcher regressions failed first; a clean restricted native shell
+confirmed the original command unavailable. Setup now pins only the installed
+MCP copy to the current interpreter/executable, preserving bundle and metadata.
+All 51 lifecycle/CLI/MCP tests, Ruff/Bandit/secret/diff checks passed. Reinstalled
+only the isolated test package, reran real native plugin registration in the same
+profile, verified native cache, then initialized/listed three tools/planned through
+that cached launcher without Layman on PATH. Real config SHA unchanged; zero model
+calls. [Report](SOURCE_INSTALL_PLUGIN_ENTRY_2026-10-18.md) states clean-machine,
+GUI, login and frozen-platform limits. No user install replaced or release made.
+Hosted verification pending; overall goal active, token savings unproven.
+
 2026-10-18 source-install onboarding repair: GitHub release API still returns an
 empty list. Removed non-working future release-installer command blocks from the
 English README's primary install entry; kept their clearly gated documentation

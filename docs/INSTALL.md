@@ -179,6 +179,12 @@ task you type and does not launch a model. `codex-plus status` checks saved logi
 not actual model access; sign into Codex if it reports missing ChatGPT credentials.
 Restart Codex and open a new task after setup to load the installed plugin.
 
+Setup pins the installed plugin's MCP launcher to the Python environment or
+standalone executable that ran setup, rather than relying on the desktop app's
+PATH. Keep that runtime in place. If you move or recreate the virtual environment,
+run setup again from its new full command path, then restart Codex. The portable
+plugin source bundle is not rewritten.
+
 Only contributors who need tests, audits or builds should additionally install
 the development tools:
 

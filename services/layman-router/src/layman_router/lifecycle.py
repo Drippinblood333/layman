@@ -291,6 +291,14 @@ def install_codex_plugin() -> dict[str, Any]:
     manifest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(bundle_manifest, manifest)
     shutil.copytree(bundle_plugin, root / "plugins" / "layman", dirs_exist_ok=True)
+    # A source/venv install need not expose `layman` on the desktop app's PATH.
+    # Pin only the installed copy's launcher to this runtime before Codex caches
+    # the plugin. Keep the distributable bundle portable and unchanged.
+    mcp_path = root / "plugins" / "layman" / ".mcp.json"
+    mcp = json.loads(mcp_path.read_text(encoding="utf-8"))
+    launcher = _process_command("mcp-server")
+    mcp["mcpServers"]["layman"].update(command=launcher[0], args=launcher[1:])
+    mcp_path.write_text(json.dumps(mcp, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if not manifest.exists():
         raise FileNotFoundError(f"Durable Layman marketplace was not created: {manifest}")
     _ensure_configured_codex_home()
