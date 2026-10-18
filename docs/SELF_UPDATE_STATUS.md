@@ -12,7 +12,10 @@ isolated invalid `.git` marker reported changed_files=0 before, null after.
 Successful counterpart evidence remains intact; raw diagnostics are not included.
 `repository=true` still means a `.git` marker was found, not verified integrity.
 Ruff/Bandit passed after correcting test import spacing; no model call, dependency
-or permission change. Hosted verification of the forthcoming commit remains open.
+or permission change. Source `7ee4d7cb3ded65f253e57718c957f971ce6ec2e6` was
+pushed to `codex/verify-git-evidence`; exact CI 39122205607 was observed queued,
+not passed. Main remains at `4b58b47`, whose CI 39122014913 is still in progress.
+No duplicate workflow, release or installed replacement was requested.
 
 2026-10-18 project scan pruning: a first-failing regression showed ignored
 top-level dependency directories were traversed before result filtering. Parent
