@@ -68,3 +68,19 @@ Next evidence step is to resolve the task's line-boundary specification and use
 independent tasks under a new protocol, not rerun this one until it passes.
 [Official native usage documentation](https://learn.chatgpt.com/docs/non-interactive-mode#make-output-machine-readable)
 was searched/fetched before execution. No formal release or installation change.
+
+## Subsequent offline contract clarification
+
+Added public evaluation-only line-content fixtures, not a new live pilot:
+evals/token_optimization/log_contract.py. The future synthetic task now explicitly
+excludes CRLF/LF/CR terminators from marker while preserving every other character,
+including leading/trailing spaces and tabs. This is a NEW task specification,
+not a reinterpretation of the frozen v1-v3 instruction or a recovered model answer.
+
+Three independent hand-authored cases cover LF, CRLF with Chinese/spaces, and CR
+with tabs/no final terminator. A separate reference parser derives their expected
+answers from raw text and from exactly restored codec output. The exact validator
+still rejects added terminators and trimming. All 16 contract/answer-check tests
+passed; no model execution, token measurement, default change or repeat build.
+Published fixtures/answers are not holdouts and must not be presented as fresh
+generalization evidence. Old marker mismatches remain failures with unknown cause.

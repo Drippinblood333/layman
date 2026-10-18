@@ -65,6 +65,8 @@ The [v2 synthetic CLI log-extraction pilot](LOSSLESS_LOG_PILOT_V2_2026-10-18.md)
 
 The [separate v3 diagnostic](LOSSLESS_LOG_DIAGNOSTIC_V3_2026-10-18.md) reused that exact task and gate with value-free per-field checks: raw passed all six; encoded parsed and matched schema but failed marker equality (the other five matched). Total usage 37,397/21,513 is again not accepted savings. High cache reuse and this reused synthetic case are disclosed; missing answer values prevent diagnosing whitespace versus other content. No automatic normalization or default change was made.
 
+Future synthetic tasks have a public [line-content contract](../evals/token_optimization/log_contract.py): exclude only CRLF/LF/CR terminators, preserve all other spaces/tabs. Independent offline reference checks cover three new fixtures and reject trimming or retained terminators. These are public validation cases, not holdouts, model-quality results or retroactive changes to v1-v3 scoring.
+
 ## Static routing suite
 
 `evals/router-v2/cases.jsonl` contains 300 varied cases across summary, rewrite, code explanation, debugging, architecture and extraction. Each category has 50 cases covering Chinese and English, long context, one versus multiple tools, previous-response state, budget/quality metadata, high-risk content and conflicting route overrides.

@@ -4,6 +4,16 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 offline line-contract clarification: old "complete checkpoint line"
+did not explicitly state terminator boundaries. Added a new evaluation-only task
+definition that excludes CRLF/LF/CR but preserves all other spaces/tabs. Three
+public synthetic cases have independent hand-authored answers checked by a
+separate parser on raw and restored output; newline-retaining/trimmed answers
+still fail. All 16 contract/answer-check tests and scoped Ruff/diff checks passed.
+No model calls or complete rebuild; no runtime/default/permission change. Old
+v1-v3 scores and protocols remain untouched, actual mismatch cause still unknown.
+Public fixtures are not future holdouts or measured token savings. Full goal active.
+
 2026-10-18 v3 codec diagnosis closed its separate two-invocation ceiling: exact
 prior task/fixture/schema/quality rule, new value-free diagnostics. Raw 37,397
 tokens passed all six fields; encoded 21,513 parsed/matched schema but marker
