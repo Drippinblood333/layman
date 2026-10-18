@@ -16,8 +16,12 @@ searched/opened before implementation; no full protocol-compliance claim.
 No model invocation, dependency or user-install change. The prior local summary
 fix is included in this source batch for one shared hosted gate. Source
 `1f0d23a0209529bc56d60a0a08c2a684ce31a326` is pushed to
-`codex/verify-mcp-utf8`; exact CI 39125215140 was observed queued, not passed.
-Main remains at `5495718` pending this gate; no release or installed replacement.
+`codex/verify-mcp-utf8`; exact CI 39125215140 completed successfully with all ten
+validation jobs passed, without a rerun. After fetch/ancestry validation, main
+was fast-forwarded from `5495718` to this exact SHA and independently confirmed
+with `ls-remote`. Main CI 39125618810 is in progress on this SHA, not green. This
+closes the bounded MCP source batch, including the earlier clarification-summary
+change, not the overall token-efficiency goal. No release or installed replacement.
 
 2026-10-18 MCP plan clarification summary: the existing execution contract already
 limits repeated reads, so it was not retuned without behavior evidence. Instead,
