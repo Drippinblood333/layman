@@ -10,9 +10,11 @@ route diagnostics. Default JSON/MCP and execution behavior remain unchanged.
 Four first-failing cases plus JSON control now pass; CLI/task-plan/MCP: 52 passed.
 Four measured examples fell from 82–85 display lines to 14–17, not measured model
 token savings or proof of usability. [Evidence](BRIEF_PLAN_2026-10-18.md). Hosted
-verification of source `f11e326` is queued as exact CI 39120916701 on
-`codex/verify-brief-plan`; main remains at `78fdaff`. No model call or installation
-replacement. Main's prior automatic CI 39120729639 remains in progress.
+verification of source `f11e326` completed successfully as exact CI 39120916701
+with all ten validation jobs passed, without a rerun. Remote main is independently
+verified at the same SHA after its push reported that the ref already held the
+desired commit; no force push. Main CI 39121223805 is in progress, not green.
+No model call or installation replacement. Prior main CI 39120729639 succeeded.
 
 2026-10-18 missing-CLI setup fix: default plugin setup now rejects missing/unusable
 CLI discovery before changing Layman's install state. Two first-failing cases
@@ -23,7 +25,8 @@ passed. No extra subprocess or model call. This is not transactional setup; see
 pushed to `codex/verify-setup-prerequisite`; exact hosted CI 39120437908 was
 completed successfully with all ten validation jobs passing, without a rerun.
 After fetch/ancestry validation, main was fast-forwarded to this exact SHA and
-independently checked. Main's automatic CI 39120729639 is in progress, not green. This
+independently checked. Main's automatic CI 39120729639 subsequently completed
+successfully on the same SHA. This
 closes the bounded missing-CLI state fix, not the overall product goal.
 
 2026-10-18 offline-first source onboarding: documentation now lets newcomers try

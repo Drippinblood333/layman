@@ -33,4 +33,5 @@ After a fresh fetch and ancestry check, remote main was fast-forwarded from
 `841eaa5` to the exact verified SHA and independently confirmed with `ls-remote`.
 No duplicate CI was dispatched or formal release requested. Main's automatic
 push-triggered [run 39120729639](https://github.com/Drippinblood333/layman/actions/runs/39120729639)
-was observed in progress on this SHA, not assumed successful.
+subsequently completed successfully on this same SHA. This was read from the
+terminal run state, not inferred from the earlier validation-branch gate.

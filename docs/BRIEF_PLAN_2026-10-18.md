@@ -37,5 +37,12 @@ are needed. No native model invocation or user-install replacement occurred.
 Release secret/whitespace checks also passed. Source commit
 `f11e326f96bb5f6b438ca9c68103e2c30cca6676` is pushed to
 `codex/verify-brief-plan`; exact [CI run 39120916701](https://github.com/Drippinblood333/layman/actions/runs/39120916701)
-was observed queued, not passed. Main remains at `78fdaff`; its automatic CI
-39120729639 was still in progress when checked. No duplicate run was dispatched.
+completed successfully with all ten validation jobs passing, without a rerun.
+Previous main CI 39120729639 also completed successfully on `78fdaff`.
+After fetch/ancestry validation, the main push reported a ref-lock mismatch saying
+main already held the desired `f11e326` SHA; `git ls-remote` independently confirmed
+that exact ref. No force push or assumption about the ref updater was needed.
+Main's automatic [CI 39121223805](https://github.com/Drippinblood333/layman/actions/runs/39121223805)
+was observed in progress on the same SHA, not claimed successful. No extra run,
+tag or formal release was dispatched. This closes the bounded brief-preview
+feature, not the larger same-quality token-efficiency goal.
