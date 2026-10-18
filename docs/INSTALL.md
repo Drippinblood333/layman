@@ -87,6 +87,11 @@ states that execution has not started, rather than saying "Plan ready". This is
 a normal planning result (`isError=false`), not execution or a permission change;
 the full structured plan remains available unchanged.
 
+MCP stdio reads/writes UTF-8 bytes independently of the host text-stream locale.
+Malformed UTF-8 frames are not dispatched to tools; this follows the existing
+malformed-frame discard behavior. Already-decoded text streams used by embedding
+callers remain supported. This does not change task text, permissions or routing.
+
 Plus mode does not exercise the HTTP proxy, API fallback, or API billing.
 
 In CLI/MCP `plan` results, read clarification from the top-level `prompt_guidance`.

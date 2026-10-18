@@ -4,6 +4,18 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 MCP UTF-8 boundary fix: both real subprocess entrypoints failed Chinese
+request/path preservation under forced cp1252 text decoding, and an invalid-UTF-8
+frame could reach a tool spy. All three first-failing regressions now pass: MCP
+uses binary UTF-8 stdin/stdout where available, preserves decoded text embedding
+streams and discards malformed byte frames before dispatch. Existing async
+cancellation/thread behavior remains covered. MCP/task-plan/prompt-guidance/CLI:
+118 passed; Ruff/Bandit/whitespace passed. This follows the
+[pinned MCP transport encoding requirement](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports),
+searched/opened before implementation; no full protocol-compliance claim.
+No model invocation, dependency or user-install change. The prior local summary
+fix is included in this source batch for one shared hosted gate; not yet deployed.
+
 2026-10-18 MCP plan clarification summary: the existing execution contract already
 limits repeated reads, so it was not retuned without behavior evidence. Instead,
 three vague/context-only plan cases reproduced a text-only summary saying "Plan

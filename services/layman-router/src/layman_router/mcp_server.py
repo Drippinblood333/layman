@@ -17,8 +17,14 @@ PROTOCOL_VERSION = "2025-06-18"
 
 
 def _write(stream: TextIO, payload: dict[str, Any]) -> None:
-    stream.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n")
-    stream.flush()
+    text = json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n"
+    binary = getattr(stream, "buffer", None)
+    if binary is not None:
+        binary.write(text.encode("utf-8"))
+        binary.flush()
+    else:
+        stream.write(text)
+        stream.flush()
 
 
 def _result(request_id: Any, result: dict[str, Any]) -> dict[str, Any]:
@@ -184,10 +190,12 @@ def serve(stdin: TextIO = sys.stdin, stdout: TextIO = sys.stdout) -> int:
             with workers_lock:
                 workers.discard(threading.current_thread())
 
-    for line in stdin:
+    for line in getattr(stdin, "buffer", stdin):
         try:
+            if isinstance(line, bytes):
+                line = line.decode("utf-8")
             message = json.loads(line.lstrip("\ufeff"))
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, UnicodeDecodeError):
             continue
         if not isinstance(message, dict):
             continue

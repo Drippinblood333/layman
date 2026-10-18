@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import io
 import json
+import os
+import subprocess
+import sys
 import threading
 import time
 
@@ -174,3 +177,40 @@ def test_concrete_plan_keeps_short_ready_summary(tmp_path):
     assert plan["prompt_guidance"]["needs_clarification"] is False
     assert result["content"][0]["text"] == f"Plan ready: {plan['workflow']} via {plan['route']['route_tier']}."
     assert result["isError"] is False
+
+
+@pytest.mark.parametrize("module,args", [
+    ("layman_router.cli", ["mcp-server"]), ("layman_router.mcp_server", []),
+])
+def test_mcp_stdio_is_utf8_under_legacy_text_encoding(tmp_path, module, args):
+    workspace = tmp_path / "中文项目"
+    workspace.mkdir()
+    request = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+        "name": "plan", "arguments": {
+            "task": "只读分析 README.md，不要修改文件。", "workspace": str(workspace),
+        },
+    }}
+    response = subprocess.run(
+        [sys.executable, "-m", module, *args], cwd=tmp_path,
+        input=(json.dumps(request, ensure_ascii=False) + "\n").encode("utf-8"),
+        capture_output=True, timeout=20, check=False,
+        env={**os.environ, "PYTHONUTF8": "0", "PYTHONIOENCODING": "cp1252:surrogateescape"},
+    )
+    assert response.returncode == 0, response.stderr.decode("utf-8", errors="replace")
+    result = json.loads(response.stdout.decode("utf-8"))["result"]
+    assert result["isError"] is False
+    plan = result["structuredContent"]
+    assert plan["workspace"] == str(workspace.resolve())
+    assert plan["route"]["sandbox"] == "read-only"
+
+
+def test_invalid_utf8_mcp_frame_cannot_reach_a_tool(monkeypatch):
+    invalid = b'{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"plan","arguments":{"task":"\xff"}}}\n'
+    ping = b'{"jsonrpc":"2.0","id":2,"method":"ping"}\n'
+    incoming = io.TextIOWrapper(io.BytesIO(invalid + ping), encoding="cp1252")
+    outgoing = io.StringIO()
+    calls = []
+    monkeypatch.setattr(mcp_server, "_call_tool", lambda *a, **k: calls.append(1) or {})
+    assert serve(incoming, outgoing) == 0
+    assert calls == []
+    assert [item["id"] for item in map(json.loads, outgoing.getvalue().splitlines())] == [2]
