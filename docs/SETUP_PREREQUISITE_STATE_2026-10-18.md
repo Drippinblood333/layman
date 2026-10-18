@@ -28,5 +28,9 @@ version replacement. Release secret scanning also passed. Source commit
 `78fdaff7cb10f3bbd3fe2c365232d6fd0a3ef0b1` was pushed to
 `codex/verify-setup-prerequisite` after one TLS handshake failure and a successful
 retry. Exact [CI run 39120437908](https://github.com/Drippinblood333/layman/actions/runs/39120437908)
-was observed queued, not passed. Main remains at the previous verified source
-`841eaa5`; no duplicate CI run or formal release was requested.
+completed successfully with all ten validation jobs passed, without rerunning.
+After a fresh fetch and ancestry check, remote main was fast-forwarded from
+`841eaa5` to the exact verified SHA and independently confirmed with `ls-remote`.
+No duplicate CI was dispatched or formal release requested. Main's automatic
+push-triggered [run 39120729639](https://github.com/Drippinblood333/layman/actions/runs/39120729639)
+was observed in progress on this SHA, not assumed successful.

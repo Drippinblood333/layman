@@ -11,7 +11,10 @@ installation without requiring login. Lifecycle/CLI/MCP: 54 passed; Ruff/Bandit
 passed. No extra subprocess or model call. This is not transactional setup; see
 [limits and evidence](SETUP_PREREQUISITE_STATE_2026-10-18.md). Source `78fdaff` is
 pushed to `codex/verify-setup-prerequisite`; exact hosted CI 39120437908 was
-observed queued. Main remains at verified `841eaa5` pending this gate.
+completed successfully with all ten validation jobs passing, without a rerun.
+After fetch/ancestry validation, main was fast-forwarded to this exact SHA and
+independently checked. Main's automatic CI 39120729639 is in progress, not green. This
+closes the bounded missing-CLI state fix, not the overall product goal.
 
 2026-10-18 offline-first source onboarding: documentation now lets newcomers try
 planning before setup, explicitly identifies the Codex CLI/plugin and Plus-login
