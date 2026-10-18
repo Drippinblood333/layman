@@ -94,6 +94,13 @@ implementation or publishing. This takes precedence over project-stage release
 steps; clarification questions, when present, still come first. It reuses the
 selected permission result, not a new claim to understand every prompt.
 
+Release-candidate planning ignores recognized future-approval boilerplate such as
+"公开发布时，我会批准" or "When we publish, I will approve" when selecting the
+current workflow. English `ship` must be a whole word, not part of `ownership` or
+`membership`. A separate request to check or perform a release still selects the
+release gate. This narrow wording filter does not grant authorization, rewrite the
+task, or understand all future/negated/quoted instructions.
+
 Use `$layman-auto` in a new task to route the original request through the bundled local MCP tool. The tool verifies ChatGPT login, removes API-key environment variables, and starts an ephemeral Codex run. Terminal users can copy a task to the clipboard and pipe standard input without placing the task text in command history:
 
 ```powershell

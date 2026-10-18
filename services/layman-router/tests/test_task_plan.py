@@ -58,6 +58,36 @@ def test_non_release_task_does_not_inherit_release_checks(monkeypatch, tmp_path:
 
 
 @pytest.mark.parametrize("task", [
+    "优化prompt，避免过度测试；公开发布时，我均会批准。",
+    "先修复 src/a.py；正式发版时，我会同意。",
+    "Improve the CLI help. When we publish, I will approve.",
+    "Fix src/a.py; if we ship, we will approve.",
+    "Fix the file ownership marker logic.",
+    "Add membership labels to the UI.",
+])
+def test_future_approval_or_ship_substring_does_not_request_release(monkeypatch, tmp_path, task):
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+        "stage": "release_candidate", "next_steps": ["Run the full release gate"],
+    })
+    result = create_task_plan(task, tmp_path)
+    assert result["workflow"] != "release-gate"
+    assert "Run the full release gate" not in result["next_steps"]
+
+
+@pytest.mark.parametrize("task", [
+    "检查是否达到公开发布条件",
+    "Run the release gate now.",
+    "检查发布条件；公开发布时，我会批准。",
+    "Run the release gate; when we ship, I will approve.",
+])
+def test_explicit_release_request_survives_separate_future_approval(monkeypatch, tmp_path, task):
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+        "stage": "release_candidate", "next_steps": ["Run the full release gate"],
+    })
+    assert create_task_plan(task, tmp_path)["workflow"] == "release-gate"
+
+
+@pytest.mark.parametrize("task", [
     "帮我优化整个项目",
     "修复src/a.py的空指针异常，不改接口",
     "请删除生产支付数据库并迁移权限",

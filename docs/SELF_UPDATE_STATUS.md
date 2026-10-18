@@ -4,6 +4,14 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 release-intent fix: six reproduced false-release cases now avoid the
+full release workflow; four genuine release/check controls still select it.
+Future-approval boilerplate is filtered only for workflow selection and `ship`
+no longer matches inside `ownership`/`membership`. Original tasks and permissions
+remain unchanged. Scoped task-plan/CLI/MCP tests: 47 passed; hosted verification
+pending. [Evidence and limits](RELEASE_INTENT_FILTER_2026-10-18.md). No new model
+call or token-saving claim; broader goal remains active.
+
 2026-10-18 executable coding-log component pilot closed its two-start ceiling:
 same capped-backoff task, identical starting files/driver/codec/instructions,
 matched Sol/medium/private runtime and 2000-token output limit. Original failed
