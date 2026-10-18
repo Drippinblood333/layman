@@ -65,3 +65,18 @@ already specified UTF-8. Fixed only those test reads to use UTF-8 too; the exact
 Unicode path assertions remain. Both focused cases then passed with PYTHONUTF8=0
 locally. No production workaround, weaker assertion, timeout change or failed-job
 rerun was used to hide the initial failure. A new source SHA needs a new gate.
+
+## Corrected hosted gate and source promotion
+
+[CI 39115763667](https://github.com/Drippinblood333/layman/actions/runs/39115763667)
+completed SUCCESS on exact 408b157aa66e23443b42d711afb04d9bb84a643f, all ten
+validation jobs passed: three OS tests, five standalone targets, Docker and release
+assets; publish skipped. This was the new test-correction SHA, not a retry of the
+failed original. Confirmed main ancestry and fast-forwarded this exact SHA
+non-force to main, then verified the remote ref. This promotion also carries the
+previous locally held onboarding and rejected-codec evidence documentation.
+
+[Automatic main CI 39116115739](https://github.com/Drippinblood333/layman/actions/runs/39116115739)
+was observed in progress on the same SHA; its terminal result is not yet claimed.
+No duplicate workflow was dispatched. No user's installed runtime was replaced,
+no model execution was added, and no tag/formal release was created.

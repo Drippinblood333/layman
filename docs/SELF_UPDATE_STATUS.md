@@ -4,6 +4,17 @@ Updated: 2026-10-18
 
 ## Verified checkpoint
 
+2026-10-18 source-plugin corrected gate passed: [CI 39115763667](https://github.com/Drippinblood333/layman/actions/runs/39115763667)
+completed SUCCESS on exact 408b157aa66e23443b42d711afb04d9bb84a643f. All ten
+validation jobs passed, publish skipped. The prior failed original remains below;
+this was a new corrected SHA, not a failed-job retry. Verified main ancestry,
+non-force fast-forwarded that exact SHA from eeea9ca to main, and confirmed remote
+ref. Prior locally held onboarding/negative codec reports are now included too.
+[Automatic main CI 39116115739](https://github.com/Drippinblood333/layman/actions/runs/39116115739)
+was observed in progress on the same SHA, not yet claimed green. No duplicate
+workflow, installed-version replacement, model execution, tag or publication.
+Finite install/plugin repair batch verified; overall goal remains active.
+
 2026-10-18 source-plugin first hosted gate failed: CI 39115414834 terminal FAILURE
 on a2dc41f8396ea15649d8ac6ff04b8052307b3670; Windows 2 failed / 539 passed.
 New tests decoded UTF-8 launcher JSON using the system locale, corrupting Chinese
