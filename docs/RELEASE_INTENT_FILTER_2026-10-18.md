@@ -23,6 +23,12 @@ changed. No general natural-language intent or negation understanding is claimed
 - No model invocation, API expense, installation replacement, tag or release.
 - Avoiding the erroneous workflow is verified; token savings are not measured.
 
-Hosted verification is pending for the forthcoming exact source commit. Earlier
-green CI cannot certify this change. Remaining product gates, including broader
+- Ruff, Bandit, release secret scan and whitespace checks passed; the adjacent
+  evaluation helpers' 16 tests also passed. A first test command used the wrong
+  directory and collected no tests; the corrected test paths produced this result.
+
+Source commit `841eaa517c2c86ce47ab1af003a83c4c50e0aaa0` is pushed to
+`codex/verify-release-intent`. Exact [CI run 39119758929](https://github.com/Drippinblood333/layman/actions/runs/39119758929)
+was observed queued, not passed. Main has not been advanced to this commit.
+Earlier green CI cannot certify this change. Remaining product gates, including broader
 same-quality token comparisons and public installation/release checks, stay open.

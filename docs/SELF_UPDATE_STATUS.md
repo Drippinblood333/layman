@@ -10,7 +10,10 @@ Future-approval boilerplate is filtered only for workflow selection and `ship`
 no longer matches inside `ownership`/`membership`. Original tasks and permissions
 remain unchanged. Scoped task-plan/CLI/MCP tests: 47 passed; hosted verification
 pending. [Evidence and limits](RELEASE_INTENT_FILTER_2026-10-18.md). No new model
-call or token-saving claim; broader goal remains active.
+call or token-saving claim; broader goal remains active. Source `841eaa5` is on
+`codex/verify-release-intent`; exact CI 39119758929 was observed queued. Ruff,
+Bandit, secret scan and 16 adjacent evaluation-helper tests passed locally.
+Main remains at `13866b9` pending terminal hosted verification.
 
 2026-10-18 executable coding-log component pilot closed its two-start ceiling:
 same capped-backoff task, identical starting files/driver/codec/instructions,
