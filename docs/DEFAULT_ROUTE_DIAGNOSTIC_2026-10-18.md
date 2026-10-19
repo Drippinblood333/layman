@@ -99,3 +99,41 @@ repair of this closed trial. It does not authorize a new run or unseal its lock.
 Official [config RPC guidance](https://learn.chatgpt.com/docs/app-server#config-rpc-examples-for-app-settings)
 and [CLI configuration location guidance](https://learn.chatgpt.com/docs/enterprise/govcloud-configuration)
 were searched/fetched before probing. No write RPC was sent.
+
+## 2026-10-19 rejecting-provider startup probes
+
+Two native startup diagnostics used only generated profiles, a new test Git
+workspace, no copied auth, the same private alpha.20 binary, and a custom provider
+pointing to a local HTTP service. That service discards request bodies and always
+returns an error; it does not forward requests or perform inference. Request and
+stream retries were configured to zero. This is not another subscription trial.
+The original paired trial remains sealed at one reservation.
+
+- Read-only startup: native exit 1 as expected, one local request rejected,
+  41,149 request-body bytes discarded, zero completed turns. The isolated config
+  and real user config hashes were unchanged. This minimal startup did not
+  reproduce historical drift; it does not reproduce the full authenticated task.
+- Workspace-write startup: timed out after 18 seconds. Termination was attempted
+  only for the created PID/tree, but pipe collection also timed out after five
+  seconds. The controller failed before final metrics were written. Local request
+  count and its completed before/after hash comparison are therefore unknown,
+  not zero or a pass. Subsequent metadata inspection found the expected synthetic
+  provider keys and no auth file; a visible process snapshot found no executable
+  remaining under this private runtime path. Real config mtime matched the prior
+  observation, which is weaker than a completed cryptographic comparison. No
+  further process termination, settings repair or retry was attempted.
+
+These observations do not establish the historical writer or configuration
+change, and the writable-mode failure is not erased by the read-only result.
+The code's general stop/seal protection remains needed. The local custom provider
+returned no successful model response; no real model provider was requested by
+this diagnostic configuration. This is not comprehensive external-network or
+native-side-effect attestation. No actual user install/config was deliberately
+changed, no auth was copied, and no paid-model generation or reset was requested.
+
+Private source/results, including explicit failed-diagnostic metadata, remain in
+ignored `build/native-startup-config-probe-2026-10-19/`. Controllers are guarded
+against reusing existing profile directories. No runtime product source changed,
+so no new platform rebuild was triggered. Search/fetch preceded the probes using
+the official [custom provider documentation](https://learn.chatgpt.com/docs/config-file/config-advanced#custom-model-providers)
+and [provider retry/authentication reference](https://learn.chatgpt.com/docs/config-file/config-reference).

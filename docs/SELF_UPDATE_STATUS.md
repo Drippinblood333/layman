@@ -4,6 +4,18 @@ Updated: 2026-10-19
 
 ## Verified checkpoint
 
+2026-10-19 local rejecting-provider startup diagnosis: read-only native startup
+reached the local refusing service once, exited 1 without a completed turn, and
+left synthetic/real config hashes unchanged. Workspace-write startup instead
+timed out at 18 seconds; post-termination pipe collection timed out at five more
+seconds, so its final metrics/hash comparison are incomplete, not passed. Later
+visible process inventory found no executable under the private runtime path;
+no unrelated Codex process was terminated. Historical drift cause remains unknown.
+[Full boundaries and failed-probe evidence](DEFAULT_ROUTE_DIAGNOSTIC_2026-10-18.md#2026-10-19-rejecting-provider-startup-probes).
+No auth copied or real model response; local endpoint never forwards requests.
+Old comparison stays sealed at one reservation; no live evaluation was reopened.
+Product source unchanged, no platform rebuild or system-settings repair. Goal active.
+
 2026-10-19 config-drift evaluation guard: simulated changes during preflight or
 after the first task reproduced the old runner launching both arms. The runner
 now checks the user-config snapshot immediately before reservation (after fixture
