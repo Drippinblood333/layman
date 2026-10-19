@@ -38,6 +38,36 @@ def test_public_cli_exposes_beginner_entry_points():
     assert parser.parse_args(["run", "--dry-run", "--clipboard"]).clipboard is True
 
 
+@pytest.mark.parametrize("mode", ["plus", "auto"])
+@pytest.mark.parametrize("skip_plugin", [False, True])
+def test_plus_setup_start_rejected_before_setup_mutations(monkeypatch, capsys, mode, skip_plugin):
+    monkeypatch.setattr(cli, "detect_user_mode", lambda: ("plus", {"codex_path": "synthetic-codex"}))
+    monkeypatch.setattr(cli, "read_state", lambda: pytest.fail("Invalid flags must stop before state access"))
+    monkeypatch.setattr(cli, "setup_state", lambda *a: pytest.fail("Invalid flags must not initialize state"))
+    monkeypatch.setattr(cli, "install_codex_plugin", lambda: pytest.fail("Invalid flags must not install plugins"))
+    monkeypatch.setattr(cli, "start_router", lambda: pytest.fail("Invalid flags must not start a service"))
+    args = ["setup", "--mode", mode, "--start"] + (["--skip-plugin"] if skip_plugin else [])
+    assert cli.main(args) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "HTTP router requires API mode" in captured.err
+
+
+@pytest.mark.parametrize("mode", ["api", "auto"])
+def test_api_setup_start_still_starts_requested_service(monkeypatch, capsys, mode):
+    monkeypatch.setenv("OPENAI_API_KEY", "synthetic-not-a-key")
+    monkeypatch.setattr(cli, "detect_user_mode", lambda: ("api", {}))
+    monkeypatch.setattr(cli, "read_state", dict)
+    monkeypatch.setattr(cli, "setup_state", lambda selected: {"mode": selected})
+    monkeypatch.setattr(cli, "write_state", lambda state: None)
+    monkeypatch.setattr(cli, "enable_codex", lambda **kw: SimpleNamespace(diff="preview only"))
+    calls = []
+    monkeypatch.setattr(cli, "start_router", lambda: calls.append("start") or {"running": True})
+    assert cli.main(["setup", "--mode", mode, "--start", "--skip-plugin"]) == 0
+    assert calls == ["start"]
+    assert json.loads(capsys.readouterr().out)["router"] == {"running": True}
+
+
 def test_terminal_input_preserves_intent_without_polluting_stdout(monkeypatch, capsys):
     task = " 修复登录报错，不改接口 "
     stream = StringIO(task + "\r\nsecond line\n")

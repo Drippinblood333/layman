@@ -159,6 +159,11 @@ layman dashboard
 
 `layman setup --mode api --apply-codex --start` performs the same steps explicitly in one command. API routing is Beta until a release-grade live API benchmark is completed.
 
+`--start` is only supported in API mode. If setup selects Plus (explicitly or
+automatically), this combination is rejected before writing Layman setup state
+or installing its plugin. Mode detection still runs first; this is not a general
+transactional-install guarantee.
+
 ## Source installation
 
 Until a standalone release is available, use the source checkout with Python

@@ -265,6 +265,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "setup":
             detected_mode, detection = detect_user_mode()
             mode = detected_mode if args.mode == "auto" else args.mode
+            if mode == "plus" and args.start:
+                raise RuntimeError("The HTTP router requires API mode; Plus mode uses $layman-auto without a service")
             if mode == "api" and not os.getenv("OPENAI_API_KEY"):
                 raise RuntimeError("API mode requires OPENAI_API_KEY in the current environment")
             if not args.skip_plugin and not detection.get("codex_path"):
@@ -301,8 +303,6 @@ def main(argv: list[str] | None = None) -> int:
                 result["codex_config_applied"] = args.apply_codex
                 if args.start:
                     result["router"] = start_router()
-            elif args.start:
-                raise RuntimeError("The HTTP router requires API mode; Plus mode uses $layman-auto without a service")
             if mode == "plus":
                 try:
                     executable = find_codex()

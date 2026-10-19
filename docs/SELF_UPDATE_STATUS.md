@@ -4,6 +4,16 @@ Updated: 2026-10-19
 
 ## Verified checkpoint
 
+2026-10-19 setup argument preflight: four first-failing controls showed explicit
+Plus and auto-detected Plus with `--start` reaching setup state access before the
+unsupported-service error (with and without plugin installation). That existing
+error now precedes state access, initialization, plugin installation and service
+startup. Two API/auto-API positive controls still start the requested service.
+CLI/lifecycle suite: 64 passed. Detection still runs first and may create an
+explicitly configured `CODEX_HOME`; this is not a fully write-free or transactional
+setup guarantee. No model, dependency, installed-runtime or token-saving change.
+Local source validation only; exact-source hosted validation remains outstanding.
+
 2026-10-19 local rejecting-provider startup diagnosis: read-only native startup
 reached the local refusing service once, exited 1 without a completed turn, and
 left synthetic/real config hashes unchanged. Workspace-write startup instead
