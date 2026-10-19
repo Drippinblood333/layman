@@ -179,6 +179,17 @@ This is a preflight snapshot, not a lock or complete effective-config attestatio
 project/managed layers, credentials and concurrent writes are not covered. Do not
 reopen a closed trial or reuse an old allowance merely because its digest changed.
 
+Before reserving each task (after fixture preparation), and after its execution,
+the runner compares that user-config snapshot again. A mismatch or unreadable
+snapshot seals the journal with a durable `.closed.json` marker. No later arm is
+launched; retries are rejected before Codex resolution. Already incurred usage
+is retained, with a completed native run marked `needs_verification` for comparison
+purposes. Unspent slots become unauthorized, not spent. An unspecified cumulative
+cap is reported as unknown (`null`), not invented credits. This remains a bounded
+snapshot check, not a file lock or guarantee against changes between checks or in
+unobserved managed/project layers. It does not restore any user settings or unlock
+previously closed trials.
+
 Layman may claim Token savings only when all published gates pass: at least 15% paired median total-token reduction, positive bootstrap lower bound, no quality regression, safe high-risk routing, at least 20% output-token reduction, and no increase in median files read.
 
 The two full-corpus gates check the exact 30 declared case IDs, not only a count

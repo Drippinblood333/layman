@@ -28,6 +28,65 @@ def test_benchmark_has_exact_category_distribution():
     assert counts == {"bugfix": 6, "feature": 6, "refactor": 5, "testing": 5, "docs_config": 4, "high_risk": 4}
 
 
+@pytest.mark.parametrize("change_when", ["preflight", "fixture", "model", "never", "never_no_cap"])
+def test_configuration_drift_stops_and_seals_trial(monkeypatch, tmp_path, change_when):
+    home = tmp_path / "codex-home"
+    home.mkdir()
+    config = home / "config.toml"
+    config.write_text("# original\n", encoding="utf-8")
+    monkeypatch.setenv("CODEX_HOME", str(home))
+    args = argparse.Namespace(
+        output=tmp_path / "results.jsonl", work_root=tmp_path / "work", seed=20261010,
+        run=True, max_calls=2, total_call_cap=None if change_when == "never_no_cap" else 2, allow_more_calls=False,
+        codex_path="fake", case_ids=["feature-01"],
+    )
+    monkeypatch.setattr(benchmark, "find_codex", lambda _: "fake")
+
+    def login(_):
+        if change_when == "preflight":
+            config.write_text("# changed\n", encoding="utf-8")
+        return {"available": True, "chatgpt_login": True}
+
+    monkeypatch.setattr(benchmark, "codex_login_status", login)
+    monkeypatch.setattr(benchmark.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a[0], 0, "test-version", ""))
+    def prepare(case, path):
+        path.mkdir(parents=True)
+        if change_when == "fixture":
+            config.write_text("# changed\n", encoding="utf-8")
+
+    monkeypatch.setattr(benchmark, "prepare_workspace", prepare)
+    monkeypatch.setattr(benchmark, "validate_workspace", lambda *a: {"passed": True})
+    calls = []
+
+    def execute(*a, **k):
+        calls.append(1)
+        if change_when == "model":
+            config.write_text("# changed\n", encoding="utf-8")
+        return {"status": "completed", "usage": {"input_tokens": 10, "output_tokens": 2}, "answer": ""}
+
+    monkeypatch.setattr(benchmark, "_direct_run", execute)
+    monkeypatch.setattr(benchmark, "run_plus_task", execute)
+    result = run_benchmark(args)
+    expected_calls = {"preflight": 0, "fixture": 0, "model": 1, "never": 2, "never_no_cap": 2}[change_when]
+    assert len(calls) == result["reserved_attempts_total"] == expected_calls
+    closed = change_when not in {"never", "never_no_cap"}
+    assert result["trial_closed"] is closed
+    if closed:
+        assert result["authorized_attempts_remaining"] == 0
+        assert args.output.with_name("results.jsonl.closed.json").is_file()
+        monkeypatch.setattr(benchmark, "find_codex", lambda _: pytest.fail("Closed trial must not resolve Codex"))
+        with pytest.raises(RuntimeError, match="Trial is closed"):
+            run_benchmark(args)
+    if change_when == "model":
+        row = json.loads(args.output.read_text(encoding="utf-8"))
+        assert row["execution_status"] == "needs_verification"
+        assert row["native_execution_status"] == "completed"
+        assert row["total_tokens"] == 12
+        assert row["user_configuration_unchanged"] is False
+    if change_when == "never_no_cap":
+        assert result["authorized_attempts_remaining"] is None
+
+
 def test_manifest_tracks_user_config_identity_and_content_without_retaining_them(monkeypatch, tmp_path):
     first_home = tmp_path / "first"
     second_home = tmp_path / "second"

@@ -1,8 +1,23 @@
 # Project update status
 
-Updated: 2026-10-18
+Updated: 2026-10-19
 
 ## Verified checkpoint
+
+2026-10-19 config-drift evaluation guard: simulated changes during preflight or
+after the first task reproduced the old runner launching both arms. The runner
+now checks the user-config snapshot immediately before reservation (after fixture
+creation) and after execution; changes/unverifiable state stop and durably seal
+the journal. A completed native status and incurred usage are retained, while
+comparison status becomes needs_verification. Closed retry blocks before Codex
+resolution; unspent slots are closed, not charged. Simulated preflight/fixture
+drift launches zero tasks; post-first drift launches one; stable controls launch
+both. Benchmark suite: 71 passed, final five controls and Ruff/whitespace passed.
+No native model calls, user config writes, quota resets or trial reopening.
+This prospective guard is not a lock/all-layer config proof or token savings.
+Eval/docs-only local commit; hosted validation deferred to the next source batch.
+The historical trial remains sealed at one reservation; main MCP CI 39125618810
+is now independently verified terminal success on `1f0d23a`.
 
 2026-10-18 MCP UTF-8 boundary fix: both real subprocess entrypoints failed Chinese
 request/path preservation under forced cp1252 text decoding, and an invalid-UTF-8
@@ -19,7 +34,7 @@ fix is included in this source batch for one shared hosted gate. Source
 `codex/verify-mcp-utf8`; exact CI 39125215140 completed successfully with all ten
 validation jobs passed, without a rerun. After fetch/ancestry validation, main
 was fast-forwarded from `5495718` to this exact SHA and independently confirmed
-with `ls-remote`. Main CI 39125618810 is in progress on this SHA, not green. This
+with `ls-remote`. Main CI 39125618810 subsequently completed successfully on this SHA. This
 closes the bounded MCP source batch, including the earlier clarification-summary
 change, not the overall token-efficiency goal. No release or installed replacement.
 

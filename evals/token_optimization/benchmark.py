@@ -326,6 +326,8 @@ def _ordered_arms(seed: int, selected: list[BenchmarkCase] | None = None) -> lis
 @contextmanager
 def _exclusive_trial(output: Path):
     resolved_output = output.resolve()
+    if resolved_output.with_name(resolved_output.name + ".closed.json").exists():
+        raise RuntimeError("Trial is closed; review its closure record before authorizing a separate experiment")
     lock = resolved_output.with_name(resolved_output.name + ".lock")
     lock.parent.mkdir(parents=True, exist_ok=True)
     owner = uuid.uuid4().hex
@@ -343,6 +345,23 @@ def _exclusive_trial(output: Path):
         # Never remove a replacement lock or automatically steal a stale lock.
         if lock.exists() and lock.read_text(encoding="utf-8") == owner:
             lock.unlink()
+
+
+def _configuration_matches(expected: dict[str, Any]) -> bool:
+    try:
+        return _user_config_provenance() == expected
+    except (OSError, ValueError):
+        return False
+
+
+def _close_trial(output: Path) -> None:
+    resolved = output.resolve()
+    marker = resolved.with_name(resolved.name + ".closed.json")
+    with marker.open("x", encoding="utf-8") as stream:
+        json.dump({"closed": True, "reason": "user_configuration_not_verified",
+                   "recorded_at": datetime.now(UTC).isoformat()}, stream)
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
@@ -409,10 +428,16 @@ def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
     baseline_total, baseline_failed = _failure_counts(args.output, experiment_digest)
     completed_now = 0
     failed_now = 0
+    trial_closed = False
     with args.output.open("a", encoding="utf-8") as stream:
         for case, arm in pending[: min(args.max_calls, remaining_budget)]:
             workspace = args.work_root / f"{case.id}-{arm}-{uuid.uuid4().hex[:8]}"
             prepare_workspace(case, workspace)
+            if not _configuration_matches(experiment["user_configuration"]):
+                _close_trial(args.output)
+                trial_closed = True
+                _remove_workspace(workspace, args.work_root)
+                break
             # Reserve one entire Codex execution before launch. A failed or
             # interrupted execution still consumes the authorization ceiling.
             with journal.open("a", encoding="utf-8") as budget_stream:
@@ -426,6 +451,14 @@ def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
                 result = _direct_run(case, workspace, executable)
             else:
                 result = run_plus_task(_execution_prompt(case), cwd=workspace, codex_path=executable, max_model_attempts=1)
+            result["user_configuration_unchanged"] = _configuration_matches(experiment["user_configuration"])
+            if not result["user_configuration_unchanged"]:
+                _close_trial(args.output)
+                trial_closed = True
+                result["native_execution_status"] = result["status"]
+                if result["status"] == "completed":
+                    result["status"] = "needs_verification"
+                    result["error_category"] = "user_configuration_not_verified"
             validation = validate_workspace(case, workspace, result.get("answer", ""))
             record = _public_record(case, arm, result, validation, experiment=experiment)
             stream.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -441,7 +474,7 @@ def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
             cumulative_total = baseline_total + processed_now
             cumulative_failed = baseline_failed + failed_now
             bounded_selection = getattr(args, "pilot", False) or getattr(args, "case_ids", None) is not None
-            if (bounded_selection and call_failed) or record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"} or (
+            if trial_closed or (bounded_selection and call_failed) or record.get("error_category") in {"subscription_limit", "authentication", "model_unavailable"} or (
                 cumulative_total >= 10 and cumulative_failed / cumulative_total > 0.10
             ):
                 break
@@ -451,7 +484,10 @@ def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
         "experiment_digest": experiment_digest,
         "reserved_attempts_total": len(reservations) + completed_now + failed_now,
         "total_call_cap": total_call_cap,
-        "authorized_attempts_remaining": max(0, total_call_cap - len(reservations) - completed_now - failed_now),
+        "trial_closed": trial_closed,
+        "authorized_attempts_remaining": 0 if trial_closed else (
+            max(0, total_call_cap - len(reservations) - completed_now - failed_now) if total_call_cap is not None else None
+        ),
     }
 
 
