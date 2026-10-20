@@ -1,6 +1,6 @@
 # Project update status
 
-Updated: 2026-10-19
+Updated: 2026-10-20
 
 ## Verified checkpoint
 
@@ -12,7 +12,13 @@ startup. Two API/auto-API positive controls still start the requested service.
 CLI/lifecycle suite: 64 passed. Detection still runs first and may create an
 explicitly configured `CODEX_HOME`; this is not a fully write-free or transactional
 setup guarantee. No model, dependency, installed-runtime or token-saving change.
-Local source validation only; exact-source hosted validation remains outstanding.
+2026-10-20 exact-source hosted gate: validation run
+[39189925912](https://github.com/Drippinblood333/layman/actions/runs/39189925912)
+completed successfully with all ten validation jobs on
+`091b3bd51ffad87ea3e1abea085553db500a5346`. After fresh fetch and ancestry
+verification, main was fast-forwarded from `1f0d23a` to that same source SHA;
+`ls-remote` independently confirmed it. Main's separate post-push CI is not yet
+verified. No release tag, formal release, installed replacement or model trial.
 
 2026-10-19 local rejecting-provider startup diagnosis: read-only native startup
 reached the local refusing service once, exited 1 without a completed turn, and
