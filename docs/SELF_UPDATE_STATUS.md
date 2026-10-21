@@ -1,6 +1,6 @@
 # Project update status
 
-Updated: 2026-10-20
+Updated: 2026-10-21
 
 ## Verified checkpoint
 
@@ -19,8 +19,12 @@ completed successfully with all ten validation jobs on
 verification, main was fast-forwarded from `1f0d23a` to that same source SHA;
 `ls-remote` independently confirmed it. Main's separate post-push CI
 [39350721839](https://github.com/Drippinblood333/layman/actions/runs/39350721839)
-is confirmed queued on this same SHA, not yet passed. No release tag, formal
-release, installed replacement or model trial.
+was independently verified on 2026-10-21 as completed successfully on this same
+SHA, with all ten validation jobs passed, no failures and no active jobs. Remote
+main still matches this source. This closes the bounded setup-preflight source
+batch, not the overall installation/usability/token-efficiency goal. No release
+tag, formal release, installed replacement or model trial. Documentation-only
+evidence commits remain local to avoid rebuilding unchanged product source.
 
 2026-10-19 local rejecting-provider startup diagnosis: read-only native startup
 reached the local refusing service once, exited 1 without a completed turn, and
