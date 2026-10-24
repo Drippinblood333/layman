@@ -124,6 +124,53 @@ diagnostic should use a local synthetic successful completion, not a real model,
 to separate successful native completion from failed startup. The old closed
 journal still has one reservation; no product source, CI or model trial restarted.
 
+## Synthetic successful-completion and command follow-up
+
+The next batch exercised successful native completion without real inference.
+A loopback-only fixture sent fixed Responses SSE lifecycle/message events after
+discarding incoming bodies. It never forwarded a request or used a model backend.
+Only synthetic text was returned; reported fixture usage zeros are NOT measured
+model token usage and cannot support savings, cost or billing claims.
+The [official Responses streaming guide](https://developers.openai.com/api/docs/guides/streaming-responses)
+was searched/fetched before constructing these events.
+
+| Condition | Observed native outcome | Observed config delta |
+| --- | --- | --- |
+| Fixed assistant completion, no command | Exit 0, fixed last-message matched | None |
+| Initial command probe with mistaken zero tool budget | Exit 1, budget_exceeded; roundtrip incomplete | None; not a pass |
+| Corrected command probe, tool/file ceiling 2 | Exit 0, one tool call, no command failures, tool output returned, fixed last-message matched | None |
+| Same command with Direct's explicit workspace permission profile and medium effort | Exit 0, one tool call, no command failures, tool output returned, fixed last-message matched | None |
+
+The one commanded action was `Get-Location`, run in the owned synthetic workspace.
+The corrected/profiling probes each sent one synthetic function call, observed its
+matching output in the next request and sent a final synthetic message. They did
+not edit project code. The last variant aligned `default_permissions=":workspace"`,
+`CODEX_PERMISSION_PROFILE=:workspace` and medium effort with the real Direct
+launcher after source inspection exposed the missing comparison condition.
+The provider remained the non-reserved local diagnostic provider, not the official
+authenticated inference path; this remains an important difference.
+
+Each condition has its own guarded result directory under ignored `build/`:
+`config-success-keys-2026-10-24`, `config-tool-keys-2026-10-24`,
+`config-tool-keys-2026-10-24-permitted` and `config-tool-profile-2026-10-24`.
+The mistaken zero-budget result is retained unchanged. Corrected variants record
+their in-memory source hashes and reuse the earlier snapshot/monitor definitions
+without rerunning or overwriting that earlier probe's actions/results.
+
+No raw/parsed configuration delta or sampled transition was observed in these
+conditions. The final config hash still matches the probe end, and later visible
+process inventory found zero private-runtime processes. The sealed real-model
+journal still contains exactly one reservation; no real model generation,
+benchmark restart, production code change, config write by the probe or CI run.
+
+This narrows the conditions tested, not the root cause: local successful completion
+and this one read-only command did not reproduce the earlier real-call drift.
+It does not rule out authenticated-provider behavior, file-changing tasks,
+different command paths or concurrent writers, and 100 ms sampling can miss
+transient changes. Stop adding low-value probe variants here. Do not launch a
+fresh model pair as a diagnostic retry; a subsequent investigation needs a concrete
+new hypothesis or passive change evidence from ordinary authorized activity.
+
 ## Full-goal boundary
 
 Current evidence still does not close the owner's objective:

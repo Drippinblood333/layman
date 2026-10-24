@@ -21,8 +21,15 @@ startup checks observed no raw or parsed config changes. Refused startup exited
 1 before deadline; three loopback requests discarded 326,424 bytes, never forwarded,
 with zero real model responses. No visible private-runtime process remained;
 config end hash unchanged and old journal still one sealed reservation. This does
-not identify the earlier writer/keys or repair the trial. Next: local synthetic
-successful completion, not another real-model attempt.
+not identify the earlier writer/keys or repair the trial. Further local
+synthetic successful completion and a real Get-Location command roundtrip also
+completed with stable config, including a variant matching Direct's explicit
+workspace profile/medium effort. An initial zero-tool-budget harness refusal is
+retained, not counted as passed; corrected probes used bounded ceiling 2.
+All completions/usage were fixture-generated, not model measurements. No native
+process remained; real trial still sealed at one reservation. Stop low-value
+variants; require a concrete new hypothesis/passive evidence before another probe
+batch, and no real-model diagnostic retry.
 [Full protocol, incurred usage, zero-model evidence and goal audit](POSTCOMPACT_DEFAULT_PAIR_2026-10-24.md).
 
 2026-10-24 compaction-prompt intent preservation: official config reference and
