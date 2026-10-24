@@ -58,7 +58,33 @@ before promotion/publication. Previous candidate binaries retain their old
 certificate bundles and are not retroactively repaired by this source change.
 
 Hosted gate [40103799633](https://github.com/Drippinblood333/layman/actions/runs/40103799633)
-is confirmed in progress on source `cd613c5b455939ba14b40d00b5146dd974cefc91`,
-branch `codex/verify-security-dependencies`. It includes the earlier offline-plan
-and Pillow changes; no duplicate validation branch for each dependency. Main was
-independently read as `091b3bd51ffad87ea3e1abea085553db500a5346`, not promoted.
+completed successfully with all ten validation jobs, no active jobs and no
+failures on source `cd613c5b455939ba14b40d00b5146dd974cefc91`, branch
+`codex/verify-security-dependencies`. All three OS runtime audits passed. It
+includes the earlier offline-plan and Pillow changes; no duplicate validation
+branch for each dependency. `gh run watch` encountered an annotations EOF;
+direct run/jobs reads confirmed terminal success without a rerun.
+
+## Windows binary acceptance and promotion
+
+Downloaded artifact `12563203602` (`layman-windows-x64`) from that exact run to
+ignored `build/ci-cd613c5/windows-x64`. The 17,275,004-byte executable SHA-256 is
+`a6ebd7928893ee25d5a45d188b5a0a2477c322faa83f338dd5955f7dc45d6e4e`.
+Its embedded `certifi/cacert.pem`, read with PyInstaller's archive reader, is
+byte-identical to the locally hash-verified 2026.10.19 package's CA bundle:
+SHA-256 `50f79f98dac192b20dbf73f35c56f0b0c557ab267ff5199d1117cc1180b70785`.
+SSL loads 120 CAs from these extracted bytes and the compromised G3 root is absent.
+The runtime manifest records certifi 2026.10.19. Executable hash, all three
+BUILD metadata digest links and source lock hash match. This verifies actual
+embedded bytes, not just a manifest; it is not code signing, a fresh installed
+workflow, all-platform binary inspection or an end-to-end TLS interoperability test.
+
+After fresh fetch and ancestry validation, main was fast-forwarded from
+`091b3bd51ffad87ea3e1abea085553db500a5346` to exact verified source
+`cd613c5b455939ba14b40d00b5146dd974cefc91`, independently confirmed by `ls-remote`.
+Main CI [40104120671](https://github.com/Drippinblood333/layman/actions/runs/40104120671)
+is confirmed in progress, not yet passed. The separate dynamic dependency-graph
+update [40104126033](https://github.com/Drippinblood333/layman/actions/runs/40104126033)
+is also running; it is not duplicate CI. An immediate alert API read still returns
+41 open Pillow alerts. Do not claim closure before graph processing and a fresh
+alert check; no alert was manually dismissed. No formal release/install replacement.

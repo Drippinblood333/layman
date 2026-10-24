@@ -15,8 +15,15 @@ vulnerability pass; shared hosted validation must check independently. No audit
 suppression or repeated identical local retries.
 [Evidence and verification boundaries](CERTIFI_SECURITY_UPDATE_2026-10-24.md).
 Shared hosted gate [40103799633](https://github.com/Drippinblood333/layman/actions/runs/40103799633)
-is confirmed in progress on `cd613c5b455939ba14b40d00b5146dd974cefc91`, including
-the earlier planning and Pillow fixes. Main remains `091b3bd`; no promotion yet.
+completed successfully with all ten jobs, including all three OS runtime audits,
+on `cd613c5b455939ba14b40d00b5146dd974cefc91` and the earlier planning/Pillow fixes.
+Actual Windows artifact `12563203602` embedded CA bytes match the fixed certifi
+package; executable/metadata/lock hashes match. Fresh fetch/ancestry check then
+fast-forwarded main to this exact source, independently confirmed by ls-remote.
+Main CI [40104120671](https://github.com/Drippinblood333/layman/actions/runs/40104120671)
+and separate dynamic graph update `40104126033` are in progress. Immediate open
+Pillow alert count remains 41 pending graph processing, not verified closed.
+No formal release or user-install replacement; no model/token-saving claim.
 
 2026-10-24 Pillow security batch: all 41 current GitHub alerts are development
 Pillow records; range membership confirmed 12.3.0 affected / 13.0.0 excluded for
@@ -25,7 +32,8 @@ dev pin. After a failed download and bounded successful retry, actual local
 Pillow 13.0.0 passed 44 packaging tests, including isolated six-frame GIF decode;
 pip check and Ruff passed. Default runtime dependencies/lock unchanged. No model
 or user-install change. [Evidence and limits](PILLOW_SECURITY_UPDATE_2026-10-24.md).
-Local only pending a shared hosted gate after the separate certifi repair.
+Its shared hosted gate is now passed and source promoted as recorded above;
+post-main graph/alert closure remains unverified.
 
 2026-10-24 offline-plan duplicate classification: four first-failing controls
 confirmed each `create_task_plan` classified the unchanged task twice. The outer
