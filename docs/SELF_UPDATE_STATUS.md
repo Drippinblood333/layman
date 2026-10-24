@@ -18,7 +18,18 @@ froze repository inspection equally and retained configuration loading: median
 59.6868 ms before versus 42.7328 ms after. This is a bounded local CPU measurement,
 not cold CLI/end-to-end latency, token savings or a general semantic guarantee.
 No model or paid API calls; user installation unchanged. Exact-source hosted
-validation remains outstanding; the overall goal is still active.
+validation [40103178651](https://github.com/Drippinblood333/layman/actions/runs/40103178651)
+is confirmed in progress on `4ab7c725f8c5c531c98753bf6a9988ba9137574f`, not yet
+passed; main is not promoted. The overall goal is still active.
+
+Security follow-up discovered during this push: GitHub reported 41 open dependency
+alerts (5 critical, 23 high, 13 moderate). A first API observation returned EOF;
+retrying the same read succeeded and confirmed 41 records, all associated with
+`services/layman-router/pyproject.toml`. The five critical records name Pillow
+(alerts 1, 10, 27, 32, 41). Vulnerable version ranges, current resolution, build
+versus runtime exposure and fixes have NOT yet been triaged; this is not proof
+that the packaged runtime is vulnerable or safe. Prioritize that separate batch
+before any formal release; do not dismiss alerts or blindly upgrade dependencies.
 
 2026-10-19 setup argument preflight: four first-failing controls showed explicit
 Plus and auto-detected Plus with `--start` reaching setup state access before the
