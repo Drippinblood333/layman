@@ -87,6 +87,12 @@ states that execution has not started, rather than saying "Plan ready". This is
 a normal planning result (`isError=false`), not execution or a permission change;
 the full structured plan remains available unchanged.
 
+For the existing recognized vague/context-only phrases, English requests receive
+English clarification questions; recognized Chinese requests (including Chinese
+with `bug`) retain the original Chinese questions. This is a bounded wording
+choice, not general language detection or model-based translation. It does not
+rewrite the task, add execution permission, or expand the phrases being blocked.
+
 MCP stdio reads/writes UTF-8 bytes independently of the host text-stream locale.
 Malformed UTF-8 frames are not dispatched to tools; this follows the existing
 malformed-frame discard behavior. Already-decoded text streams used by embedding

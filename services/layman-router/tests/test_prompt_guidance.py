@@ -5,6 +5,37 @@ from layman_router.prompt_guidance import prompt_guidance
 from layman_router.task_plan import create_task_plan
 
 
+@pytest.mark.parametrize("task,expected", [
+    ("continue", "original task"),
+    ("continue the previous task", "original task"),
+    ("please improve the whole project", "specific outcome"),
+    ("fix it", "specific outcome"),
+    ("fix\u00a0it", "specific outcome"),
+    ("fix the bug, please", "specific outcome"),
+])
+def test_english_clarification_is_readable_without_chinese(task, expected):
+    result = prompt_guidance(task)
+    assert result["needs_clarification"] is True
+    assert len(result["questions"]) == 2
+    assert expected in result["questions"][0]
+    assert all(question.isascii() for question in result["questions"])
+    assert result["rewritten"] is False
+    assert result["model_calls"] == 0
+
+
+def test_english_mcp_clarification_remains_execution_blocking(monkeypatch, tmp_path):
+    from layman_router import mcp_server
+
+    monkeypatch.setattr("layman_router.plus_run.find_codex", lambda *a, **k: pytest.fail("Clarification must not start Codex"))
+    arguments = {"task": "fix it", "workspace": str(tmp_path)}
+    plan = mcp_server._call_tool("plan", arguments)
+    assert "specific outcome" in plan["content"][0]["text"]
+    run = mcp_server._call_tool("run", arguments)
+    assert run["isError"] is True
+    assert run["structuredContent"]["error_category"] == "prompt_clarification_required"
+    assert "specific outcome" in run["content"][0]["text"]
+
+
 @pytest.mark.parametrize("task", [
     "继续", "请继续吧", "接着做", "继续之前的任务", "继续上一个任务，谢谢！",
     "continue", "please continue", "go on", "continue the previous task", "carry on, please.",
@@ -13,7 +44,7 @@ def test_context_only_continuations_request_missing_goal_without_rewriting(task)
     result = prompt_guidance(task)
     assert result["needs_clarification"] is True
     assert len(result["questions"]) == 2
-    assert "原始任务" in result["questions"][0]
+    assert ("original task" if task.isascii() else "原始任务") in result["questions"][0]
     assert result["rewritten"] is False
     assert result["model_calls"] == 0
 
@@ -120,7 +151,7 @@ def test_mcp_vague_run_exposes_questions_without_model_execution(monkeypatch, tm
     result = mcp_server._call_tool("run", {"task": task, "workspace": str(tmp_path)})
     assert result["isError"] is True
     assert result["structuredContent"]["error_category"] == "prompt_clarification_required"
-    assert "具体结果" in result["content"][0]["text"]
+    assert ("specific outcome" if task.isascii() else "具体结果") in result["content"][0]["text"]
 
 
 def test_polite_vague_run_stops_before_login_and_preserves_concrete_followup(monkeypatch, tmp_path):

@@ -4,6 +4,17 @@ Updated: 2026-10-24
 
 ## Verified checkpoint
 
+2026-10-24 clarification usability: six first-failing controls reproduced English
+vague/continuation requests receiving Chinese-only questions, including MCP plan.
+Existing recognized English phrases now get English questions; recognized Chinese
+phrases keep the exact original questions. No new language dependency or model,
+rewriting, classification expansion, output-schema or permission change. At most
+two questions and the pre-Codex execution stop remain intact. An added non-ASCII
+whitespace control prevents ASCII-only language selection. Guidance/task-plan/
+CLI/MCP suites: 135 passed; scoped Ruff/whitespace passed. This is usability, not
+measured token savings or a general multilingual prompt-quality assessment.
+Exact-source hosted validation remains outstanding; no installed replacement.
+
 2026-10-24 alert reconciliation: confirmed the default branch is main and its
 manifest Git blob exactly matches verified source `cd613c5`; the graph's one
 Pillow purl is 13.0.0. All 41 open records still require 12.3.0 and have update

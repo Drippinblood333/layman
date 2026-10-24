@@ -30,16 +30,23 @@ def prompt_guidance(task: str) -> dict[str, object]:
         rf"(?:please\s+)?fix\s+(?:(?:the|this)\s+)?bugs?{en_end}",
         request,
     ))
+    chinese = re.search(r"[\u4e00-\u9fff]", request) is not None
     questions = []
     if continuation:
         questions = [
             "本次任务没有写明要继续的目标。请补充原始任务和仍需完成的结果。",
             "目前已完成什么，最近的验证结果是什么？只需补充这些，不必粘贴全部对话。",
+        ] if chinese else [
+            "What original task should continue, and what outcome is still unfinished?",
+            "What is already done, and what was the latest verification result? No full conversation is needed.",
         ]
     elif broad or unspecified:
         questions = [
             "你希望改善的具体结果是什么？例如安装步骤、某个报错或一个使用流程。",
             "怎样判断改善成功？如果仍需改进整个项目，先确认优先顺序，不缩减原始范围。",
+        ] if chinese else [
+            "What specific outcome should improve, such as installation, an error, or a user workflow?",
+            "How will you verify success? If the whole project remains in scope, set priorities without shrinking that scope.",
         ]
     return {
         "method": "limited offline wording check; not semantic validation",
