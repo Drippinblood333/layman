@@ -4,6 +4,15 @@ Updated: 2026-10-24
 
 ## Verified checkpoint
 
+2026-10-24 alert reconciliation: confirmed the default branch is main and its
+manifest Git blob exactly matches verified source `cd613c5`; the graph's one
+Pillow purl is 13.0.0. All 41 open records still require 12.3.0 and have update
+timestamps before the repair push. Wrong-branch/unpublished-manifest causes are
+excluded; the internal reconciliation cause remains unknown. No alert dismissal,
+dummy commit, repeated build or setting change. Stop this bounded diagnosis;
+one compact check at the next normal heartbeat, while other goal work continues.
+[Detailed evidence and remaining publication boundary](DEPENDENCY_ALERT_RECONCILIATION_2026-10-24.md).
+
 2026-10-24 certifi runtime security repair: official advisories checked; the lock
 updates only certifi 2026.7.22 -> 2026.10.19 and its two PyPI hashes. License approval
 and immutable upstream source follow the new release; unchanged LICENSE blob
