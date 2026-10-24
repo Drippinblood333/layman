@@ -14,8 +14,13 @@ whitespace control prevents ASCII-only language selection. Guidance/task-plan/
 CLI/MCP suites: 135 passed; scoped Ruff/whitespace passed. This is usability, not
 measured token savings or a general multilingual prompt-quality assessment.
 Exact-source hosted gate [40104758087](https://github.com/Drippinblood333/layman/actions/runs/40104758087)
-is confirmed queued on `97099ac4451be9ddde208d1738c2929ccb57d2f5`, not yet
-passed; main is not promoted and user installation is unchanged.
+completed successfully on `97099ac4451be9ddde208d1738c2929ccb57d2f5`, all ten
+validation jobs passed. One jobs-read EOF was resolved by reading the same run
+again, without a rerun. After fresh fetch/ancestry verification, main was
+fast-forwarded from `cd613c5` to this exact source; ls-remote confirmed the result.
+Main's separate post-push CI [40105083906](https://github.com/Drippinblood333/layman/actions/runs/40105083906)
+is confirmed in progress on that same SHA, not yet passed. User installation
+unchanged; no release tag, formal release or real model task.
 
 2026-10-24 alert reconciliation: confirmed the default branch is main and its
 manifest Git blob exactly matches verified source `cd613c5`; the graph's one
