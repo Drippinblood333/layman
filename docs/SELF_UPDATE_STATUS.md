@@ -13,7 +13,9 @@ two questions and the pre-Codex execution stop remain intact. An added non-ASCII
 whitespace control prevents ASCII-only language selection. Guidance/task-plan/
 CLI/MCP suites: 135 passed; scoped Ruff/whitespace passed. This is usability, not
 measured token savings or a general multilingual prompt-quality assessment.
-Exact-source hosted validation remains outstanding; no installed replacement.
+Exact-source hosted gate [40104758087](https://github.com/Drippinblood333/layman/actions/runs/40104758087)
+is confirmed queued on `97099ac4451be9ddde208d1738c2929ccb57d2f5`, not yet
+passed; main is not promoted and user installation is unchanged.
 
 2026-10-24 alert reconciliation: confirmed the default branch is main and its
 manifest Git blob exactly matches verified source `cd613c5`; the graph's one
