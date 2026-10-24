@@ -41,7 +41,7 @@ APPROVED_RUNTIME_LICENSES = {
     ("annotated-types", "0.8.0"): "MIT",
     ("anyio", "4.14.2"): "MIT",
     ("attrs", "26.1.0"): "MIT",
-    ("certifi", "2026.7.22"): "MPL-2.0",
+    ("certifi", "2026.10.19"): "MPL-2.0",
     ("click", "8.4.2"): "BSD-3-Clause",
     ("colorama", "0.4.6"): "BSD-3-Clause",
     ("fastapi", "0.141.1"): "MIT",
@@ -67,10 +67,10 @@ CLASSIFIER_LICENSES = {
     "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)": "MPL-2.0",
 }
 LICENSE_OVERRIDES = {
-    ("certifi", "2026.7.22"): {
+    ("certifi", "2026.10.19"): {
         "expression": "MPL-2.0",
         "evidence": "curated-upstream-license",
-        "url": "https://github.com/certifi/python-certifi/blob/f4bc676bc101fe2235846e37044e8c693d6cbaf4/LICENSE",
+        "url": "https://github.com/certifi/python-certifi/blob/662df63d7906df66f1f07c0751a3dfe9da14d914/LICENSE",
     },
     ("colorama", "0.4.6"): {
         "expression": "BSD-3-Clause",

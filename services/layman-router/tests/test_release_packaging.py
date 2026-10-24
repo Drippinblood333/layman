@@ -27,6 +27,12 @@ PLATFORMS = {
 FAKE_NOTICE_CONTENT = b"test license notice\n"
 
 
+def test_locked_certificate_bundle_includes_emsign_security_fix():
+    inventory = runtime_inventory_module()
+    locked = dict(inventory.locked_dependencies(ROOT / "services/layman-router/requirements.lock"))
+    assert Version(locked["certifi"]) >= Version("2026.10.19")
+
+
 def test_demo_imaging_dependency_uses_security_fixed_release():
     project = tomllib.loads((ROOT / "services/layman-router/pyproject.toml").read_text(encoding="utf-8"))
     dependencies = project["project"]["optional-dependencies"]["dev"]
@@ -532,7 +538,7 @@ def test_runtime_inventory_matches_lock_and_emits_traceable_spdx_licenses(tmp_pa
     )
     assert all(item["license"]["notices"] for item in dependencies.values())
     assert inventory._license_record(
-        {"License": "MPL-2.0"}, "certifi", "2026.7.22"
+        {"License": "MPL-2.0"}, "certifi", "2026.10.19"
     )["expression"] == "MPL-2.0"
     assert inventory._license_record(
         {"Classifier": ["License :: OSI Approved :: BSD License"]},
@@ -553,7 +559,7 @@ def test_runtime_inventory_matches_lock_and_emits_traceable_spdx_licenses(tmp_pa
         ("annotated-types", "0.8.0"): "MIT",
         ("anyio", "4.14.2"): "MIT",
         ("attrs", "26.1.0"): "MIT",
-        ("certifi", "2026.7.22"): "MPL-2.0",
+        ("certifi", "2026.10.19"): "MPL-2.0",
         ("click", "8.4.2"): "BSD-3-Clause",
         ("colorama", "0.4.6"): "BSD-3-Clause",
         ("fastapi", "0.141.1"): "MIT",

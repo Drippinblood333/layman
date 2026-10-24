@@ -4,6 +4,17 @@ Updated: 2026-10-24
 
 ## Verified checkpoint
 
+2026-10-24 certifi runtime security repair: official advisories checked; the lock
+updates only certifi 2026.7.22 -> 2026.10.19 and its two PyPI hashes. License approval
+and immutable upstream source follow the new release; unchanged LICENSE blob
+confirmed. New security regression first failed; actual hash-verified wheel install,
+168 relevant tests, pip check, Ruff and secret/whitespace checks passed. Loaded CA
+bundle excludes the compromised emSign G3 root and retains unaffected emSign roots.
+Post-update OSV audit and one bounded retry failed on proxy connectivity, not a
+vulnerability pass; shared hosted validation must check independently. No audit
+suppression or repeated identical local retries.
+[Evidence and verification boundaries](CERTIFI_SECURITY_UPDATE_2026-10-24.md).
+
 2026-10-24 Pillow security batch: all 41 current GitHub alerts are development
 Pillow records; range membership confirmed 12.3.0 affected / 13.0.0 excluded for
 all 41. Official release notes and Python minimum checked before updating the
