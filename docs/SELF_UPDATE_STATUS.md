@@ -14,7 +14,11 @@ file/tool limits remain unchanged. New benchmark fingerprints explicitly record
 the inherit policy, not the old unused prompt hash; no historical trial reopened.
 Plus execution/preflight/benchmark suites: 203 passed. No live model, real
 compaction or token-quality/savings claim; no new config-reading path or writes
-to user installation/config. Hosted gate outstanding.
+to user installation/config. Exact-source hosted gate
+[40105835977](https://github.com/Drippinblood333/layman/actions/runs/40105835977)
+is confirmed in progress on `8b1aa177f77003fca88417944aea90221ece2c22`, not yet
+passed; main not promoted. Observe this run, do not restart it merely for an
+observation timeout. The overall goal remains active.
 
 2026-10-24 clarification usability: six first-failing controls reproduced English
 vague/continuation requests receiving Chinese-only questions, including MCP plan.
