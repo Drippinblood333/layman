@@ -22,9 +22,12 @@ verification preceded fast-forwarding main from `97099ac` to this exact source;
 ls-remote independently confirmed it. No repeated CI/model task was used to repair
 observation. Main's separate post-push CI
 [40106190056](https://github.com/Drippinblood333/layman/actions/runs/40106190056)
-is confirmed in progress on the same source, not yet passed. No formal release
-or installed replacement. The overall goal remains active; actual compaction
-quality and default-workflow token benefits are still unproven.
+subsequently completed successfully on the same source: all ten validation jobs
+passed, none failed and none active. A fresh ls-remote confirmed main still points
+to `8b1aa177f77003fca88417944aea90221ece2c22`. This closes the bounded compaction-
+prompt preservation source batch, with no restarted CI, extra test or model call.
+No formal release or installed replacement. The overall goal remains active;
+actual compaction quality and default-workflow token benefits are still unproven.
 
 2026-10-24 clarification usability: six first-failing controls reproduced English
 vague/continuation requests receiving Chinese-only questions, including MCP plan.
