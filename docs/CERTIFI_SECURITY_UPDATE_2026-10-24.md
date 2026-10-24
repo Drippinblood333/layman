@@ -83,8 +83,17 @@ After fresh fetch and ancestry validation, main was fast-forwarded from
 `091b3bd51ffad87ea3e1abea085553db500a5346` to exact verified source
 `cd613c5b455939ba14b40d00b5146dd974cefc91`, independently confirmed by `ls-remote`.
 Main CI [40104120671](https://github.com/Drippinblood333/layman/actions/runs/40104120671)
-is confirmed in progress, not yet passed. The separate dynamic dependency-graph
-update [40104126033](https://github.com/Drippinblood333/layman/actions/runs/40104126033)
-is also running; it is not duplicate CI. An immediate alert API read still returns
-41 open Pillow alerts. Do not claim closure before graph processing and a fresh
-alert check; no alert was manually dismissed. No formal release/install replacement.
+subsequently completed successfully on the same source: ten successful validation
+jobs, no failures and none active. `ls-remote` reconfirmed that main still points
+to that SHA. Observation hit another annotations EOF, not a job failure; direct
+run/jobs reads confirmed the terminal outcome without restarting the workflow.
+
+The separate dynamic dependency-graph update
+[40104126033](https://github.com/Drippinblood333/layman/actions/runs/40104126033)
+also completed successfully; it is not duplicate CI. A fresh dependency-graph
+SBOM API response actually records `pillow` version `13.0.0`. However, a subsequent
+open-alert API read still returns 41 Pillow records even after main CI finished.
+Alert closure is therefore NOT verified. A processing delay is only a possibility,
+not an established diagnosis; preserve the discrepancy for follow-up before formal
+publication. No alert was manually dismissed or audit weakened. No formal
+release/install replacement; the overall token-efficiency goal remains active.

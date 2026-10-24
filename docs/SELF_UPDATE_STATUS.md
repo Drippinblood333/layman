@@ -21,8 +21,12 @@ Actual Windows artifact `12563203602` embedded CA bytes match the fixed certifi
 package; executable/metadata/lock hashes match. Fresh fetch/ancestry check then
 fast-forwarded main to this exact source, independently confirmed by ls-remote.
 Main CI [40104120671](https://github.com/Drippinblood333/layman/actions/runs/40104120671)
-and separate dynamic graph update `40104126033` are in progress. Immediate open
-Pillow alert count remains 41 pending graph processing, not verified closed.
+is independently verified terminal success on this same SHA, all ten jobs passed.
+The separate dynamic graph update `40104126033` also succeeded; its fresh SBOM
+records Pillow 13.0.0. Subsequent open-alert API still returns 41 Pillow records:
+closure remains unverified despite the updated graph, with cause not established.
+Preserve this discrepancy for follow-up rather than dismissing alerts. Remote
+main still matches the verified source; no repeated test runs or new model calls.
 No formal release or user-install replacement; no model/token-saving claim.
 
 2026-10-24 Pillow security batch: all 41 current GitHub alerts are development
