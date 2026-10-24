@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 import yaml
 from packaging.requirements import Requirement
+from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[3]
 PLATFORMS = {
@@ -24,6 +25,35 @@ PLATFORMS = {
     "layman-linux-arm64": ("linux-arm64", "layman"),
 }
 FAKE_NOTICE_CONTENT = b"test license notice\n"
+
+
+def test_demo_imaging_dependency_uses_security_fixed_release():
+    project = tomllib.loads((ROOT / "services/layman-router/pyproject.toml").read_text(encoding="utf-8"))
+    dependencies = project["project"]["optional-dependencies"]["dev"]
+    pillow = next(Requirement(item) for item in dependencies if Requirement(item).name.lower() == "pillow")
+    pins = list(pillow.specifier)
+    assert len(pins) == 1 and pins[0].operator == "=="
+    assert Version(pins[0].version) >= Version("13.0.0")
+    assert all(Requirement(item).name.lower() != "pillow" for item in project["project"]["dependencies"])
+
+
+def test_demo_gif_generation_with_pinned_imaging_library(monkeypatch, tmp_path):
+    from PIL import Image
+
+    spec = importlib.util.spec_from_file_location("layman_test_demo", ROOT / "scripts/build-demo-gif.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    output = tmp_path / "demo.gif"
+    monkeypatch.setattr(module, "OUTPUT", output)
+    assert module.main() == 0
+    with Image.open(output) as image:
+        assert image.size == (1000, 560)
+        assert image.n_frames == len(module.SCENES)
+        for frame in range(image.n_frames):
+            image.seek(frame)
+            image.load()
+            assert image.info["duration"] == 5000
 
 
 @pytest.mark.parametrize("system,machine,expected", [

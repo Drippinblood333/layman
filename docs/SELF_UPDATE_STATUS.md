@@ -4,6 +4,15 @@ Updated: 2026-10-24
 
 ## Verified checkpoint
 
+2026-10-24 Pillow security batch: all 41 current GitHub alerts are development
+Pillow records; range membership confirmed 12.3.0 affected / 13.0.0 excluded for
+all 41. Official release notes and Python minimum checked before updating the
+dev pin. After a failed download and bounded successful retry, actual local
+Pillow 13.0.0 passed 44 packaging tests, including isolated six-frame GIF decode;
+pip check and Ruff passed. Default runtime dependencies/lock unchanged. No model
+or user-install change. [Evidence and limits](PILLOW_SECURITY_UPDATE_2026-10-24.md).
+Local only pending a shared hosted gate after the separate certifi repair.
+
 2026-10-24 offline-plan duplicate classification: four first-failing controls
 confirmed each `create_task_plan` classified the unchanged task twice. The outer
 plan now reuses the task type, risk and complexity already returned by its route;
@@ -19,8 +28,11 @@ froze repository inspection equally and retained configuration loading: median
 not cold CLI/end-to-end latency, token savings or a general semantic guarantee.
 No model or paid API calls; user installation unchanged. Exact-source hosted
 validation [40103178651](https://github.com/Drippinblood333/layman/actions/runs/40103178651)
-is confirmed in progress on `4ab7c725f8c5c531c98753bf6a9988ba9137574f`, not yet
-passed; main is not promoted. The overall goal is still active.
+is now terminal failure on `4ab7c725f8c5c531c98753bf6a9988ba9137574f`: all three
+OS test jobs failed locked-runtime audit on certifi 2026.7.22 / PYSEC-2026-4320,
+before functional tests. Local OSV audit independently reproduced the same ID
+(reported twice), with fixed version 2026.10.19. Main is not promoted; no audit
+suppression or unchanged-source rerun. The overall goal is still active.
 
 Security follow-up discovered during this push: GitHub reported 41 open dependency
 alerts (5 critical, 23 high, 13 moderate). A first API observation returned EOF;
