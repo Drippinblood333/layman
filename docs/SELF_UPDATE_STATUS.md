@@ -4,6 +4,19 @@ Updated: 2026-10-24
 
 ## Verified checkpoint
 
+2026-10-24 bounded drift evidence enhancement (eval-only): a first-failing mock
+execution showed the sealed row lacks changed-section evidence. The runner now
+keeps a matching pre-launch config baseline in memory and, only on a post-call
+mismatch, records safe top-level section labels/hashes/counts or explicit unknown
+status. No values/dynamic paths; custom names hashed, 16-label/1-MiB bounds.
+Comment-only drift still seals after one simulated call and retains incurred
+usage/native completion as needs_verification; no guard weakened or trial reopened.
+Privacy, malformed/oversized and output-cap controls passed. An initial oversized
+pytest parameter ID caused fixture errors; short explicit IDs fixed the harness.
+Complete benchmark suite: 75 passed; Ruff/whitespace/secret scan passed. No model,
+native diagnostic or hosted CI rerun. Local eval/docs change held for the next
+relevant source gate; root cause and default-workflow token benefit remain unproven.
+
 2026-10-24 current-default calibration: NEW two-start subscription ceiling under
 continuing owner authorization; old trials untouched. Frozen derived safe_filename
 task/stronger hidden checks, Sol/medium, same verified alpha.20 runtime and seed-

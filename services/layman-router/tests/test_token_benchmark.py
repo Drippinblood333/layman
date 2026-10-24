@@ -83,6 +83,11 @@ def test_configuration_drift_stops_and_seals_trial(monkeypatch, tmp_path, change
         assert row["native_execution_status"] == "completed"
         assert row["total_tokens"] == 12
         assert row["user_configuration_unchanged"] is False
+        diagnostic = row["configuration_change_diagnostic"]
+        assert diagnostic["status"] == "observed"
+        assert diagnostic["raw_content_changed"] is True
+        assert diagnostic["parsed_content_changed"] is False
+        assert diagnostic["changed_sections"] == []
     if change_when == "never_no_cap":
         assert result["authorized_attempts_remaining"] is None
 
@@ -111,6 +116,53 @@ def test_manifest_tracks_user_config_identity_and_content_without_retaining_them
     serialized = json.dumps([first, moved, edited])
     assert "synthetic-private-config-sentinel" not in serialized
     assert str(tmp_path) not in serialized
+
+
+def test_config_change_diagnostic_keeps_values_and_custom_names_private(monkeypatch, tmp_path):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    config = tmp_path / "config.toml"
+    config.write_text('model="synthetic-private-before"\n[projects."private-path-sentinel"]\ntrust_level="trusted"\n', encoding="utf-8")
+    before = benchmark._config_diagnostic_snapshot(benchmark._user_config_provenance())
+    config.write_text('model="synthetic-private-after"\n[projects."private-path-sentinel"]\ntrust_level="untrusted"\n[private-key-name-sentinel]\nvalue="synthetic-secret"\n', encoding="utf-8")
+    result = benchmark._config_change_diagnostic(before)
+    assert result["status"] == "observed"
+    assert result["raw_content_changed"] is True
+    assert result["parsed_content_changed"] is True
+    assert result["changed_sections_total"] == 3
+    assert "model" in result["changed_sections"] and "projects" in result["changed_sections"]
+    assert len([name for name in result["changed_sections"] if name.startswith("other_sha256:")]) == 1
+    serialized = json.dumps(result)
+    assert all(private not in serialized for private in (
+        "synthetic-private-before", "synthetic-private-after", "private-path-sentinel",
+        "private-key-name-sentinel", "synthetic-secret", str(tmp_path),
+    ))
+
+
+def test_config_change_diagnostic_bounds_section_output(monkeypatch, tmp_path):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    config = tmp_path / "config.toml"
+    config.write_text("# original\n", encoding="utf-8")
+    before = benchmark._config_diagnostic_snapshot(benchmark._user_config_provenance())
+    config.write_text("\n".join(f'custom_section_{index}="private"' for index in range(40)), encoding="utf-8")
+    result = benchmark._config_change_diagnostic(before)
+    assert len(result["changed_sections"]) == 16
+    assert result["changed_sections_total"] == 40
+    assert result["sections_truncated"] is True
+    assert "custom_section" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("content,expected", [
+    pytest.param('model = "unterminated', "unavailable", id="malformed"),
+    pytest.param('#' + 'x' * 1_048_576, "size_limit", id="oversized"),
+])
+def test_config_change_diagnostic_failure_does_not_expose_contents(monkeypatch, tmp_path, content, expected):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    config = tmp_path / "config.toml"
+    config.write_text("# original\n", encoding="utf-8")
+    before = benchmark._config_diagnostic_snapshot(benchmark._user_config_provenance())
+    config.write_text(content, encoding="utf-8")
+    assert benchmark._config_change_diagnostic(before) == {"status": expected}
+    assert benchmark._config_change_diagnostic(None) == {"status": "baseline_unavailable"}
 
 
 def test_user_config_provenance_records_default_missing_file(monkeypatch, tmp_path):

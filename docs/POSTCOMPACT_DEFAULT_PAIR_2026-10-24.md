@@ -171,6 +171,24 @@ transient changes. Stop adding low-value probe variants here. Do not launch a
 fresh model pair as a diagnostic retry; a subsequent investigation needs a concrete
 new hypothesis or passive change evidence from ordinary authorized activity.
 
+## Prospective evidence improvement, not trial repair
+
+The local benchmark runner was subsequently enhanced to keep a matching baseline
+in memory and record bounded changed-section diagnostics on future post-call
+drift. Fixed section names are readable; custom names are hashed. No configuration
+values/dynamic paths are retained, at most 16 labels are emitted, and parsing is
+limited to 1 MiB. Unknown/invalid/oversized observations are explicitly labeled.
+The original byte-level stop/seal rule is unchanged, including for comment-only
+changes; follow-up metadata cannot requalify a stopped result.
+
+The first-failing mock-native regression now passes, and the full local benchmark
+suite has 75 passing tests plus Ruff/whitespace/secret scan. No real model or new
+startup probe was used to test this enhancement. It does not recover the historical
+changed keys, identify an actor, repair this pair or authorize another execution.
+The historical journal and its closed marker remain untouched. Eval/docs-only
+change stays local until a relevant hosted gate, avoiding another all-platform
+rebuild for diagnostic metadata alone.
+
 ## Full-goal boundary
 
 Current evidence still does not close the owner's objective:

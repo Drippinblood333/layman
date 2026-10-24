@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tomllib
 import uuid
 from contextlib import contextmanager
 from dataclasses import asdict
@@ -73,7 +74,7 @@ def _stable_digest(value: Any) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def _user_config_provenance() -> dict[str, Any]:
+def _user_config_state() -> tuple[dict[str, Any], bytes | None]:
     configured = os.environ.get("CODEX_HOME")
     home = Path(configured).expanduser() if configured is not None else Path.home() / ".codex"
     if not home.is_absolute():
@@ -87,7 +88,53 @@ def _user_config_provenance() -> dict[str, Any]:
         "path_sha256": hashlib.sha256(os.path.normcase(str(path)).encode("utf-8")).hexdigest(),
         "content_sha256": hashlib.sha256(content).hexdigest() if content is not None else None,
         "exists": content is not None,
-    }
+    }, content
+
+
+def _user_config_provenance() -> dict[str, Any]:
+    return _user_config_state()[0]
+
+
+def _config_diagnostic_snapshot(expected: dict[str, Any]) -> tuple[dict[str, Any], bytes | None] | None:
+    """Transient baseline only; never persist config bytes or weaken the guard."""
+    try:
+        state = _user_config_state()
+        if state[0] != expected or len(state[1] or b"") > 1_048_576:
+            return None
+        return state
+    except (OSError, ValueError):
+        return None
+
+
+def _config_change_diagnostic(before: tuple[dict[str, Any], bytes | None] | None) -> dict[str, Any]:
+    if before is None:
+        return {"status": "baseline_unavailable"}
+    try:
+        after = _user_config_state()
+        if before[0]["path_sha256"] != after[0]["path_sha256"]:
+            return {"status": "path_identity_changed"}
+        if len(after[1] or b"") > 1_048_576:
+            return {"status": "size_limit"}
+        left = tomllib.loads((before[1] or b"").decode("utf-8"))
+        right = tomllib.loads((after[1] or b"").decode("utf-8"))
+        changed = [key for key in left.keys() | right.keys()
+                   if key not in left or key not in right or _stable_digest(left[key]) != _stable_digest(right[key])]
+        # Only fixed schema section names may be readable; custom names can
+        # contain private identifiers or paths. Never include config values.
+        known = {"model", "model_provider", "model_providers", "model_reasoning_effort",
+                 "model_verbosity", "model_context_window", "approval_policy", "sandbox_mode",
+                 "sandbox_workspace_write", "windows", "features", "projects", "plugins",
+                 "mcp_servers", "hooks", "developer_instructions", "compact_prompt", "profile",
+                 "profiles", "tui", "notice", "permissions", "default_permissions"}
+        labels = sorted(key if key in known else "other_sha256:" + hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
+                        for key in changed)
+        return {"status": "observed", "before_sha256": before[0]["content_sha256"],
+                "after_sha256": after[0]["content_sha256"],
+                "raw_content_changed": before[0] != after[0],
+                "parsed_content_changed": bool(changed), "changed_sections": labels[:16],
+                "changed_sections_total": len(labels), "sections_truncated": len(labels) > 16}
+    except (OSError, ValueError, TypeError, RecursionError):
+        return {"status": "unavailable"}
 
 
 def _experiment_manifest(seed: int, selected: list[BenchmarkCase] | None = None) -> dict[str, Any]:
@@ -432,6 +479,7 @@ def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
         for case, arm in pending[: min(args.max_calls, remaining_budget)]:
             workspace = args.work_root / f"{case.id}-{arm}-{uuid.uuid4().hex[:8]}"
             prepare_workspace(case, workspace)
+            before_config = _config_diagnostic_snapshot(experiment["user_configuration"])
             if not _configuration_matches(experiment["user_configuration"]):
                 _close_trial(args.output)
                 trial_closed = True
@@ -454,10 +502,12 @@ def _run_reserved_benchmark(args, experiment, plan) -> dict[str, Any]:
             if not result["user_configuration_unchanged"]:
                 _close_trial(args.output)
                 trial_closed = True
+                result["configuration_change_diagnostic"] = _config_change_diagnostic(before_config)
                 result["native_execution_status"] = result["status"]
                 if result["status"] == "completed":
                     result["status"] = "needs_verification"
                     result["error_category"] = "user_configuration_not_verified"
+            before_config = None
             validation = validate_workspace(case, workspace, result.get("answer", ""))
             record = _public_record(case, arm, result, validation, experiment=experiment)
             stream.write(json.dumps(record, ensure_ascii=False) + "\n")

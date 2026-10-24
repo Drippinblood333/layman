@@ -199,6 +199,18 @@ snapshot check, not a file lock or guarantee against changes between checks or i
 unobserved managed/project layers. It does not restore any user settings or unlock
 previously closed trials.
 
+On a post-execution mismatch, the runner now attaches a bounded
+`configuration_change_diagnostic`. A baseline matching the frozen user-config
+identity is held in memory only; a follow-up snapshot compares parsed top-level
+values. Records contain fixed section labels, hashes/counts and status, never
+configuration values or dynamic paths. Custom section names are hashed, at most
+16 labels are retained, and parsing is limited to 1 MiB. Unavailable/invalid/
+oversized snapshots report that limitation, not an invented diff. The diagnostic
+can observe a later state than the guard and cannot identify the writer or every
+intermediate change. Even parsed-equivalent formatting/comment changes still
+seal the trial; diagnostic metadata never makes the comparison eligible again.
+This changes prospective experiment fingerprints, not historical closed journals.
+
 Layman may claim Token savings only when all published gates pass: at least 15% paired median total-token reduction, positive bootstrap lower bound, no quality regression, safe high-risk routing, at least 20% output-token reduction, and no increase in median files read.
 
 The two full-corpus gates check the exact 30 declared case IDs, not only a count
