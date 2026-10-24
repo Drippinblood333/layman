@@ -4,6 +4,20 @@ Updated: 2026-10-24
 
 ## Verified checkpoint
 
+2026-10-24 current-default calibration: NEW two-start subscription ceiling under
+continuing owner authorization; old trials untouched. Frozen derived safe_filename
+task/stronger hidden checks, Sol/medium, same verified alpha.20 runtime and seed-
+fixed Direct->Layman order. Original FAIL/reference PASS; quota 73% five-hour /
+11% weekly used before launch. Direct native completed and passed function/scope
+checks, incurring 75,769 reported tokens (cached/reasoning subsets not double-counted).
+Post-call config mismatch triggered the real guard: comparison needs_verification,
+durable closure, one reservation/result, zero Layman executions, unused slot sealed.
+Follow-up same path identity / different content hash; writer/changed keys unknown.
+Closed replay refuses before native resolution. No real compaction observed; no
+valid pair or savings claim. No paid API/reset/install/release. Stop new paired
+starts until configuration drift is explained/controlled; use zero-model key-level
+diagnostics next. [Full protocol, incurred usage and goal audit](POSTCOMPACT_DEFAULT_PAIR_2026-10-24.md).
+
 2026-10-24 compaction-prompt intent preservation: official config reference and
 precedence docs confirm inline/file compaction settings and CLI override priority.
 Three first-failing mock-native cases reproduced unconditional Layman override
