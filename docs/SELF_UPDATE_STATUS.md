@@ -19,8 +19,12 @@ validation jobs passed. One jobs-read EOF was resolved by reading the same run
 again, without a rerun. After fresh fetch/ancestry verification, main was
 fast-forwarded from `cd613c5` to this exact source; ls-remote confirmed the result.
 Main's separate post-push CI [40105083906](https://github.com/Drippinblood333/layman/actions/runs/40105083906)
-is confirmed in progress on that same SHA, not yet passed. User installation
-unchanged; no release tag, formal release or real model task.
+subsequently completed successfully on that same SHA: all ten validation jobs
+passed, no failures and no active jobs. Fresh ls-remote independently confirmed
+main still points to `97099ac4451be9ddde208d1738c2929ccb57d2f5`. This closes the
+bounded clarification-language source batch, not the whole product/token goal.
+No repeated model evaluation, source change or extra test run during observation.
+User installation unchanged; no release tag, formal release or real model task.
 
 2026-10-24 alert reconciliation: confirmed the default branch is main and its
 manifest Git blob exactly matches verified source `cd613c5`; the graph's one
