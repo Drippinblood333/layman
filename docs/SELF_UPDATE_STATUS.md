@@ -16,7 +16,14 @@ Follow-up same path identity / different content hash; writer/changed keys unkno
 Closed replay refuses before native resolution. No real compaction observed; no
 valid pair or savings claim. No paid API/reset/install/release. Stop new paired
 starts until configuration drift is explained/controlled; use zero-model key-level
-diagnostics next. [Full protocol, incurred usage and goal audit](POSTCOMPACT_DEFAULT_PAIR_2026-10-24.md).
+diagnostics. Follow-up actual-profile passive/version/config-read/local-refused
+startup checks observed no raw or parsed config changes. Refused startup exited
+1 before deadline; three loopback requests discarded 326,424 bytes, never forwarded,
+with zero real model responses. No visible private-runtime process remained;
+config end hash unchanged and old journal still one sealed reservation. This does
+not identify the earlier writer/keys or repair the trial. Next: local synthetic
+successful completion, not another real-model attempt.
+[Full protocol, incurred usage, zero-model evidence and goal audit](POSTCOMPACT_DEFAULT_PAIR_2026-10-24.md).
 
 2026-10-24 compaction-prompt intent preservation: official config reference and
 precedence docs confirm inline/file compaction settings and CLI override priority.

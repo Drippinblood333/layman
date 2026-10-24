@@ -84,6 +84,46 @@ documents the read-only rate-limit RPC used here. No Evals platform or model jud
 was invoked. Continue with a zero-model before/after key-level diagnostic that
 keeps values in memory only; do not spend another task execution to diagnose this.
 
+## Zero-model key-level follow-up
+
+The next bounded diagnostic used the same verified private runtime and actual
+current config path. Parsed configuration values stayed in memory; only hashes,
+changed top-level key labels and process/request counters were eligible for its
+private report. Unknown key labels are hashed rather than printing dynamic paths.
+The probe itself never writes the user's configuration. Existing auth was not
+copied into another profile. No write/config-update RPC was sent.
+
+| Stage | Observed outcome | Observed config delta |
+| --- | --- | --- |
+| Passive, no native process | 5 seconds | None |
+| Native version query | Exit 0 | None |
+| Native effective config-read presence check | Completed; developer instructions absent | None |
+| Native workspace-write startup with local refusing provider | Exit 1 before the 12-second deadline | None |
+
+The synthetic provider uses a non-reserved ID, binds only 127.0.0.1, refuses all
+requests with HTTP 400 and never forwards them. Three local HTTP requests had
+326,424 body bytes discarded without retention; no real model response/generation
+occurred. This is not a complete external-network/auth-store audit. A later
+inventory found zero visible processes under the private runtime directory, and
+the user's config hash still matched the probe's end snapshot. Only synthetic
+workspace/report files were created in ignored `build/config-drift-keys-2026-10-24/`.
+
+No raw or parsed config changes were observed before/after stages or by a 100 ms
+watcher during them; changed-key lists are empty. Polling can miss transient
+changes, and this does not rule out another writer. It does not identify which
+keys changed during the earlier real execution, restore comparability, or reopen
+the trial. The older isolated workspace-write timeout is a different condition
+and is not relabeled as passed by this probe.
+
+The [official app-server API](https://learn.chatgpt.com/docs/app-server)
+distinguishes effective `config/read` from `config/value/write` and
+`config/batchWrite`; documentation was searched/fetched before this follow-up.
+These observations narrow the tested conditions only: passive observation,
+version/config read and refused startup did not reproduce the drift. The next
+diagnostic should use a local synthetic successful completion, not a real model,
+to separate successful native completion from failed startup. The old closed
+journal still has one reservation; no product source, CI or model trial restarted.
+
 ## Full-goal boundary
 
 Current evidence still does not close the owner's objective:
