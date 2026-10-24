@@ -150,6 +150,15 @@ Executing the local task benchmark now requires an exclusive `<output>.lock` bef
 
 Preview is the default. Add `--run` only after approval. Use a fresh output file for a new authorization and experiment; never increase the cap or remove the reservation journal to bypass an existing approval ceiling. Machine-readable records contain fingerprints, counts and validation outcomes, not answer text or generated code.
 
+As of 2026-10-24, native Plus execution inherits Codex's configured/default
+compaction prompt instead of passing Layman's inline override. New experiment
+manifests record `compact_prompt_policy=inherit_codex_configuration`; they no
+longer label an unused Layman prompt hash as the effective prompt. The execution
+source and policy change the experiment digest: do not combine these trials with
+old-policy pairs or reopen sealed/exhausted journals. Existing config fingerprints
+are not a complete hash of external prompt-file contents or every resolved layer.
+This policy change has no new live quality/token measurement by itself.
+
 For a bounded follow-up, preselect exact existing fixtures with repeatable `--case-id`, without `--pilot`. Unknown/duplicate IDs and conflicting selection modes are rejected before Codex resolution. Corpus order is canonical, the selected corpus is fingerprinted, and arms are randomized with the recorded seed. This option does not reset the shared reservation cap, bypass interrupted-attempt review or authorize model use. Like the pilot, it stops on the first execution failure. A subset is calibration evidence, not a fresh holdout or a way to close the 30-pair public gate; choose tasks before seeing outcomes and retain failures/negative results.
 
 The final four approved attempts in the current trial were preselected for `feature-01` and `testing-01`, each with direct/Layman arms. They have now completed: total-token reductions were 8.18% and 11.32%, but output and elapsed time increased, and the public claim gate remains false. The original trial is exhausted at 12/12; do not add `--run` under a different journal or raised cap to bypass it. See the [complete evidence and limitations](TOKEN_PILOT_2026-10-09.md#ninth-through-twelfth-attempts-preselected-feature-and-testing-pairs). This broadens calibration task types beyond repeatedly testing `bugfix-01`; it does not constitute an untouched evaluation corpus. Zero-call preview, reusing the original journal/output:

@@ -39,7 +39,6 @@ from layman_router.plus_eval import (
     subscription_environment,
 )
 from layman_router.plus_run import (
-    COMPACT_PROMPT,
     POLICIES,
     _execution_contract,
     _usage_available,
@@ -112,7 +111,7 @@ def _experiment_manifest(seed: int, selected: list[BenchmarkCase] | None = None)
         "execution_contract_sha256": hashlib.sha256(
             inspect.getsource(_execution_contract).encode("utf-8")
         ).hexdigest(),
-        "compact_prompt_sha256": hashlib.sha256(COMPACT_PROMPT.encode("utf-8")).hexdigest(),
+        "compact_prompt_policy": "inherit_codex_configuration",
         "benchmark_protocol_sha256": hashlib.sha256(
             Path(__file__).read_bytes()
             + (Path(__file__).with_name("fixture.py")).read_bytes()

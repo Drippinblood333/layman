@@ -4,6 +4,18 @@ Updated: 2026-10-24
 
 ## Verified checkpoint
 
+2026-10-24 compaction-prompt intent preservation: official config reference and
+precedence docs confirm inline/file compaction settings and CLI override priority.
+Three first-failing mock-native cases reproduced unconditional Layman override
+even with configured/unknown developer instructions. Remove that CLI override
+and unused prompt constant; inherit native configured/default prompt without
+another config-reading process. Existing thresholds, sandbox, original task and
+file/tool limits remain unchanged. New benchmark fingerprints explicitly record
+the inherit policy, not the old unused prompt hash; no historical trial reopened.
+Plus execution/preflight/benchmark suites: 203 passed. No live model, real
+compaction or token-quality/savings claim; no new config-reading path or writes
+to user installation/config. Hosted gate outstanding.
+
 2026-10-24 clarification usability: six first-failing controls reproduced English
 vague/continuation requests receiving Chinese-only questions, including MCP plan.
 Existing recognized English phrases now get English questions; recognized Chinese

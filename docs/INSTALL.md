@@ -141,6 +141,14 @@ layman run --clipboard
 
 High-risk tasks are routed to deep and run read-only. Model-unavailable fallback only moves upward; subscription or authentication errors never fall back to API billing.
 
+Layman does not pass a `compact_prompt` override to native Codex runs. Codex keeps
+the configured inline/file-based compaction prompt, or its built-in default;
+Layman does not read or log that prompt. Its existing tier-based compaction
+thresholds and file/tool budgets remain in effect. This preserves prompt choice,
+not a guarantee of summary quality, token savings or preservation of every other
+Codex setting. See the [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+and [configuration precedence](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence).
+
 ### Developer calibration — not a first-use requirement
 
 `layman codex-plus eval` previews the fixed 18-case, 36-call comparison without launching a model. Running it is an evaluation workload, not setup or an ordinary user task. Only execute after a separate approval that names the cumulative call budget and output journal. A per-batch limit alone is not a cumulative allowance; failures also consume budget. See the [benchmark controls](BENCHMARKS.md) and [current release evidence](SELF_UPDATE_STATUS.md). Existing exhausted approvals do not authorize a new run.

@@ -97,6 +97,8 @@ def test_manifest_tracks_user_config_identity_and_content_without_retaining_them
     (second_home / "config.toml").write_text(secret, encoding="utf-8")
     monkeypatch.setenv("CODEX_HOME", str(first_home))
     first = benchmark._experiment_manifest(7)
+    assert first["compact_prompt_policy"] == "inherit_codex_configuration"
+    assert "compact_prompt_sha256" not in first
     assert set(first["user_configuration"]) == {"path_sha256", "content_sha256", "exists"}
     monkeypatch.setenv("CODEX_HOME", str(second_home))
     moved = benchmark._experiment_manifest(7)

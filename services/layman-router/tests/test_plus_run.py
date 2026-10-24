@@ -105,6 +105,7 @@ def test_native_developer_instruction_policy_preserves_user_config(monkeypatch, 
     command, options = calls[0]
     overrides = [item for item in command if item.startswith("developer_instructions=")]
     assert bool(overrides) is (state is False)
+    assert not any(item.startswith(("compact_prompt=", "experimental_compact_prompt_file=")) for item in command)
     assert result["developer_instructions_policy"] == expected
     assert options["input_text"] == "请总结内容"
     assert options["tool_call_limit"] == POLICIES[RouteTier.FAST].tool_calls

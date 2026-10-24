@@ -36,12 +36,6 @@ from .prompt_guidance import prompt_guidance
 from .routing import decide_route, router_overhead, structured_decision
 from .workflow import select_workflow
 
-COMPACT_PROMPT = (
-    "Compress the active task history. Preserve the objective, explicit user decisions, current scope, "
-    "modified files, test results, unresolved errors, safety constraints, and remaining work. Remove "
-    "duplicate logs, superseded exploration, repeated file contents, and already-resolved discussion."
-)
-
 
 @dataclass(frozen=True)
 class TierExecutionPolicy:
@@ -359,8 +353,6 @@ def run_plus_task(
                 f"model_auto_compact_token_limit={policy.compact_tokens}",
                 "-c",
                 'model_auto_compact_token_limit_scope="body_after_prefix"',
-                "-c",
-                f"compact_prompt={_toml_string(COMPACT_PROMPT)}",
                 *(["-c", f"developer_instructions={_toml_string(contract)}"] if developer_state is False else []),
                 "-c",
                 'approval_policy="never"',
