@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from .classify import classify_task
 from .config import load_config
+from .models import TaskType
 from .plus_run import plus_task_plan
 from .project_status import inspect_project
 from .workflow import select_workflow
@@ -16,18 +16,19 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     root = Path(workspace).expanduser().resolve()
     project = inspect_project(root)
     config = load_config()
-    features = classify_task({"model": "auto", "input": task}, config)
     route = plus_task_plan(task, config=config)
+    task_type = TaskType(route["task_type"])
+    risk = route["risk"]
 
-    workflow = select_workflow(features.task_type, features.risk, project_stage=project["stage"], task=task)
+    workflow = select_workflow(task_type, risk, project_stage=project["stage"], task=task)
     # Plan owns clarification at the top level; do not emit the same questions
     # again inside its route. Standalone Plus previews keep their own guidance.
     guidance = route.pop("prompt_guidance")
 
     modules = ["context", f"workflow:{workflow}", "routing", "output"]
-    if features.risk != "low":
+    if risk != "low":
         modules.append("safety")
-    if features.task_type.value not in {
+    if task_type.value not in {
         "summary",
         "rewrite",
         "translation",
@@ -36,7 +37,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     }:
         modules.append("verification")
 
-    plan_first = guidance["needs_clarification"] or features.risk == "high" or workflow in {"idea-to-smallest-usable-version", "read-only-risk-review"}
+    plan_first = guidance["needs_clarification"] or risk == "high" or workflow in {"idea-to-smallest-usable-version", "read-only-risk-review"}
     read_only = route["sandbox"] == "read-only"
     acceptance = [
         "The requested user-visible outcome is present.",
@@ -48,7 +49,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
             "The requested findings are supported by read-only evidence.",
             "No files or behaviors are changed.",
         ]
-    if features.risk == "high":
+    if risk == "high":
         acceptance.append("Implementation starts only after the read-only risk review is accepted.")
 
     if guidance["needs_clarification"]:
@@ -72,9 +73,9 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     return {
         "workspace": str(root),
         "project_stage": project["stage"],
-        "task_type": features.task_type.value,
-        "risk": features.risk,
-        "complexity": features.complexity,
+        "task_type": task_type.value,
+        "risk": risk,
+        "complexity": route["routing_decision"]["complexity"],
         "workflow": workflow,
         "selected_modules": modules,
         "execution": "plan-first" if plan_first else "execute-and-verify",

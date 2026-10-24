@@ -9,6 +9,33 @@ from layman_router.plus_run import plus_task_plan
 from layman_router.task_plan import create_task_plan
 
 
+@pytest.mark.parametrize("task", [
+    "帮我优化整个项目", "修复 src/a.py 的异常，不改接口",
+    "只读分析 README.md，不要修改文件。", "请删除生产支付数据库并迁移权限",
+])
+def test_plan_classifies_original_task_once(monkeypatch, tmp_path, task):
+    from layman_router import plus_run, task_plan
+
+    original = plus_run.classify_task
+    classified = []
+
+    def record(payload, config):
+        assert payload == {"model": "auto", "input": task}
+        features = original(payload, config)
+        classified.append(features)
+        return features
+
+    monkeypatch.setattr(plus_run, "classify_task", record)
+    monkeypatch.setattr(task_plan, "classify_task", record, raising=False)
+    result = create_task_plan(task, tmp_path)
+    assert len(classified) == 1
+    features = classified[0]
+    assert result["task_type"] == features.task_type.value
+    assert result["risk"] == features.risk
+    assert result["complexity"] == features.complexity
+    assert result["route"]["routing_decision"]["complexity"] == features.complexity
+
+
 def test_feature_plan_selects_workflow_and_does_not_return_task(tmp_path: Path):
     (tmp_path / "pyproject.toml").write_text("[project]\nname='demo'\n", encoding="utf-8")
     (tmp_path / "src").mkdir()

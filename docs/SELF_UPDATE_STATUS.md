@@ -1,8 +1,24 @@
 # Project update status
 
-Updated: 2026-10-21
+Updated: 2026-10-24
 
 ## Verified checkpoint
+
+2026-10-24 offline-plan duplicate classification: four first-failing controls
+confirmed each `create_task_plan` classified the unchanged task twice. The outer
+plan now reuses the task type, risk and complexity already returned by its route;
+the standalone route still performs its original classification. No optional
+caller-supplied feature override, new dependency, schema or permission change.
+Task-plan/prompt-guidance/CLI/MCP suites: 128 passed; Ruff and whitespace passed.
+Seven before/after cases (vague, coding, read-only, destructive, release wording,
+summary and long input) produced equal full plans after removing only timing
+fields. The baseline function was loaded in memory from commit `15c3187`.
+An alternating 40-pair warm in-process measurement of those seven-task batches
+froze repository inspection equally and retained configuration loading: median
+59.6868 ms before versus 42.7328 ms after. This is a bounded local CPU measurement,
+not cold CLI/end-to-end latency, token savings or a general semantic guarantee.
+No model or paid API calls; user installation unchanged. Exact-source hosted
+validation remains outstanding; the overall goal is still active.
 
 2026-10-19 setup argument preflight: four first-failing controls showed explicit
 Plus and auto-detected Plus with `--start` reaching setup state access before the
