@@ -56,3 +56,9 @@ No user-installed Layman/Codex replacement, paid API, real model task or release
 Updated standalone/container builds and cross-platform validation are required
 before promotion/publication. Previous candidate binaries retain their old
 certificate bundles and are not retroactively repaired by this source change.
+
+Hosted gate [40103799633](https://github.com/Drippinblood333/layman/actions/runs/40103799633)
+is confirmed in progress on source `cd613c5b455939ba14b40d00b5146dd974cefc91`,
+branch `codex/verify-security-dependencies`. It includes the earlier offline-plan
+and Pillow changes; no duplicate validation branch for each dependency. Main was
+independently read as `091b3bd51ffad87ea3e1abea085553db500a5346`, not promoted.

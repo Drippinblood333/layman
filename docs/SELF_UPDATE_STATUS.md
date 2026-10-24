@@ -14,6 +14,9 @@ Post-update OSV audit and one bounded retry failed on proxy connectivity, not a
 vulnerability pass; shared hosted validation must check independently. No audit
 suppression or repeated identical local retries.
 [Evidence and verification boundaries](CERTIFI_SECURITY_UPDATE_2026-10-24.md).
+Shared hosted gate [40103799633](https://github.com/Drippinblood333/layman/actions/runs/40103799633)
+is confirmed in progress on `cd613c5b455939ba14b40d00b5146dd974cefc91`, including
+the earlier planning and Pillow fixes. Main remains `091b3bd`; no promotion yet.
 
 2026-10-24 Pillow security batch: all 41 current GitHub alerts are development
 Pillow records; range membership confirmed 12.3.0 affected / 13.0.0 excluded for
