@@ -4,6 +4,16 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 MCP execution-switch validation: seven first-failing controls showed
+`dry_run` accepting non-booleans via Python truthiness, including falsey invalid
+values selecting execution. Reject before the executor; preserve omitted/valid
+boolean behavior. Two stdio controls confirm a fixed safe error with zero calls
+and no task echo. MCP/prompt-guidance/Plus suites: 188 passed; scoped Ruff,
+whitespace and secret scan passed after documenting the existing ValueError
+boundary's narrow TRY004 exception. Exact-source hosted verification pending.
+No real model, new dependency, config/install change, release or token claim.
+[Validation evidence](MCP_DRY_RUN_VALIDATION_2026-10-25.md).
+
 2026-10-25 configuration-isolation feasibility: official exec docs and the
 hash-matched alpha.20 help list `--ignore-user-config`. A two-start synthetic-home
 control used the same deliberately malformed config: ordinary loading failed

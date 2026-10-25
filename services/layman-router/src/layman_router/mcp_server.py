@@ -130,10 +130,14 @@ def _call_tool(
         }
     if name != "run":
         raise ValueError("Unknown tool")
+    dry_run = arguments.get("dry_run", False)
+    if not isinstance(dry_run, bool):
+        # The protocol boundary returns ValueError as a safe tool error.
+        raise ValueError("dry_run must be a boolean")  # noqa: TRY004
     result = run_plus_task(
         task,
         cwd=workspace,
-        execute=not bool(arguments.get("dry_run", False)),
+        execute=not dry_run,
         cancel_token=cancel_token,
     )
     answer = result.pop("answer", "")

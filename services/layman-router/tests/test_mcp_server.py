@@ -13,6 +13,54 @@ from layman_router import mcp_server
 from layman_router.mcp_server import serve
 
 
+@pytest.mark.parametrize("dry_run", [None, 0, 1, "false", "true", [], {}])
+def test_malformed_dry_run_cannot_start_execution(monkeypatch, tmp_path, dry_run):
+    calls = []
+    monkeypatch.setattr(mcp_server, "run_plus_task", lambda *a, **k: calls.append(k) or {
+        "mode": "run", "status": "completed", "answer": "unexpected execution",
+    })
+    with pytest.raises(ValueError, match="dry_run must be a boolean"):
+        mcp_server._call_tool("run", {
+            "task": "Fix src/a.py", "workspace": str(tmp_path), "dry_run": dry_run,
+        })
+    assert calls == []
+
+
+@pytest.mark.parametrize("dry_run,execute", [(False, True), (True, False)])
+def test_boolean_dry_run_preserves_execution_choice(monkeypatch, tmp_path, dry_run, execute):
+    calls = []
+    monkeypatch.setattr(mcp_server, "run_plus_task", lambda *a, **k: calls.append(k) or {
+        "mode": "dry-run" if not k["execute"] else "run", "status": "completed",
+        "route_tier": "balanced", "answer": "done",
+    })
+    mcp_server._call_tool("run", {
+        "task": "Fix src/a.py", "workspace": str(tmp_path), "dry_run": dry_run,
+    })
+    assert len(calls) == 1
+    assert calls[0]["execute"] is execute
+
+
+@pytest.mark.parametrize("dry_run", [None, "false"])
+def test_malformed_dry_run_over_stdio_returns_safe_error_without_execution(monkeypatch, tmp_path, dry_run):
+    calls = []
+    monkeypatch.setattr(mcp_server, "run_plus_task", lambda *a, **k: calls.append(1))
+    private_task = "Fix src/a.py private-request-marker"
+    incoming = io.StringIO(json.dumps({
+        "jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+            "name": "run", "arguments": {
+                "task": private_task, "workspace": str(tmp_path), "dry_run": dry_run,
+            },
+        },
+    }) + "\n")
+    outgoing = io.StringIO()
+    assert serve(incoming, outgoing) == 0
+    result = json.loads(outgoing.getvalue())["result"]
+    assert result["isError"] is True
+    assert result["content"] == [{"type": "text", "text": "dry_run must be a boolean"}]
+    assert private_task not in outgoing.getvalue()
+    assert calls == []
+
+
 def test_mcp_missing_workspace_execution_is_not_success(monkeypatch, tmp_path):
     monkeypatch.setattr(mcp_server, "run_plus_task", lambda *a, **k: {
         "mode": "run", "status": "needs_verification",
