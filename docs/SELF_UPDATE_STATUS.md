@@ -4,6 +4,18 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 local first-use CLI candidate: bare `layman` previously exited 2
+with a required-command error and no clear first step. Three first-failing
+controls cover explicit/implicit empty argv and a real CLI subprocess. It now
+prints a three-line offline `plan --brief`/help guide and exits 0, without
+reading piped tasks, loading config, finding Codex, starting a model or setup.
+This intentionally changes only the missing-command exit behavior; explicit
+help, unknown options and existing subcommands retain their parser paths.
+CLI/MCP/prompt-guidance suites: 128 passed; scoped Ruff/whitespace checks passed.
+No dependency, model-task comparison or human-usability/savings claim. Local
+candidate held for a later source gate; the staged owner update remains frozen
+at verified `c35c5b7` and does not yet include this new first-use guide.
+
 2026-10-25 beginner-facing introduction: replaced the English/Chinese README
 lead's governor/execution-layer jargon with task-assistant wording, concrete next
 steps and the distinction between offline planning, ChatGPT execution and API

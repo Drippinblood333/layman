@@ -11,6 +11,43 @@ import pytest
 from layman_router import cli
 
 
+@pytest.mark.parametrize("argv", [[], None])
+def test_no_arguments_show_safe_first_step_without_starting_work(monkeypatch, capsys, argv):
+    monkeypatch.setattr(sys, "argv", ["layman"])
+    for name in ("_input_task", "load_config", "find_codex", "run_plus_task", "setup_state"):
+        monkeypatch.setattr(cli, name, lambda *a, **k: pytest.fail("Welcome must not start work or setup"))
+    assert cli.main(argv) == 0
+    captured = capsys.readouterr()
+    assert "layman plan --brief" in captured.out
+    assert "No task has started" in captured.out
+    assert "layman --help" in captured.out
+    assert captured.err == ""
+    assert len(captured.out.splitlines()) <= 3
+
+
+def test_no_argument_cli_does_not_need_config_login_or_read_piped_task(tmp_path):
+    home = tmp_path / "unused-home"
+    codex_home = tmp_path / "unused-codex-home"
+    result = subprocess.run([sys.executable, "-m", "layman_router.cli"],
+        input=b"private-piped-task-must-not-appear", capture_output=True, timeout=15, check=False,
+        cwd=tmp_path, env={**os.environ, "LAYMAN_HOME": str(home), "CODEX_HOME": str(codex_home),
+            "LAYMAN_ROUTER_CONFIG": str(tmp_path / "absent-config.yaml")})
+    assert result.returncode == 0
+    assert b"layman plan --brief" in result.stdout
+    assert b"private-piped-task" not in result.stdout + result.stderr
+    assert result.stderr == b""
+    assert not home.exists() and not codex_home.exists()
+
+
+@pytest.mark.parametrize("argv,code", [(["--help"], 0), (["--unknown-option"], 2)])
+def test_explicit_help_and_invalid_options_keep_parser_behavior(capsys, argv, code):
+    with pytest.raises(SystemExit) as error:
+        cli.main(argv)
+    assert error.value.code == code
+    captured = capsys.readouterr()
+    assert "No task has started" not in captured.out + captured.err
+
+
 def test_clipboard_input_preserves_unicode(monkeypatch):
     monkeypatch.setattr(cli, "_clipboard_task", lambda: "增加一个设置页面")
     assert cli._input_task(clipboard=True) == "增加一个设置页面"

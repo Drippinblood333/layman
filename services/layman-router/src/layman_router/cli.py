@@ -245,7 +245,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     _configure_windows_stdio()
-    args = build_parser().parse_args(argv)
+    arguments = sys.argv[1:] if argv is None else argv
+    if not arguments:
+        print(
+            "Start offline (no model task): layman plan --brief\n"
+            "Enter one task when prompted. No task has started.\n"
+            "All commands: layman --help"
+        )
+        return 0
+    args = build_parser().parse_args(arguments)
     try:
         if args.command == "compact-output":
             binary_input = getattr(sys.stdin, "buffer", None)
