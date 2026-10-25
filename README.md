@@ -1,8 +1,10 @@
 # Layman
 
-**Govern Codex work from intent to evidence-reported result, while measuring and bounding avoidable waste.**
+**Make Codex easier to use: clarify the task, choose a path, and check the result.**
 
-Layman is an evidence-first efficiency governor and execution layer for Codex. It helps beginners understand what to do next and asks Codex to report verification evidence while using the lowest predicted sufficient model effort, enforced tool/process limits, and explicit context/output targets. A successful subprocess alone is not proof that the requested result was verified. Quality-adjusted efficiency remains Experimental until fresh holdouts pass.
+Layman helps you plan and run Codex tasks without changing your request. It suggests next steps, selects models by task rules, and sets file, tool and output budgets. Some recognized vague phrases trigger clarification questions.
+
+Preview plans offline; execution needs ChatGPT sign-in, while separate API routing needs an API key. Check the verification evidence, not just a successful exit. Default-workflow token savings remain unproven (Experimental).
 
 [中文说明](README.zh-CN.md) · [Installation](docs/INSTALL.md) · [Architecture](docs/ARCHITECTURE.md) · [Product direction](docs/PRODUCT_DIRECTION_2026-08-12.md) · [Security](docs/SECURITY.md) · [Benchmarks](docs/BENCHMARKS.md) · [Release status](docs/V3_RELEASE_CHECKLIST.md)
 

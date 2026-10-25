@@ -4,6 +4,15 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 beginner-facing introduction: replaced the English/Chinese README
+lead's governor/execution-layer jargon with task-assistant wording, concrete next
+steps and the distinction between offline planning, ChatGPT execution and API
+routing. Clarification remains explicitly limited to recognized phrases; no
+task rewriting, process-success-as-quality or proven token-savings claim. Manual
+copy review only, not human usability acceptance. Links/commands and runtime are
+unchanged; no model task, test/build rerun or user installation change. The
+existing guarded updater remains independently waiting for natural MCP exit.
+
 2026-10-25 installed-runtime drift: actual PATH executable is 28,489,749 bytes,
 preview still gpt-5.6-luna/tool-output 4,000; downloaded hash-verified c35c5b7
 candidate is 17,275,087 bytes, gpt-6-luna/2,000 and matches source. Metadata/lock,
