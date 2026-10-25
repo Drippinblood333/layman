@@ -4,6 +4,15 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 bounded task-scope fix: four first-failing English/Chinese controls
+showed release-document updates triggering full release-gate recommendations.
+The workflow intent check now excludes only the known release-document noun
+phrases; four controls preserve a separate actual release/readiness request.
+Original task, routing and permissions are unchanged. Task-plan/prompt-guidance/
+CLI/MCP suites: 143 passed; scoped Ruff/whitespace checks passed. Hosted candidate
+verification pending; no token-saving claim or model execution.
+[Scope evidence](RELEASE_DOCUMENT_SCOPE_2026-10-25.md).
+
 2026-10-25 security-alert reconciliation: GitHub reports zero open alerts and
 41 fixed Pillow alerts, none dismissed; latest fixed timestamp
 2026-10-24T17:43:22Z. This closes the prior dependency-graph/alert mismatch,

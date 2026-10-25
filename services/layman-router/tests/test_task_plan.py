@@ -115,6 +115,34 @@ def test_explicit_release_request_survives_separate_future_approval(monkeypatch,
 
 
 @pytest.mark.parametrize("task", [
+    "Update the release notes for the CLI help fix.",
+    "Review release documentation for broken links.",
+    "更新发布说明，记录 CLI 帮助修复。",
+    "修复发版说明中的链接。",
+])
+def test_release_documentation_is_not_a_request_to_run_the_release_gate(monkeypatch, tmp_path, task):
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+        "stage": "release_candidate", "next_steps": ["Run the full release gate"],
+    })
+    result = create_task_plan(task, tmp_path)
+    assert result["workflow"] != "release-gate"
+    assert "Run the full release gate" not in result["next_steps"]
+
+
+@pytest.mark.parametrize("task", [
+    "Update the release notes, then publish the version.",
+    "Review release documentation and run the release gate.",
+    "更新发布说明，然后发布版本。",
+    "修复发版说明，并检查发布条件。",
+])
+def test_release_documentation_does_not_hide_a_separate_release_request(monkeypatch, tmp_path, task):
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+        "stage": "release_candidate", "next_steps": ["Run the full release gate"],
+    })
+    assert create_task_plan(task, tmp_path)["workflow"] == "release-gate"
+
+
+@pytest.mark.parametrize("task", [
     "帮我优化整个项目",
     "修复src/a.py的空指针异常，不改接口",
     "请删除生产支付数据库并迁移权限",

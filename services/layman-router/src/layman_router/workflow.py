@@ -26,6 +26,13 @@ def _requests_release(task: str) -> bool:
         ),
     ):
         normalized = re.sub(pattern, " ", normalized)
+    # Mentioning a release document is not requesting release work. Filter only
+    # these noun phrases in this transient intent check; a separate publish or
+    # release-gate request still counts. The original task is never rewritten.
+    normalized = re.sub(
+        r"\brelease\s+(?:notes|documentation)\b|(?:发布|发版)说明",
+        " ", normalized,
+    )
     return bool(re.search(r"\b(?:release|publish|ship)\b", normalized)) or any(
         term in normalized for term in ("上线", "发布", "发版")
     )
