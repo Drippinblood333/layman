@@ -1,8 +1,19 @@
 # Project update status
 
-Updated: 2026-10-24
+Updated: 2026-10-25
 
 ## Verified checkpoint
+
+2026-10-25 security-alert reconciliation: GitHub reports zero open alerts and
+41 fixed Pillow alerts, none dismissed; latest fixed timestamp
+2026-10-24T17:43:22Z. This closes the prior dependency-graph/alert mismatch,
+not a diagnosis of its server-side cause. Remote main remains `8b1aa17`, and
+main CI 40106190056 is completed/success with ten successful jobs, no failures.
+No dependency/code change, build rerun, model call, user-installation change,
+tag or release was needed. Eval-only candidate `f9bd748` remains local for the
+next relevant source gate. Configuration-drift cause, comparable default-workflow
+token benefit and the other public-release gates remain open.
+[Reconciliation evidence](DEPENDENCY_ALERT_RECONCILIATION_2026-10-24.md).
 
 2026-10-24 bounded drift evidence enhancement (eval-only): a first-failing mock
 execution showed the sealed row lacks changed-section evidence. The runner now

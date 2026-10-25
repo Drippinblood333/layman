@@ -1,6 +1,21 @@
 # Bounded reconciliation of remaining Pillow alerts
 
-## Current evidence
+## Resolution observed 2026-10-25
+
+The next ordinary heartbeat read the GitHub alerts API: **zero open alerts**.
+The fixed-alert endpoint returned 41 records, all Pillow, with no dismissals;
+the latest `fixed_at` is `2026-10-24T17:43:22Z`. This closes the previously
+observed alert-state discrepancy. No manual dismissal, dependency-graph
+resubmission, manifest churn or repeated build was performed to clear it.
+The server-side cause of the earlier delay remains unknown.
+
+Remote `main` remains `8b1aa177f77003fca88417944aea90221ece2c22`;
+[its CI run](https://github.com/Drippinblood333/layman/actions/runs/40106190056)
+is completed/success with ten successful jobs and zero failures. These are
+point-in-time checks, not a guarantee against future advisories or completion
+of the remaining quality, installer/user-acceptance and publication gates.
+
+## Historical evidence (2026-10-24)
 
 Follow-up to [the verified security update](CERTIFI_SECURITY_UPDATE_2026-10-24.md).
 No application, dependency, workflow, account setting or alert state was modified
@@ -38,7 +53,7 @@ guaranteed reconciliation deadline or diagnose this repository's internal state.
 The mismatch is observed; its server-side cause is unknown. Do not relabel all
 alerts false positives or claim they have closed.
 
-## Next action and boundaries
+## Original next action and boundaries (now reconciled)
 
 Stop this diagnostic batch here. At the next ordinary project heartbeat, make
 one compact alert-state read, without a new automation, dummy commit, manifest
