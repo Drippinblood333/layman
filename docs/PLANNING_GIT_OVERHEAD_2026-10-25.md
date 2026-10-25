@@ -42,7 +42,27 @@ Every compared plan/preview was identical after excluding those timing fields.
 These are warm in-process local measurements, not CLI cold startup, a cross-machine
 latency guarantee, model-token savings or a same-quality model-task comparison.
 
-Local candidate only: retain for the next relevant source CI gate, rather than
-trigger another all-platform build immediately after the preceding delivery.
+Initially held locally for the next relevant source CI gate, rather than
+triggering an all-platform build immediately after the preceding delivery.
 No dependency, real model call, user config/install replacement, tag or release.
 
+## Hosted verification and remote checkpoint
+
+Exact source `c35c5b7a517d8bdcda65da6e744931eda05f137f` passed all ten jobs in
+[validation run 40168144565](https://github.com/Drippinblood333/layman/actions/runs/40168144565),
+with zero failures or active jobs. This covers three-system tests, five standalone
+build/lifecycle jobs, Docker and combined asset assembly. The complete committed
+diff review also caught an extra blank line at this document's EOF; this follow-up
+fixes it without rebuilding source solely for a documentation whitespace change.
+
+Fresh fetch and ancestry checking preceded a non-force main promotion attempt.
+The push returned a ref-lock conflict saying main already equals this candidate
+instead of the advertised `acd96e0`. It also printed a bypass warning for nine
+queued required checks; this is retained as observed, not described as a clean
+successful push. Independent `ls-remote` and subsequent fetch confirmed main at
+this exact candidate. The conflict does not attribute the concurrent writer;
+no force push or repeated promotion was used.
+
+Main's separate [run 40168378532](https://github.com/Drippinblood333/layman/actions/runs/40168378532)
+is in progress on the same SHA, not yet accepted as passed. No PR, release tag,
+formal publication or replacement of the user's installed runtime occurred.

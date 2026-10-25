@@ -4,6 +4,15 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 lean-planning delivery checkpoint: exact source `c35c5b7` passed all
+ten jobs in validation run 40168144565. Main promotion attempt returned a ref-lock
+conflict because the remote already equals that candidate, plus a queued-check
+bypass warning; do not describe the push as cleanly successful. Independent
+ls-remote/fetch confirmed main at the exact verified source, without force/retry.
+Main's separate run 40168378532 is in progress, not yet accepted. Complete-diff
+review caught an extra EOF blank in the evidence doc, fixed in this documentation
+follow-up only. No repeated model/local test run, installation change or release.
+
 2026-10-25 local lean-planning candidate: task planning and Plus preflight used
 only project stage but collected unused Git branch/status, two child processes
 per Git checkout. Skip Git only for those callers; default status inspection
@@ -12,7 +21,8 @@ caller controls plus a default/skip parity control; selected suites 211 passed,
 Ruff/whitespace/secret scan passed. Twenty alternating warm pairs per entrypoint
 kept outputs identical except known routing timings; Git processes 2->0, plan
 median 105.058->11.919 ms, preview 113.643->12.259 ms on this checkout. Not token
-measurements. Candidate held locally for the next relevant hosted source gate.
+measurements. Candidate was initially held locally; the hosted gate is now
+recorded above, while main's separate post-push run remains in progress.
 [Local evidence](PLANNING_GIT_OVERHEAD_2026-10-25.md).
 
 2026-10-25 preceding main gate closure: run 40167826666 completed successfully
