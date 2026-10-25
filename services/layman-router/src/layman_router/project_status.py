@@ -88,8 +88,8 @@ def _git_summary(root: Path) -> dict[str, Any]:
     }
 
 
-def inspect_project(workspace: str | Path) -> dict[str, Any]:
-    """Return bounded, content-free evidence about a software workspace."""
+def inspect_project(workspace: str | Path, *, include_git: bool = True) -> dict[str, Any]:
+    """Return bounded evidence; skipped Git is explicitly unknown, not clean."""
 
     root = Path(workspace).expanduser().resolve()
     if not root.is_dir():
@@ -157,7 +157,7 @@ def inspect_project(workspace: str | Path) -> dict[str, Any]:
         "release_ready": False,
         "release_ready_reason": "A file inspection cannot prove that builds, tests, installation, and release gates pass.",
         "evidence": evidence,
-        "git": _git_summary(root),
+        "git": _git_summary(root) if include_git else None,
         "next_steps": next_steps,
         "privacy": "File contents were not read or retained.",
     }

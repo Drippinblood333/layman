@@ -14,7 +14,7 @@ def create_task_plan(task: str, workspace: str | Path) -> dict[str, Any]:
     if not task.strip():
         raise ValueError("Task must not be empty")
     root = Path(workspace).expanduser().resolve()
-    project = inspect_project(root)
+    project = inspect_project(root, include_git=False)
     config = load_config()
     route = plus_task_plan(task, config=config)
     task_type = TaskType(route["task_type"])

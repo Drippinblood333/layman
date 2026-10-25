@@ -62,7 +62,7 @@ def test_high_risk_plan_cannot_drop_safety_or_deep_route(tmp_path: Path):
     "只读检查发布条件，不要修改文件。",
 ])
 def test_read_only_plan_does_not_recommend_implementation_or_release_execution(monkeypatch, tmp_path, task):
-    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root, **kwargs: {
         "stage": "release_candidate", "next_steps": ["Run the full release gate"],
     })
     result = create_task_plan(task, tmp_path)
@@ -74,7 +74,7 @@ def test_read_only_plan_does_not_recommend_implementation_or_release_execution(m
 
 
 def test_non_release_task_does_not_inherit_release_checks(monkeypatch, tmp_path: Path):
-    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root, **kwargs: {
         "stage": "release_candidate", "next_steps": ["Run the full release gate"],
     })
     result = create_task_plan("优化prompt，避免过度测试，精简输入输出", tmp_path)
@@ -93,7 +93,7 @@ def test_non_release_task_does_not_inherit_release_checks(monkeypatch, tmp_path:
     "Add membership labels to the UI.",
 ])
 def test_future_approval_or_ship_substring_does_not_request_release(monkeypatch, tmp_path, task):
-    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root, **kwargs: {
         "stage": "release_candidate", "next_steps": ["Run the full release gate"],
     })
     result = create_task_plan(task, tmp_path)
@@ -108,7 +108,7 @@ def test_future_approval_or_ship_substring_does_not_request_release(monkeypatch,
     "Run the release gate; when we ship, I will approve.",
 ])
 def test_explicit_release_request_survives_separate_future_approval(monkeypatch, tmp_path, task):
-    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root, **kwargs: {
         "stage": "release_candidate", "next_steps": ["Run the full release gate"],
     })
     assert create_task_plan(task, tmp_path)["workflow"] == "release-gate"
@@ -121,7 +121,7 @@ def test_explicit_release_request_survives_separate_future_approval(monkeypatch,
     "修复发版说明中的链接。",
 ])
 def test_release_documentation_is_not_a_request_to_run_the_release_gate(monkeypatch, tmp_path, task):
-    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root, **kwargs: {
         "stage": "release_candidate", "next_steps": ["Run the full release gate"],
     })
     result = create_task_plan(task, tmp_path)
@@ -136,7 +136,7 @@ def test_release_documentation_is_not_a_request_to_run_the_release_gate(monkeypa
     "修复发版说明，并检查发布条件。",
 ])
 def test_release_documentation_does_not_hide_a_separate_release_request(monkeypatch, tmp_path, task):
-    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root: {
+    monkeypatch.setattr("layman_router.task_plan.inspect_project", lambda root, **kwargs: {
         "stage": "release_candidate", "next_steps": ["Run the full release gate"],
     })
     assert create_task_plan(task, tmp_path)["workflow"] == "release-gate"

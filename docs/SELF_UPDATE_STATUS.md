@@ -4,6 +4,22 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 local lean-planning candidate: task planning and Plus preflight used
+only project stage but collected unused Git branch/status, two child processes
+per Git checkout. Skip Git only for those callers; default status inspection
+stays unchanged and skipped evidence is null, not clean. Six first-failing
+caller controls plus a default/skip parity control; selected suites 211 passed,
+Ruff/whitespace/secret scan passed. Twenty alternating warm pairs per entrypoint
+kept outputs identical except known routing timings; Git processes 2->0, plan
+median 105.058->11.919 ms, preview 113.643->12.259 ms on this checkout. Not token
+measurements. Candidate held locally for the next relevant hosted source gate.
+[Local evidence](PLANNING_GIT_OVERHEAD_2026-10-25.md).
+
+2026-10-25 preceding main gate closure: run 40167826666 completed successfully
+on `acd96e04ad68d1a4deed9c0f21858fc15c8601e8`; all ten jobs passed, no failures.
+This is the preceding MCP-switch delivery's verification, not hosted proof for
+the newer local lean-planning candidate.
+
 2026-10-25 distinct catalog hypothesis check: official `model/list` returned
 seven entries through the verified alpha.20 runtime/current profile, with no
 generated turn. Config raw/parsed hashes unchanged, no 100-ms sampled transition;

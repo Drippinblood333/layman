@@ -8,6 +8,35 @@ import pytest
 from layman_router.project_status import inspect_project
 
 
+def test_explicitly_skipped_git_is_not_reported_as_clean(monkeypatch, tmp_path):
+    calls = []
+    git = {"repository": True, "branch": "main", "changed_files": 3}
+    monkeypatch.setattr("layman_router.project_status._git_summary", lambda root: calls.append(root) or git)
+    default = inspect_project(tmp_path)
+    assert default["git"] == git
+    assert len(calls) == 1
+    calls.clear()
+    skipped = inspect_project(tmp_path, include_git=False)
+    assert calls == []
+    assert skipped == {**default, "git": None}
+
+
+@pytest.mark.parametrize("entrypoint", ["plan", "dry-run"])
+@pytest.mark.parametrize("task", ["Fix src/a.py null handling", "帮我优化整个项目", "检查发布条件"])
+def test_task_planning_does_not_collect_unused_git_evidence(monkeypatch, tmp_path, entrypoint, task):
+    from layman_router.plus_run import run_plus_task
+    from layman_router.task_plan import create_task_plan
+
+    monkeypatch.setattr("layman_router.project_status._git_summary",
+                        lambda root: pytest.fail("Planning consumes stage, not Git status"))
+    if entrypoint == "plan":
+        result = create_task_plan(task, tmp_path)
+    else:
+        result = run_plus_task(task, cwd=tmp_path, execute=False)
+    assert result["project_stage"] == "idea"
+    assert "git" not in result
+
+
 def test_empty_workspace_is_idea_stage(tmp_path: Path):
     result = inspect_project(tmp_path)
     assert result["stage"] == "idea"

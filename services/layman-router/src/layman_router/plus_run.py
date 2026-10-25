@@ -254,7 +254,7 @@ def run_plus_task(
     workspace = cwd.expanduser().resolve()
     if not workspace.is_dir():
         raise FileNotFoundError(f"Workspace does not exist: {workspace}")
-    project = inspect_project(workspace)
+    project = inspect_project(workspace, include_git=False)
     preview["project_stage"] = project["stage"]
     task_type = TaskType(str(preview["task_type"]))
     preview["workflow"] = select_workflow(

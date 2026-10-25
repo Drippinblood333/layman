@@ -43,6 +43,7 @@ assembly, with zero failures or active jobs. Fresh fetch/ancestry checking
 preceded a non-force fast-forward of main from `c5e8ebb`; independent `ls-remote`
 confirmed the exact source SHA. Main's separate
 [run 40167826666](https://github.com/Drippinblood333/layman/actions/runs/40167826666)
-is in progress, not yet accepted as passed. No PR, tag or release was created.
+subsequently completed successfully: ten successful jobs, no failures. The same
+handle was polled, with no restart. No PR, tag or release was created.
 This closes the bounded code-validation milestone, not the entire project goal.
 
