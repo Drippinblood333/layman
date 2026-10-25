@@ -29,8 +29,20 @@ than broadening exception handling or disabling a lint category.
   lint pass flagged TRY004; the documented protocol-boundary exception resolves
   that mismatch without changing runtime behavior.
 - No dependency, schema expansion, task rewriting, model call, config/installation
-  replacement, paid API, tag or release. Hosted exact-source verification pending.
+  replacement, paid API, tag or release.
 
 This prevents an observed invalid-input execution path. It is not a measured
 token saving: no real task comparison or quality gate was run in this batch.
+
+## Hosted verification and delivery
+
+Exact source `acd96e04ad68d1a4deed9c0f21858fc15c8601e8` passed all ten jobs in
+[validation CI 40167540901](https://github.com/Drippinblood333/layman/actions/runs/40167540901):
+three-system tests, five standalone build/lifecycle jobs, Docker and release-asset
+assembly, with zero failures or active jobs. Fresh fetch/ancestry checking
+preceded a non-force fast-forward of main from `c5e8ebb`; independent `ls-remote`
+confirmed the exact source SHA. Main's separate
+[run 40167826666](https://github.com/Drippinblood333/layman/actions/runs/40167826666)
+is in progress, not yet accepted as passed. No PR, tag or release was created.
+This closes the bounded code-validation milestone, not the entire project goal.
 
