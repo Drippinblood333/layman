@@ -4,12 +4,24 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 installed-runtime drift: actual PATH executable is 28,489,749 bytes,
+preview still gpt-5.6-luna/tool-output 4,000; downloaded hash-verified c35c5b7
+candidate is 17,275,087 bytes, gpt-6-luna/2,000 and matches source. Metadata/lock,
+version, dry-run and invalid-MCP checks passed, zero model generation. Two scoped
+sync attempts correctly refused active old MCP processes; initial external zero
+counts were wrong due to path separator comparison, corrected to four processes.
+Old executable unchanged; paused stages retained privately. Hidden one-shot helper
+PID 12316 confirmed live, waiting for natural exit until 08:23:39Z (16:23:39 local),
+then idle-gated backup/switch/in-place checks or timeout. Installation NOT completed;
+no setup, plugin refresh, force stop, account/config/PATH change or release.
+[Exact evidence, correction and handoff](LOCAL_RUNTIME_DRIFT_2026-10-25.md).
+
 2026-10-25 lean-planning delivery checkpoint: exact source `c35c5b7` passed all
 ten jobs in validation run 40168144565. Main promotion attempt returned a ref-lock
 conflict because the remote already equals that candidate, plus a queued-check
 bypass warning; do not describe the push as cleanly successful. Independent
 ls-remote/fetch confirmed main at the exact verified source, without force/retry.
-Main's separate run 40168378532 is in progress, not yet accepted. Complete-diff
+Main's separate run 40168378532 subsequently passed all ten jobs. Complete-diff
 review caught an extra EOF blank in the evidence doc, fixed in this documentation
 follow-up only. No repeated model/local test run, installation change or release.
 

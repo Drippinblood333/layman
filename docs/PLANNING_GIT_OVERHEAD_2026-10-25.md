@@ -64,5 +64,5 @@ this exact candidate. The conflict does not attribute the concurrent writer;
 no force push or repeated promotion was used.
 
 Main's separate [run 40168378532](https://github.com/Drippinblood333/layman/actions/runs/40168378532)
-is in progress on the same SHA, not yet accepted as passed. No PR, release tag,
+subsequently passed all ten jobs on the same SHA. No PR, release tag,
 formal publication or replacement of the user's installed runtime occurred.
