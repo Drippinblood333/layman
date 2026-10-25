@@ -189,6 +189,35 @@ The historical journal and its closed marker remain untouched. Eval/docs-only
 change stays local until a relevant hosted gate, avoiding another all-platform
 rebuild for diagnostic metadata alone.
 
+## Model-catalog hypothesis: zero-generation check (2026-10-25)
+
+A distinct hypothesis was checked after official protocol lookup: whether native
+model catalog loading/upgrade discovery, absent from the earlier custom-provider
+controls, changes the user's configuration without a generated turn. The fetched
+[official app-server overview](https://learn.chatgpt.com/docs/app-server#api-overview)
+documents `model/list` separately from generation-starting `turn/start`.
+
+The private probe `build/model-catalog-drift-2026-10-25/probe.py` and its guarded
+`result.json` retain bounded metadata only. Probe SHA-256:
+`2978586d8663d8bf0237ec65ee8c295b6ad79cee2424db5776ef5b2f1b8932b8`.
+All four native alpha.20 component hashes match the frozen runtime. The current
+actual profile was used through the existing subscription environment helper;
+no credentials were copied/read by the probe and no config value or raw native
+response was persisted. Only `initialize`, `initialized` and `model/list` were
+sent; no thread/turn/config-write method. Deadline 15 seconds, bounded response
+queue/line size, 100-ms config sampling with at most 16 transition records.
+
+Result: model list succeeded with seven entries. Raw/parsed config unchanged,
+zero sampled transitions, no timeout and native process exited. Before/after
+content SHA-256 both `02c9a99be97a07b94bf9f365d1a3aabf5501897c5cb2643ed773714df55c5790`.
+Subsequent visible inventory found no private-runtime process; historical journal
+still one reservation/result with its closed marker. This is zero model generation,
+not a successful task or a token measurement. The response may use cached catalog
+data: no forced network refresh or actual upgrade/migration was established.
+Thus this condition did not reproduce the drift; it does not rule out catalog
+refresh, inference-time migration or other/concurrent writers. Stop this check
+without repeating variants or launching a diagnostic real-model retry.
+
 ## Full-goal boundary
 
 Current evidence still does not close the owner's objective:

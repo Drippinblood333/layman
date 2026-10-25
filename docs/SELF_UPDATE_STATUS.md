@@ -4,6 +4,15 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 distinct catalog hypothesis check: official `model/list` returned
+seven entries through the verified alpha.20 runtime/current profile, with no
+generated turn. Config raw/parsed hashes unchanged, no 100-ms sampled transition;
+native exited and later visible inventory found no private-runtime process.
+Cached response is possible; no forced refresh or migration was proven, so this
+does not exclude those causes. Historical trial remains one result/reservation
+and sealed. No real-model retry, config/installation change or savings claim.
+[Protocol and bounded evidence](POSTCOMPACT_DEFAULT_PAIR_2026-10-24.md#model-catalog-hypothesis-zero-generation-check-2026-10-25).
+
 2026-10-25 MCP execution-switch validation: seven first-failing controls showed
 `dry_run` accepting non-booleans via Python truthiness, including falsey invalid
 values selecting execution. Reject before the executor; preserve omitted/valid
