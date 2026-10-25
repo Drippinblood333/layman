@@ -9,8 +9,13 @@ showed release-document updates triggering full release-gate recommendations.
 The workflow intent check now excludes only the known release-document noun
 phrases; four controls preserve a separate actual release/readiness request.
 Original task, routing and permissions are unchanged. Task-plan/prompt-guidance/
-CLI/MCP suites: 143 passed; scoped Ruff/whitespace checks passed. Hosted candidate
-verification pending; no token-saving claim or model execution.
+CLI/MCP suites: 143 passed; scoped Ruff/whitespace/secret checks passed. Candidate
+`c5e8ebb` passed all ten jobs in hosted run 40166839060. Fresh fetch/ancestry
+verification preceded a non-force main push attempt, which returned a ref-lock
+conflict because main already equals this exact candidate. Independent ls-remote
+and fetch confirmed that SHA; writer attribution is unknown. Main's separate run
+40167086229 is in progress, not yet accepted. No token-saving claim, model
+execution, installation replacement, tag or formal release.
 [Scope evidence](RELEASE_DOCUMENT_SCOPE_2026-10-25.md).
 
 2026-10-25 security-alert reconciliation: GitHub reports zero open alerts and

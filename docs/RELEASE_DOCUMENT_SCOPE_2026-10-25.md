@@ -26,8 +26,28 @@ then publishing**, or checking release readiness after fixing the notes.
   change, paid API, tag or public release.
 - This removes an observed unnecessary-work recommendation. It is not a
   measured reduction in end-to-end tokens or a proof of general prompt
-  understanding. Exact-source hosted verification remains pending.
+  understanding.
 
 The pending eval-only configuration-drift diagnostic enhancement is included in
 the same candidate ancestry, not reimplemented or used to reopen a sealed trial.
+
+## Hosted checkpoint and remote observation
+
+Exact candidate `c5e8ebb4795ebada5e360926af0e76fe2553e34a` passed all ten
+jobs in [validation run 40166839060](https://github.com/Drippinblood333/layman/actions/runs/40166839060),
+with no failures or active jobs: three-system tests, five standalone builds and
+lifecycle checks, Docker and release-asset assembly. Publication is tag-guarded;
+no release tag was created. A transient `gh run watch` EOF was handled by reading
+the same run through the API, not restarting CI.
+
+Fresh fetch and ancestry checking preceded a non-force main promotion attempt.
+That push returned a ref-lock conflict saying main already equals this exact
+candidate rather than the advertised old `8b1aa17`. A subsequent independent
+`ls-remote` and fetch confirmed main at `c5e8ebb`; the conflict alone does not
+identify the concurrent writer or establish which push completed it. No force
+push or repeated promotion was used.
+
+Main's separate [run 40167086229](https://github.com/Drippinblood333/layman/actions/runs/40167086229)
+is observed in progress on that same SHA, not yet accepted as successful. This
+closes the bounded source validation milestone, not the full project goal.
 
