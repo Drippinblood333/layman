@@ -4,6 +4,16 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 main verification closure: run 40167086229 completed successfully on
+remote main `c5e8ebb4795ebada5e360926af0e76fe2553e34a`, all ten jobs successful,
+zero failures/active jobs. The first API EOF was an observation failure, not a
+failed run; only the same run was polled. This also verifies the earlier local
+eval-only config-drift diagnostic now included in main. A bounded read-only
+installer/source-onboarding review found no additional actionable defect; it is
+not a fresh-install/human-usability pass, and no speculative refactor or repeat
+local tests were added. Configuration-drift cause and default-workflow token
+benefit remain unproven; no model call, installation replacement or release.
+
 2026-10-25 bounded task-scope fix: four first-failing English/Chinese controls
 showed release-document updates triggering full release-gate recommendations.
 The workflow intent check now excludes only the known release-document noun
@@ -14,7 +24,7 @@ CLI/MCP suites: 143 passed; scoped Ruff/whitespace/secret checks passed. Candida
 verification preceded a non-force main push attempt, which returned a ref-lock
 conflict because main already equals this exact candidate. Independent ls-remote
 and fetch confirmed that SHA; writer attribution is unknown. Main's separate run
-40167086229 is in progress, not yet accepted. No token-saving claim, model
+40167086229 subsequently passed all ten jobs. No token-saving claim, model
 execution, installation replacement, tag or formal release.
 [Scope evidence](RELEASE_DOCUMENT_SCOPE_2026-10-25.md).
 
