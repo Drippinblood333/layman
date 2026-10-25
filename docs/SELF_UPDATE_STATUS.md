@@ -4,6 +4,18 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 configuration-isolation feasibility: official exec docs and the
+hash-matched alpha.20 help list `--ignore-user-config`. A two-start synthetic-home
+control used the same deliberately malformed config: ordinary loading failed
+before any local request; ignoring base config reached one rejecting loopback
+request (41,123 bytes discarded), with no config error. Both exited 1, no usable
+usage/real model response, no credentials copied/linked; synthetic config unchanged
+and no private-runtime process remained. This is a potential separately declared
+controlled-experiment mechanism, NOT a default fix: production inheritance/guard
+stay unchanged, real auth untested, historical trial still one result/reservation
+and sealed. No new real-model comparison or token benefit.
+[Feasibility and boundaries](CONFIG_ISOLATION_FEASIBILITY_2026-10-25.md).
+
 2026-10-25 main verification closure: run 40167086229 completed successfully on
 remote main `c5e8ebb4795ebada5e360926af0e76fe2553e34a`, all ten jobs successful,
 zero failures/active jobs. The first API EOF was an observation failure, not a
