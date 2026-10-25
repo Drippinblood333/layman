@@ -268,6 +268,24 @@ def test_brief_plan_retains_actionable_guidance_without_execution(monkeypatch, t
     assert f"tool-call budget: {plan['route']['tool_call_budget']}" in output
 
 
+@pytest.mark.parametrize("explicit_target", [False, True])
+def test_brief_plan_exposes_resolved_workspace_before_next_steps(monkeypatch, tmp_path, capsys, explicit_target):
+    target = tmp_path / "中文项目 space"
+    target.mkdir()
+    monkeypatch.chdir(tmp_path if explicit_target else target)
+    private_task = "Fix src/a.py private-scope-marker"
+    monkeypatch.setattr(cli, "_input_task", lambda **kwargs: private_task)
+    monkeypatch.setattr(cli, "run_plus_task", lambda *a, **k: pytest.fail("Preview must not execute"))
+    args = ["plan", "--brief"] + (["--cwd", target.name] if explicit_target else [])
+    assert cli.main(args) == 0
+    output = capsys.readouterr().out
+    workspace_line = f"Workspace: {target.resolve()}"
+    assert workspace_line in output
+    assert output.index(workspace_line) < output.index("Next:")
+    assert "No execution started" in output
+    assert private_task not in output
+
+
 def test_plan_default_output_remains_json(monkeypatch, tmp_path, capsys):
     task = "Fix src/login.py null handling"
     monkeypatch.setattr(cli, "_input_task", lambda **kwargs: task)

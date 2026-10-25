@@ -4,6 +4,17 @@ Updated: 2026-10-25
 
 ## Verified checkpoint
 
+2026-10-25 local scope-visibility fix: brief plans omitted the workspace while
+showing next steps. Two first-failing default/relative-`--cwd` controls with
+Chinese/spaced paths reproduce the omission. The existing resolved workspace
+now appears before actions; no task echo, routing, target-selection or JSON
+schema change. Source-install instructions explain that the checkout is the
+initial directory and the same `--cwd` must be passed to preview and execution;
+a preview does not persist a target. CLI/MCP/task-plan/prompt-guidance suites:
+161 passed; scoped Ruff/whitespace checks passed. Local candidate only; frozen
+owner update still targets c35c5b7, with no helper rewrite or installation retry.
+This is a scope-check affordance, not user acceptance or token-benefit evidence.
+
 2026-10-25 local first-use CLI candidate: bare `layman` previously exited 2
 with a required-command error and no clear first step. Three first-failing
 controls cover explicit/implicit empty argv and a real CLI subprocess. It now

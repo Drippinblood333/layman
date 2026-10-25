@@ -227,6 +227,12 @@ python3 -m venv .venv
 .venv/bin/layman plan --brief
 ```
 
+The source-install examples run from Layman's own checkout. For your own project,
+both `plan` and `run` accept `--cwd` followed by its directory. The brief plan
+shows the resolved `Workspace` before next steps: check it before execution.
+Use the same `--cwd` for preview and execution; previewing does not save a target
+for the next command. Without that option, each command uses its current directory.
+
 Keep using the full `.venv` executable paths shown above after opening a new
 terminal in this checkout. A source install does not put `layman` on the global
 PATH; bare `layman` examples elsewhere assume a PATH-enabled installation. No

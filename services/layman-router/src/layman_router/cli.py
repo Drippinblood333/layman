@@ -137,6 +137,7 @@ def _brief_plan(plan: dict) -> str:
     route = plan["route"]
     lines = [
         "Offline plan. No execution started; readiness is not verified.",
+        f"Workspace: {plan['workspace']}",
         f"Stage: {plan['project_stage']} | Risk: {plan['risk']} | Mode: {plan['execution']}",
         f"Permissions: {route['sandbox']}",
         (
