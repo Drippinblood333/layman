@@ -1,8 +1,26 @@
 # Project update status
 
-Updated: 2026-10-25
+Updated: 2026-10-26
 
 ## Verified checkpoint
+
+2026-10-26 first-use delivery accepted: remote main is exact source
+`c3c8f78fa521c8666b26b4a430340ae6da5c0870`. Main run 40170575526 completed
+successfully: ten validation jobs passed, publication skipped. The downloaded
+Windows artifact passed actual executable/metadata/lock hashes and isolated
+bare-invocation, Chinese/spaced relative-workspace brief and read-only JSON
+planning checks. No model generation, owner installation change or new build.
+The older local-only notes below describe preceding checkpoints, not current
+delivery status. [Acceptance evidence](FIRST_USE_GUIDANCE_2026-10-26.md).
+
+The bounded owner updater did not complete: its final status is
+`timed_out_without_switch`, the helper is no longer running, both completion
+reports are absent and the installed executable retains its old hash. It was
+not restarted; no process was force-stopped or installation changed this batch.
+The frozen updater candidate remains c35c5b7, not the newer c3c8f78 artifact.
+[Terminal handoff result](LOCAL_RUNTIME_DRIFT_2026-10-25.md#terminal-follow-up-2026-10-26).
+The full goal remains incomplete: actual owner-installation acceptance, human
+quality/usability, fresh holdout token benefit and publication gates stay open.
 
 2026-10-25 local scope-visibility fix: brief plans omitted the workspace while
 showing next steps. Two first-failing default/relative-`--cwd` controls with

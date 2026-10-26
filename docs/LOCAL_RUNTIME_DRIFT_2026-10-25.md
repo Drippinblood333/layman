@@ -81,3 +81,23 @@ only after separate in-place version/preview/MCP checks. Timeout/error is not
 success. Backups remain for recovery; no crash/power-loss/concurrent-installer
 recovery or code signing is claimed. Overall goal remains active: this removes
 a deployment gap only when actually completed, and establishes no token benefit.
+
+## Terminal follow-up, 2026-10-26
+
+The bounded handoff expired without switching the installation. Its final
+private status is `timed_out_without_switch`, recorded at
+`2026-10-25T08:23:44.0963738Z`, with four active runtime processes at that
+checkpoint. This is a historical count, not a fresh process inventory.
+On follow-up, helper PID 12316 was absent; `sync.json` and `installed.json`
+were both absent. The actual PATH executable still hashes to
+`bc4f670c0a6129a0ab69d4f3bc8b2285fc6401a017c61e417bbaf0d9c61465f5`.
+No installation success or new backup is established.
+
+No updater restart, deadline extension, force stop, candidate replacement or
+installation retry was performed. The expired helper remains pinned to c35c5b7;
+the separately verified newer c3c8f78 artifact does not change that contract.
+The next installation step needs a maintenance window in which old Layman MCP
+users have naturally exited, followed by fresh process/hash checks, a scoped
+backup/switch and in-place acceptance. Until then, repository verification does
+not mean the owner's running plugin uses the new runtime. This is an unfinished
+deployment gate, not a token-saving claim or completion of the overall goal.
