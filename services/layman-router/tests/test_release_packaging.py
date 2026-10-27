@@ -88,6 +88,8 @@ def test_native_symbol_stripping_is_linux_only(monkeypatch, tmp_path, system, ma
     with pytest.raises(RuntimeError, match="build captured"):
         module.main()
     assert ("--strip" in commands) is expected
+    assert ("--onedir" in commands) is (system == "Windows")
+    assert ("--onefile" in commands) is (system != "Windows")
     assert "--collect-all" in commands
     assert "layman_router" in commands
 

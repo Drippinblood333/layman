@@ -296,6 +296,35 @@ def smoke_mcp(
     return {"protocol": by_id[1]["result"]["protocolVersion"], "tools": 3}
 
 
+def smoke_windows_no_extraction(executable: Path, environment: dict[str, str], temporary: Path) -> None:
+    """Exercise repeated starts and one owned MCP termination, without models."""
+    if os.name != "nt":
+        return
+    if not (executable.parent / "_internal").is_dir():
+        raise RuntimeError("Windows standalone must install its support directory")
+    for _ in range(3):
+        run([str(executable), "--version"], environment)
+    process = subprocess.Popen(
+        [str(executable), "mcp-server"], stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=environment,
+    )
+    try:
+        # Idle MCP waits on stdin; there is no task or model invocation.
+        time.sleep(1)
+        if process.poll() is not None:
+            raise RuntimeError("owned MCP process exited before termination check")
+        if list(temporary.glob("_MEI*")):
+            raise RuntimeError("Windows standalone extracted a temporary runtime")
+    finally:
+        if process.poll() is None:
+            process.kill()
+        process.wait(timeout=10)
+        if process.stdin is not None:
+            process.stdin.close()
+    if list(temporary.glob("_MEI*")):
+        raise RuntimeError("owned MCP termination left an extracted runtime")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Smoke-test a standalone Layman executable")
     parser.add_argument("--release", type=Path, default=ROOT / "release" / f"layman-v{VERSION}")
@@ -312,7 +341,13 @@ def main() -> int:
         environment.pop("OPENAI_API_KEY", None)
         environment["LAYMAN_HOME"] = str(smoke_root / "layman-home")
         environment["CODEX_HOME"] = str(smoke_root / "codex-home")
+        runtime_temporary = smoke_root / "runtime-temp"
+        runtime_temporary.mkdir()
+        environment["TEMP"] = str(runtime_temporary)
+        environment["TMP"] = str(runtime_temporary)
         environment["LAYMAN_ROUTER_DATABASE_PATH"] = str(smoke_root / "layman-home" / "usage.sqlite3")
+
+        smoke_windows_no_extraction(executable, environment, runtime_temporary)
 
         run([str(executable), "--help"], environment)
         setup = parse_json(
@@ -355,6 +390,8 @@ def main() -> int:
             raise RuntimeError(f"standalone dry run failed: {dry_run}")
         health = smoke_http(executable, environment)
         mcp = smoke_mcp(executable, environment, smoke_root)
+        if os.name == "nt" and list(runtime_temporary.glob("_MEI*")):
+            raise RuntimeError("standalone lifecycle created an extracted runtime")
 
         uninstall = parse_json(
             run([str(executable), "uninstall", "--purge-data"], environment),

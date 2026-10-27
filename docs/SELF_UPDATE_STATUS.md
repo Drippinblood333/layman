@@ -1,8 +1,24 @@
 # Project update status
 
-Updated: 2026-10-26
+Updated: 2026-10-27
 
 ## Verified checkpoint
+
+2026-10-27 Windows disk-growth repair: switched Windows builds to directory
+bundles and taught the installer to copy support files without nesting them.
+Native-extension distribution auditing includes external support files; POSIX
+packaging is unchanged. Relevant packaging/installer tests: 56 passed; Ruff and
+whitespace checks passed. The actual built package passed isolated lifecycle,
+HTTP/MCP, repeated-start and owned abnormal-termination smoke checks without
+creating runtime `_MEI` directories. Local package: 209 files, 34,533,917 bytes.
+During a verified idle window, the owner installation was switched with a retained
+old-runtime backup; all candidate file hashes, version and offline preview passed,
+with settings hashes unchanged. Fourteen verified old Layman extractions were
+removed from C: only after idle/exclusive-open checks and full hash-verified
+recovery copies on D:, reclaiming 549,630,704 file bytes of temporary contents.
+No model generation, token-benefit claim, force-stop of owner processes or formal
+release. Hosted verification for this new code is not yet established.
+[Scope, measurements and recovery evidence](WINDOWS_DISK_GROWTH_2026-10-27.md).
 
 2026-10-26 first-use delivery accepted: remote main is exact source
 `c3c8f78fa521c8666b26b4a430340ae6da5c0870`. Main run 40170575526 completed

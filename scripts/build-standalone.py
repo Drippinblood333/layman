@@ -47,7 +47,11 @@ def main() -> int:
     separator = os.pathsep
     PyInstaller.__main__.run([
         str(ROOT / "scripts" / "standalone_entry.py"),
-        "--name", "layman", "--onefile", "--clean", "--noconfirm",
+        # Windows MCP hosts may terminate the bootloader before its onefile
+        # extraction is removed. Install support files once instead of creating
+        # another _MEI tree for every independent invocation.
+        "--name", "layman", "--onedir" if platform.system() == "Windows" else "--onefile",
+        "--clean", "--noconfirm",
         # Linux runtime libraries retain large native debug/symbol sections.
         # Strip those without excluding runtime modules; leave Windows/macOS
         # unchanged and verify both Linux architectures in standalone smoke.
@@ -80,6 +84,12 @@ def main() -> int:
         "--add-data", f"{ROOT / 'plugins' / 'layman'}{separator}layman-bundle/plugins/layman",
         "--distpath", str(target), "--workpath", str(work / "work"), "--specpath", str(work),
     ])
+    if platform.system() == "Windows":
+        # Keep the existing archive/installer entrypoint at the package root.
+        bundle = target / "layman"
+        for item in bundle.iterdir():
+            item.rename(target / item.name)
+        bundle.rmdir()
     executable = target / ("layman.exe" if platform.system() == "Windows" else "layman")
     if not executable.exists():
         raise SystemExit(f"standalone executable was not created: {executable}")

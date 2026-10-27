@@ -54,6 +54,21 @@ try {
   }
   Copy-Item -LiteralPath (Join-Path $temporary 'THIRD_PARTY_LICENSES') -Destination $stagedRoot -Recurse -Force
   Copy-Item -LiteralPath (Join-Path $temporary 'layman.exe') -Destination (Join-Path $stagedRoot 'layman.exe') -Force
+  # Directory bundles install their support files once; do not nest _internal
+  # on reinstallation. Legacy onefile archives remain supported.
+  $supportRoot = Join-Path $temporary '_internal'
+  if (Test-Path -LiteralPath $supportRoot -PathType Container) {
+    $stagedSupport = Join-Path $stagedRoot '_internal'
+    if (Test-Path -LiteralPath $stagedSupport) {
+      # This is the owned staging copy, never the live installation.
+      $resolvedStage = [IO.Path]::GetFullPath($stagedRoot) + [IO.Path]::DirectorySeparatorChar
+      $resolvedSupport = [IO.Path]::GetFullPath($stagedSupport)
+      if (-not $resolvedSupport.StartsWith($resolvedStage, [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid staged support path' }
+      if ((Get-Item -LiteralPath $stagedSupport).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Refusing staged support reparse point' }
+      Remove-Item -LiteralPath $stagedSupport -Recurse -Force
+    }
+    Copy-Item -LiteralPath $supportRoot -Destination $stagedRoot -Recurse -Force
+  }
   [IO.Directory]::Move($installRoot, $backupRoot)
   $previousMoved = $true
   [IO.Directory]::Move($stagedRoot, $installRoot)

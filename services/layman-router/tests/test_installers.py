@@ -90,6 +90,8 @@ def test_installer_preserves_notices_and_refuses_incomplete_package(tmp_path, mi
         payload = (Path(os.environ["SystemRoot"]) / "System32" / "where.exe").read_bytes()
     with zipfile.ZipFile(archive, "w") as package:
         package.writestr(executable, payload)
+        if windows:
+            package.writestr("_internal/layman-bundle/marker.txt", "runtime payload\n")
         for name in NOTICES:
             if name != missing:
                 package.writestr(name, f"fixture {name}\n")
@@ -177,12 +179,16 @@ case "$url" in */SHA256SUMS.txt) cp "$LAYMAN_TEST_CHECKSUMS" "$destination";; *)
         return
     assert result.returncode == 0, result.stdout + result.stderr
     assert installed.read_bytes() == payload
+    if windows:
+        assert (install_root / "_internal/layman-bundle/marker.txt").read_text() == "runtime payload\n"
     for name in NOTICES:
         assert (notice_root / name).read_text(encoding="utf-8") == f"fixture {name}\n"
     assert (notice_root / "THIRD_PARTY_LICENSES" / "fixture.txt").read_text() == "fixture license\n"
     # Reinstallation must merge into the dedicated directory, not nest it.
     repeat = subprocess.run(command, env=env, capture_output=True, text=True, timeout=30, check=False)
     assert repeat.returncode == 0, repeat.stdout + repeat.stderr
+    if windows:
+        assert not (install_root / "_internal/_internal").exists()
     assert not (notice_root / "THIRD_PARTY_LICENSES" / "THIRD_PARTY_LICENSES").exists()
 
 

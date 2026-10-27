@@ -248,6 +248,15 @@ def validate_embedded_distributions(
         for name in executable_archive.toc
         if name.casefold().endswith(extension_suffixes)
     )
+    # In Windows onedir builds native extensions live outside the executable.
+    # Include them in the same distribution allowlist rather than weakening it.
+    support = executable_path.parent / "_internal"
+    if support.is_dir():
+        module_roots.update(
+            path.relative_to(support).as_posix().split("/", 1)[0].split(".", 1)[0]
+            for path in support.rglob("*")
+            if path.is_file() and path.name.casefold().endswith(extension_suffixes)
+        )
     packages = {
         package: {canonical_name(owner) for owner in package_owners}
         for package, package_owners in importlib.metadata.packages_distributions().items()

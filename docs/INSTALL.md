@@ -20,6 +20,14 @@ curl -fsSL https://raw.githubusercontent.com/Drippinblood333/layman/main/install
 
 The installer downloads the matching release artifact and `SHA256SUMS.txt`, verifies the archive before extraction, adds the executable to the user path, installs the bundled local Codex plugin marketplace, and runs `layman setup --mode auto`. It never enables API routing without an API key. Code signing is not claimed for the first release candidate. Restart Codex and open a new task after installation so the plugin and updated path are loaded.
 
+Windows builds now use a directory bundle: keep `layman.exe` and its `_internal/`
+directory together. The installer handles both; manual testers must extract the
+whole ZIP, not copy only the executable. Python installation is still unnecessary.
+Support files are installed once rather than unpacked into another temporary
+`_MEI*` directory on every independent start. macOS/Linux packaging is unchanged.
+Do not delete arbitrary `_MEI*` folders: other applications also use this prefix,
+and a running older Layman may still need its extracted files.
+
 Installers also retain `THIRD_PARTY_LICENSES/`, third-party notices and the build,
 runtime and component inventories. Missing required package files stop installation
 before replacing the executable. On Windows these records stay beside the executable
